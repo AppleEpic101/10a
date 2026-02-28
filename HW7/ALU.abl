@@ -1,27 +1,50 @@
 MODULE      ALU 
 
 INTERFACE  (Data7..Data0,
-            ADD, ADC, SUB, SBB, INC, DEC, NEG, 
-            AND, OR, XOR, NOT, CMP, TST,
-            LSL, LSR, ASR, ROL, ROR, RLC, RRC,
-            POPF, CLC, STC,
+            LSR, ASR, ROR, RRC, ROL, RLC, ASL,
+            ADD, ADC, SBB, SUB, CMP, INC, DEC,
+            AND, OR, XOR, NOT, TST,
             Reset, Clock
-            -> Accum7..Accum0, Flags7..Flags0);
+            -> Accum7..Accum0, Zero, Sign, Overflow, CarryFlag);
 
 TITLE      'Caltech10 ALU Unit'
 
 " Pin/Signal Declarations
-" Input
 Data7..Data0    pin;                " 8-bit data input
-ADD, ADC, SUB, SBB, INC, DEC, NEG pin;
-AND, OR, XOR, NOT, CMP, TST       pin;
-LSL, LSR, ASR, ROL, ROR, RLC, RRC pin;
-POPF, CLC, STC                    pin;
+LSR, ASR, ROR, RRC, ROL, RLC, ASL pin;
+ADD, ADC, SBB, SUB, CMP, INC, DEC pin;
+AND, OR, XOR, NOT, TST            pin;
 Reset, Clock                      pin;
 
-" Output
 Accum7..Accum0  pin istype 'reg';   " 8-bit Accumulator
-Flags7..Flags0  pin istype 'reg';   " 8-bit Status Register
+Zero, Sign, Overflow, CarryFlag pin istype 'com'; " Status Outputs
+
+" --- Internal Nodes ---
+Flags7..Flags0      node istype 'reg';  " 8-bit Status Register
+Sum8..Sum0          node istype 'com';
+ALUOut7..ALUOut0    node istype 'com';
+LogicOut7..LogicOut0 node istype 'com';
+ShiftOut7..ShiftOut0 node istype 'com';
+AdderA7..AdderA0    node istype 'com';
+AdderB7..AdderB0    node istype 'com';
+CarryIn, Cout       node istype 'com';
+Arithmetic, Shift   node istype 'com';
+LogicInst           node istype 'com';
+UpdatingAcc         node istype 'com';
+UpdatingFlags       node istype 'com';
+NewS, NewZ, NewC, NewV node istype 'com';
+IsSub, ArithmeticC, ArithmeticV node istype 'com';
+
+" --- Sets & Macros ---
+Sum      = [Sum8..Sum0];
+ALUOut   = [ALUOut7..ALUOut0];
+LogicOut = [LogicOut7..LogicOut0];
+ShiftOut = [ShiftOut7..ShiftOut0];
+AdderA   = [AdderA7..AdderA0];
+AdderB   = [AdderB7..AdderB0];
+LSL      = ASL;
+POPF, CLC, STC = [0, 0, 0]; " Not used in current demo, set to 0
+NEG      = 0;               " Not used in current demo, set to 0
 
 " --- Flag Mapping ---
 C = Flags3; 
@@ -31,12 +54,10 @@ Z = Flags0;
 
 " --- Adder Logic ---
 " Sum = [0, AdderA] + [0, AdderB] + CarryIn
-
 " AdderA is usually the accumulator. For NEG, it is 0
 AdderA = (ADD # ADC # SUB # SBB # CMP # LSL # ROL # RLC # INC # DEC) & [Accum7..Accum0]
        # (NEG) & 0;
 
-" AdderB is usually the data input. For SUB/CMP, it
 AdderB = (ADD # ADC) & [Data7..Data0]
        # (SUB # SBB # CMP) & ![Data7..Data0]
        # (LSL # ROL # RLC) & [Accum7..Accum0]
@@ -61,11 +82,11 @@ ShiftOut = (LSR) & [0, Accum7..Accum1]
          # (RRC) & [C, Accum7..Accum1];
 
 LogicOut = (AND # TST) & ([Accum7..Accum0] & [Data7..Data0])
-         # (OR)        & ([Accum7..Accum0] | [Data7..Data0])
+         # (OR)        & ([Accum7..Accum0] # [Data7..Data0])
          # (XOR)       & ([Accum7..Accum0] $ [Data7..Data0])
          # (NOT)       & ![Accum7..Accum0];
 
-" --- ALU Output Selection (mux) ---
+" --- ALU Output Selection ---
 ALUOut = (ADD # ADC # SUB # SBB # INC # DEC # NEG # CMP # LSL # ROL # RLC) & [Sum7..Sum0]
        # (AND # OR # XOR # NOT # TST) & LogicOut
        # (LSR # ASR # ROR # RRC) & ShiftOut;
@@ -127,5 +148,11 @@ ELSE WHEN UpdatingFlags THEN {
     Flags0.d = NewZ;   " Zero 
 }
 ELSE [Flags7..Flags0].d = [Flags7..Flags0];
+
+" --- Flag Output Connections ---
+CarryFlag = C;
+Overflow  = V;
+Sign      = S;
+Zero      = Z;
 
 END ALU

@@ -85,12 +85,11 @@ SReg       =  [SReg7..SReg0];			"8 bit S-Register
 " declare the unit to be tested
 
 ALU INTERFACE  (Data7..Data0,
-                ADD, ADC, SUB, SBB, INC, DEC, NEG, 
-                AND, OR, XOR, NOT, CMP, TST,
-                LSL, LSR, ASR, ROL, ROR, RLC, RRC,
-                POPF, CLC, STC,
+                LSR, ASR, ROR, RRC, ROL, RLC, ASL,
+                ADD, ADC, SBB, SUB, CMP, INC, DEC,
+                AND, OR, XOR, NOT, TST,
                 Reset, Clock
-                -> Accum7..Accum0, Flags7..Flags0);
+                -> Accum7..Accum0, Zero, Sign, Overflow, CarryFlag);
 
 
 " create an instance of the unit to be tested
@@ -118,23 +117,23 @@ ALUnit.SUB = Control2;
 ALUnit.SBB = Control3;
 ALUnit.INC = Control4;
 ALUnit.DEC = Control5;
-ALUnit.NEG = Control6;
+" Control6 was NEG
 ALUnit.AND = Control7;
 ALUnit.OR = Control8;
 ALUnit.XOR = Control9;
 ALUnit.NOT = Control10;
 ALUnit.CMP = Control11;
 ALUnit.TST = Control12;
-ALUnit.LSL = Control13;
+ALUnit.ASL = Control13; " was LSL
 ALUnit.LSR = Control14;
 ALUnit.ASR = Control15;
 ALUnit.ROL = Control16;
 ALUnit.ROR = Control17;
 ALUnit.RLC = Control18;
 ALUnit.RRC = Control19;
-ALUnit.POPF = Control20;
-ALUnit.CLC = Control21;
-ALUnit.STC = Control22;
+" Control20 was POPF
+" Control21 was CLC
+" Control22 was STC
 
 ALUnit.Reset  =  Reset;
 ALUnit.Clock  =  Clock;
@@ -142,7 +141,11 @@ ALUnit.Clock  =  Clock;
 " ALU Outputs
 
 [AccumAddr7..AccumAddr0]  =  ALUnit.[Accum7..Accum0];
-[Flags7..Flags0]          =  ALUnit.[Flags7..Flags0];
+Flags7..Flags4 = 0;
+Flags3 = ALUnit.CarryFlag;
+Flags2 = ALUnit.Overflow;
+Flags1 = ALUnit.Sign;
+Flags0 = ALUnit.Zero;
 
 
 " unused outputs are 0
