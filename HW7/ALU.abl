@@ -1,0 +1,131 @@
+MODULE      ALU 
+
+INTERFACE  (Data7..Data0,
+            ADD, ADC, SUB, SBB, INC, DEC, NEG, 
+            AND, OR, XOR, NOT, CMP, TST,
+            LSL, LSR, ASR, ROL, ROR, RLC, RRC,
+            POPF, CLC, STC,
+            Reset, Clock
+            -> Accum7..Accum0, Flags7..Flags0);
+
+TITLE      'Caltech10 ALU Unit'
+
+" Pin/Signal Declarations
+" Input
+Data7..Data0    pin;                " 8-bit data input
+ADD, ADC, SUB, SBB, INC, DEC, NEG pin;
+AND, OR, XOR, NOT, CMP, TST       pin;
+LSL, LSR, ASR, ROL, ROR, RLC, RRC pin;
+POPF, CLC, STC                    pin;
+Reset, Clock                      pin;
+
+" Output
+Accum7..Accum0  pin istype 'reg';   " 8-bit Accumulator
+Flags7..Flags0  pin istype 'reg';   " 8-bit Status Register
+
+" --- Flag Mapping ---
+C = Flags3; 
+V = Flags2;
+S = Flags1;
+Z = Flags0;
+
+" --- Adder Logic ---
+" Sum = [0, AdderA] + [0, AdderB] + CarryIn
+
+" AdderA is usually the accumulator. For NEG, it is 0
+AdderA = (ADD # ADC # SUB # SBB # CMP # LSL # ROL # RLC # INC # DEC) & [Accum7..Accum0]
+       # (NEG) & 0;
+
+" AdderB is usually the data input. For SUB/CMP, it
+AdderB = (ADD # ADC) & [Data7..Data0]
+       # (SUB # SBB # CMP) & ![Data7..Data0]
+       # (LSL # ROL # RLC) & [Accum7..Accum0]
+       # (INC) & 0
+       # (DEC) & ^hFF
+       # (NEG) & ![Accum7..Accum0];
+
+" 4 possible Carry In values
+CarryIn = (ADC & C)
+        # (SUB # CMP # INC # NEG) & 1
+        # (SBB & C)
+        # (RLC & C);
+
+" 9-bit Addition
+Sum = [0, AdderA] + [0, AdderB] + CarryIn;
+Cout = Sum8;
+
+" --- Shifter & Logic ---
+ShiftOut = (LSR) & [0, Accum7..Accum1]
+         # (ASR) & [Accum7, Accum7..Accum1]
+         # (ROR) & [Accum0, Accum7..Accum1]
+         # (RRC) & [C, Accum7..Accum1];
+
+LogicOut = (AND # TST) & ([Accum7..Accum0] & [Data7..Data0])
+         # (OR)        & ([Accum7..Accum0] | [Data7..Data0])
+         # (XOR)       & ([Accum7..Accum0] $ [Data7..Data0])
+         # (NOT)       & ![Accum7..Accum0];
+
+" --- ALU Output Selection (mux) ---
+ALUOut = (ADD # ADC # SUB # SBB # INC # DEC # NEG # CMP # LSL # ROL # RLC) & [Sum7..Sum0]
+       # (AND # OR # XOR # NOT # TST) & LogicOut
+       # (LSR # ASR # ROR # RRC) & ShiftOut;
+
+" --- Update Control ---
+Arithmetic = ADD # ADC # SUB # SBB # INC # DEC # NEG # CMP;
+Shift      = LSL # LSR # ASR # ROL # ROR # RLC # RRC;
+LogicInst  = AND # OR # XOR # NOT # TST;
+
+UpdatingAcc   = (ADD # ADC # SUB # SBB # INC # DEC # NEG # AND # OR # XOR # NOT # Shift) & !CMP & !TST;
+UpdatingFlags = Arithmetic # Shift # LogicInst # CLC # STC;
+
+EQUATIONS
+
+" --- Accumulator Register ---
+[Accum7..Accum0].clk  = Clock;
+[Accum7..Accum0].aclr = Reset;
+WHEN UpdatingAcc THEN [Accum7..Accum0].d = ALUOut;
+ELSE [Accum7..Accum0].d = [Accum7..Accum0];
+
+" --- Status Register (Flags) ---
+[Flags7..Flags0].clk  = Clock;
+[Flags7..Flags0].aclr = Reset;
+
+" S and Z are affected by all ALU operations 
+NewS = ALUOut7;
+NewZ = (ALUOut == 0);
+
+" C Flag: Inverted for Subtraction/Compare
+IsSub = SUB # SBB # CMP # NEG # DEC;
+ArithmeticC = (IsSub & !Cout) # (!IsSub & Cout);
+
+NewC = (Arithmetic & ArithmeticC)
+     # ((LSL # ROL # RLC) & Cout)
+     # ((LSR # ASR # ROR # RRC) & Accum0)
+     # (STC & 1)
+     # (CLC & 0)
+     # (LogicInst & C); " Unchanged for logic
+
+" V Flag: Overflow 
+" Right shifts always clear V
+ArithmeticV = (AdderA7 == AdderB7) & (ALUOut7 != AdderA7);
+
+NewV = (Arithmetic & ArithmeticV)
+     # ((LSL # ROL # RLC) & (ALUOut7 != Accum7))
+     # ((LSR # ASR # ROR # RRC) & 0) 
+     # (LogicInst & V); " Unchanged for logic
+
+" --- Final Flag Assignment ---
+WHEN POPF THEN [Flags7..Flags0].d = [Data7..Data0]; " Load from stack
+ELSE WHEN UpdatingFlags THEN {
+    Flags7.d = S;      " I-Flag preserved (assuming no interrupt logic yet)
+    Flags6.d = 0;      " Unused 
+    Flags5.d = 0;      " U-bit (simplified) 
+    Flags4.d = 0;      " Unused 
+    Flags3.d = NewC;   " Carry 
+    Flags2.d = NewV;   " Overflow 
+    Flags1.d = NewS;   " Sign 
+    Flags0.d = NewZ;   " Zero 
+}
+ELSE [Flags7..Flags0].d = [Flags7..Flags0];
+
+END ALU
