@@ -13,7 +13,7 @@ TITLE      'Caltech10 ALU Unit'
 
 Data7..Data0	pin;
 Accum7..Accum0	pin		ISTYPE 'REG';
-Flags7..Flags0	pin;
+Flags7..Flags0	pin		ISTYPE 'REG';
 
 UpdateAcc		pin;	" allows accum to change
 SelectBlock		pin;	" picks result from adder(1) or shifter(0)
@@ -161,7 +161,7 @@ Flag5 = (PopF & Data5) # (!PopF & Flags5);
 Flag4 = (PopF & Data4);
 
 " Assign all bits to the flag register
-Flags  :=  [Flag7, Flag6, Flag5, Flag4, CFlag, VFlag, SFlag, ZFlag];
+Flags  :=  [!Flag7, !Flag6, !Flag5, !Flag4, !CFlag, !VFlag, !SFlag, !ZFlag];
 
 
 " Update accumulator only if neccessary
