@@ -131,33 +131,36 @@ ShiftRot0  =  (!SRLowSelA & SRLowSelB & Flags3) #
 Result  =  (SelectBlock & Sum) # (!SelectBlock & ShiftRot);
 
 
-" Flag Operations (not implemented for shift/rot)
+" Flag Operations
 
-CFlag  =  (PopF & Data3) # (!PopF & SelectBlock & ((VCFlags &
-          ((!InvertCarry & CarryOut7) # (InvertCarry & !CarryOut7))) #
-          (!VCFlags & Flags3)));
+" Carry Flag: Update from Adder if selected and enabled, otherwise hold state
+CFlag  =  (PopF & Data3) # 
+          (!PopF & SelectBlock & VCFlags & ((!InvertCarry & CarryOut7) # (InvertCarry & !CarryOut7))) #
+          (!PopF & !(SelectBlock & VCFlags) & Flags3);
 
-VFlag  =  (PopF & Data2) # (!PopF & SelectBlock & ((VCFlags &
-          ((UseAdder & Accum7 & Fblock7 & !Result7) #
-          (UseAdder & !Accum7 & !Fblock7 & Result7))) # (!VCFlags & Flags2)));
+" Overflow Flag: Update from Adder if selected and enabled, otherwise hold state
+VFlag  =  (PopF & Data2) # 
+          (!PopF & SelectBlock & VCFlags & ((UseAdder & Accum7 & Fblock7 & !Result7) # 
+          (UseAdder & !Accum7 & !Fblock7 & Result7))) # 
+          (!PopF & !(SelectBlock & VCFlags) & Flags2);
 
-SFlag  =  (PopF & Data1) # (!PopF & ((SZFlags & Result7) #
-          (!SZFlags & Flags1)));
+" Sign Flag: Update anytime SZFlags is high
+SFlag  =  (PopF & Data1) # 
+          (!PopF & SZFlags & Result7) # 
+          (!PopF & !SZFlags & Flags1);
 
-ZFlag  =  (PopF & Data0) # (!PopF & ((SZFlags & !Result7 & !Result6 & !Result5
-           & !Result4 & !Result3 & !Result2 & !Result1 & !Result0) #
-          (!SZFlags & Flags0)));
-
+" Zero Flag: Update anytime SZFlags is high
+ZFlag  =  (PopF & Data0) # 
+          (!PopF & SZFlags & !Result7 & !Result6 & !Result5 & !Result4 & !Result3 & !Result2 & !Result1 & !Result0) # 
+          (!PopF & !SZFlags & Flags0);
 
 " Flags7-Flags4 will only update when the flags are being popped
-" Flags6 and Flags4 do not retain status since they are unused
 Flag7 = (PopF & Data7) # (!PopF & Flags7);
 Flag6 = (PopF & Data6);
 Flag5 = (PopF & Data5) # (!PopF & Flags5);
 Flag4 = (PopF & Data4);
 
-" The four highest-order bits are unused (default zero)
-" The flags are inverted on the LEDs
+" Assign all bits to the flag register
 Flags  :=  [Flag7, Flag6, Flag5, Flag4, CFlag, VFlag, SFlag, ZFlag];
 
 
