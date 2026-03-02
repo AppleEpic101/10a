@@ -1,7 +1,7 @@
 MODULE      ALU 
 
 INTERFACE  (Data7..Data0,
-            UpdateAcc, SelectBlock, F3..F0, UseAdder, CarryInA, CarryInB,
+            UpdateAcc, SelectBlock, UseAdder, F3..F0, CarryInA, CarryInB,
             SZFlags, VCFlags, InvertCarry, PopF, SRLowSelA, SRLowSelB,
             SRMidSel, SRHighSelA, SRHighSelB, SRHighSelC,
             Reset, Clock
@@ -12,6 +12,7 @@ TITLE      'Caltech10 ALU Unit'
 " Pins/Signal Declarations
 
 Data7..Data0	pin;
+
 Accum7..Accum0	pin		ISTYPE 'REG';
 Flags7..Flags0	pin		ISTYPE 'REG';
 

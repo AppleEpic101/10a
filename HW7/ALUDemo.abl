@@ -85,7 +85,7 @@ SReg       =  [SReg7..SReg0];			"8 bit S-Register
 " declare the unit to be tested
 
 ALU INTERFACE  (Data7..Data0,
-            UpdateAcc, SelectBlock, F3..F0, UseAdder, CarryInA, CarryInB,
+            UpdateAcc, SelectBlock, UseAdder, F3..F0, CarryInA, CarryInB,
             SZFlags, VCFlags, InvertCarry, PopF, SRLowSelA, SRLowSelB,
             SRMidSel, SRHighSelA, SRHighSelB, SRHighSelC,
             Reset, Clock
@@ -112,8 +112,8 @@ ALUnit.[Data7..Data0]  =  [DataOff7..DataOff0];
 
 ALUnit.UpdateAcc = Control0;
 ALUnit.SelectBlock = Control1;
-ALUnit.F3..F0 = Control2..Control5;
-ALUnit.UseAdder = Control6;
+ALUnit.UseAdder = Control2;
+ALUnit.F3..F0 = Control6..Control3;
 ALUnit.CarryInA = Control7;
 ALUnit.CarryInB = Control8;
 ALUnit.SZFlags = Control9;
