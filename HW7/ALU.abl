@@ -70,11 +70,11 @@ ShiftRot    =  [ShiftRot7..ShiftRot0];   " Shift/rotate output
 
 EQUATIONS
 
-" Clocks for the outputs
+" Sync clock for the output
 Accum.CLK  =  Clock;
 Flags.CLK  =  Clock;
 
-" F-block Operations (Logical Operations)
+" F-block (Logical Operations)
 
 " 4:1 mux. By varying F3-F0, we can 
 " produce logic functions (AND, OR, XOR, NOT)
@@ -83,12 +83,29 @@ Flags.CLK  =  Clock;
 Fblock  =  (!Accum & !Data & F0) # (!Accum & Data & F1) #
            (Accum & !Data & F2) # (Accum & Data & F3);
 
+" Shifts / Rotations
+
+" MSB mux 
+ShiftRot7  =  (MSBselect2 & !MSBselect1 & !MSBselect0 & Carry) #    " 100 MSB is carry flag
+              (!MSBselect2 & !MSBselect1 & MSBselect0 & Accum7) #  " 001 MSB remains the same
+              (!MSBselect2 & MSBselect1 & !MSBselect0 & Accum6) #  " 010 MSB is bit below (shift left)
+              (!MSBselect2 & MSBselect1 & MSBselect0 & Accum0);   " 011 MSB is LSB (rotate right)
+
+" LSB mux
+ShiftRot0  =  (!LSBselect1 & LSBselect0 & Flags3) #      " 01 LSB is carry flag
+              (LSBselect1 & !LSBselect0 & Accum1) #      " 10 LSB is bit above (shift right)
+              (LSBselect1 & LSBselect0 & Accum7);        " 11 LSB is MSB (rotate left)
+
+" Middle bits are shifted left or right 
+ShiftRot[6..1]  =  (MiddleSelect & Accum[5..0]) #   " MiddleSelect = 1: shift left
+                   (!MiddleSelect & Accum[7..2]);   " MiddleSelect = 0: shift right
+
 " Adder
 
 " 4:1 mux. Selects CarryIn for LSB of adder.
-CarryIn_LO  =  (!CinSel1 & CinSel0 & !Flags3) #    " Seed with !Carry (Borrow)
-                  (CinSel1 & !CinSel0 & Flags3) #  " Seed with Carry (Addition)
-                  (CinSel1 & CinSel0);             " Seed with 1 (2's complement)
+CarryIn_LO  =  (CinSel1 & CinSel0) #             " Seed with 1 (2's complement)
+               (!CinSel1 & CinSel0 & !Flags3) #    " Seed with !Carry (Borrow)
+               (CinSel1 & !CinSel0 & Flags3);     " Seed with Carry (Addition)
 
 " Ripple-carry logic for adder. 
 CarryOut  =  ((Accum & UseAdder) & Fblock) #
@@ -101,23 +118,6 @@ CarryIn  =  [CarryOut6..CarryOut0, CarryIn_LO];
 " !UseAdder sets one operand to 0, allowing F-Block to pass through adder
 Sum  =  (Accum & UseAdder) $ Fblock $ CarryIn;
 
-
-" Shifts / Rotations
-
-" MSB mux 
-ShiftRot7  =  (MSBselect2 & !MSBselect1 & !MSBselect0 & Carry) #    " 100 MSB is carry flag
-              (!MSBselect2 & !MSBselect1 & MSBselect0 & Accum7) #  " 001 MSB remains the same
-              (!MSBselect2 & MSBselect1 & !MSBselect0 & Accum6) #  " 010 MSB is bit below (shift left)
-              (!MSBselect2 & MSBselect1 & MSBselect0 & Accum0);   " 011 MSB is LSB (rotate right)
-
-" Middle bits are shifted left or right 
-ShiftRot[6..1]  =  (MiddleSelect & Accum[5..0]) #   " MiddleSelect = 1: shift left
-                   (!MiddleSelect & Accum[7..2]);   " MiddleSelect = 0: shift right
-
-" LSB mux
-ShiftRot0  =  (!LSBselect1 & LSBselect0 & Flags3) #      " 01 LSB is carry flag
-              (LSBselect1 & !LSBselect0 & Accum1) #      " 10 LSB is bit above (shift right)
-              (LSBselect1 & LSBselect0 & Accum7);        " 11 LSB is MSB (rotate left)
 
 
 " If OpSelect is high, result is from adder, otherwise result is from shift/rotater
@@ -140,7 +140,7 @@ Carry = (PopF & Data3) #                                                        
 
 " Overflow Flag: Update from Adder if selected and enabled, otherwise hold state
 
-Overflow = (PopF & Data2) #                                  " Directly load Overflow from Data bus bit 2    
+Overflow = (PopF & Data2) #                                  " Directly load Overflow    
         (!PopF & MaskVC & (
             (OpSelect & ((UseAdder & Accum7 & Fblock7 & !MuxOut7) # (UseAdder & !Accum7 & !Fblock7 & MuxOut7))) # " Detects sign change in adder
             (!OpSelect & (Accum7 $ MuxOut7))                 " Detects sign change in shift/rotate
@@ -148,14 +148,14 @@ Overflow = (PopF & Data2) #                                  " Directly load Ove
         (!PopF & !MaskVC & Flags2);                         " Otherwise, hold state for MaskVC = 0
 
 " Sign Flag: Update anytime MaskSZ is high
-Sign  =  (PopF & Data1) # 
-          (!PopF & MaskSZ & MuxOut7) # 
-          (!PopF & !MaskSZ & Flags1);
+Sign  =  (PopF & Data1) #                    " Directly load Sign 
+          (!PopF & MaskSZ & MuxOut7) #       " Sign if MuxOut is negative
+          (!PopF & !MaskSZ & Flags1);        " Otherwise, hold state for MaskSZ = 0
 
 " Zero Flag: Update anytime MaskSZ is high
-Zero  =  (PopF & Data0) # 
-          (!PopF & MaskSZ & !MuxOut7 & !MuxOut6 & !MuxOut5 & !MuxOut4 & !MuxOut3 & !MuxOut2 & !MuxOut1 & !MuxOut0) # 
-          (!PopF & !MaskSZ & Flags0);
+Zero  =  (PopF & Data0) #                                                                                                " Directly load Zero 
+          (!PopF & MaskSZ & !MuxOut7 & !MuxOut6 & !MuxOut5 & !MuxOut4 & !MuxOut3 & !MuxOut2 & !MuxOut1 & !MuxOut0) #     " Zero if MuxOut is all zeros
+          (!PopF & !MaskSZ & Flags0);                                                                                    " Otherwise, hold state for MaskSZ = 0
 
 " Update flags
 Flags  :=  [Flag7, Flag6, Flag5, Flag4, Carry, Overflow, Sign, Zero];
