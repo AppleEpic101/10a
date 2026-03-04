@@ -88,12 +88,14 @@ Zero                    node;   " Zero Flag
 Data        =  [Data7..Data0];           " Data input
 Accum       =  [Accum7..Accum0];         " Accumulator
 Flags       =  [Flags7..Flags0];         " Flags
+
 MuxOut      =  [MuxOut7..MuxOut0];       " Mux output
 Fop         =  [Fop7..Fop0];             " F-block output
-Sum         =  [Sum7..Sum0];             " Sum output
-CarryOut    =  [CarryOut7..CarryOut0];   " Carry-out bits from adder
-CarryIn     =  [CarryIn7..CarryIn0];     " Carry-in bits from adder
 ShiftOut    =  [ShiftOut7..ShiftOut0];   " Shift/rotate output
+Sum         =  [Sum7..Sum0];             " Sum output
+CarryIn     =  [CarryIn7..CarryIn0];     " Carry-in bits from adder
+CarryOut    =  [CarryOut7..CarryOut0];   " Carry-out bits from adder
+
 
 EQUATIONS
 
@@ -107,8 +109,7 @@ Flags.CLK  =  Clock;
 " produce logic functions (AND, OR, XOR, NOT)
 " between the Accum and Data inputs.
 
-Fop  =  (!Accum & !Data & F0) # (!Accum & Data & F1) #
-           (Accum & !Data & F2) # (Accum & Data & F3);
+Fop  =  (F0 & !Data & !Accum) # (F1 & Data & !Accum) # (F2 & !Data & Accum) # (F3 & Data & Accum);
 
 " Shifts / Rotations
 
