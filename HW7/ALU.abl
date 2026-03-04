@@ -9,6 +9,28 @@ INTERFACE  (Data7..Data0,
 
 TITLE      'Caltech10 ALU Unit'
 
+" Description: This module implements the ALU unit for the CPU. 
+"              It handles arithmetic, bitwise logic, and complex shifting operations. 
+"              It uses a registered Accumulator architecture and features a flexible flag-update system.
+" 
+" Inputs: Data7..Data0 - 8 bits of data input
+"         UpdateAcc - Write-enable for accumulator
+"         OpSelect - Mux select between adder and shift/rotate paths
+"         UseAdder - Pass F-block through adder when low
+"         F3..F0 - Function codes defining the bitwise relationship between Accum and Data
+"         CinSel1..CinSel0 - Mux select for carry-in
+"         InvertCarry - Invert carry flag during subtraction
+"         LSBselect1..LSBselect0 - Select pins for the value of LSB
+"         MiddleSelect - Direction control of middle bits
+"         MSBselect2..MSBselect0 - Select pins for the value of MSB
+"         MaskSZ - Prevents updates to SZ flags
+"         MaskVC - Prevents updates to VC flags
+"         PopF - Directly set flags
+"         Reset - System reset
+"         Clock - System clock
+" Outputs: Accum7..Accum0 - 8 bits of accumulator
+"          Flags7..Flags0 - 8 bits of flags
+
 " Pins/Signal Declarations
 
 " Inputs 
