@@ -149,13 +149,13 @@ Overflow = (PopF & Data2) #                                  " Directly load Ove
 
 " Sign Flag: Update anytime MaskSZ is low
 Sign  =  (PopF & Data1) #                    " Directly load Sign 
-          (!PopF & !MaskSZ & MuxOut7) #       " Sign if MuxOut is negative
-          (!PopF & MaskSZ & Flags1);        " Hold state for MaskSZ = 1
+        (!PopF & MaskSZ & Flags1) #        " Hold state for MaskSZ = 1
+        (!PopF & !MaskSZ & MuxOut7);       " Sign if MuxOut is negative
 
 " Zero Flag: Update anytime MaskSZ is low
 Zero  =  (PopF & Data0) #                                                                                                " Directly load Zero 
-          (!PopF & !MaskSZ & !MuxOut7 & !MuxOut6 & !MuxOut5 & !MuxOut4 & !MuxOut3 & !MuxOut2 & !MuxOut1 & !MuxOut0) #     " Zero if MuxOut is all zeros
-          (!PopF & MaskSZ & Flags0);                                                                                    " Hold state for MaskSZ = 1
+        (!PopF & MaskSZ & Flags0) #                                                                                  " Hold state for MaskSZ = 1
+        (!PopF & !MaskSZ & !MuxOut7 & !MuxOut6 & !MuxOut5 & !MuxOut4 & !MuxOut3 & !MuxOut2 & !MuxOut1 & !MuxOut0);     " Zero if MuxOut is all zeros
 
 " Update flags
 Flags  :=  [Flag7, Flag6, Flag5, Flag4, Carry, Overflow, Sign, Zero];
