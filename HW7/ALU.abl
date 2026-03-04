@@ -30,6 +30,11 @@ TITLE      'Caltech10 ALU Unit'
 "         Clock - System clock
 " Outputs: Accum7..Accum0 - 8 bits of accumulator
 "          Flags7..Flags0 - 8 bits of flags
+" Revision History:
+" 03/01/26   Alex Du  Initial Revision
+" 03/03/26   Alex Du  Fixed bugs
+" 03/03/26   Alex Du  Add comments
+
 
 " Pins/Signal Declarations
 
