@@ -85,9 +85,9 @@ SReg       =  [SReg7..SReg0];			"8 bit S-Register
 " declare the unit to be tested
 
 ALU INTERFACE  (Data7..Data0,
-            UpdateAcc, SelectBlock, UseAdder, F3..F0, CarryInA, CarryInB,
-            SZFlags, VCFlags, InvertCarry, PopF, SRLowSelA, SRLowSelB,
-            SRMidSel, SRHighSelA, SRHighSelB, SRHighSelC,
+            UpdateAcc, OpSelect, UseAdder, F3..F0, CinSel1..CinSel0,
+            MaskSZ, MaskVC, InvertCarry, PopF, 
+            LSBselect1..LSBselect0, MiddleSelect, MSBselect2..MSBselect0,
             Reset, Clock
             -> Accum7..Accum0, Flags7..Flags0);
 
@@ -113,19 +113,15 @@ ALUnit.[Data7..Data0]  =  [DataOff7..DataOff0];
 ALUnit.UpdateAcc = Control0;
 ALUnit.SelectBlock = Control1;
 ALUnit.UseAdder = Control2;
-ALUnit.F3..F0 = Control6..Control3;
-ALUnit.CarryInA = Control7;
-ALUnit.CarryInB = Control8;
-ALUnit.SZFlags = Control9;
-ALUnit.VCFlags = Control10;
+ALUnit.[F3..F0] = [Control6..Control3];
+ALUnit.[CinSel1..CinSel0] = [Control8..Control7];
+ALUnit.MaskSZ = Control9;
+ALUnit.MaskVC = Control10;
 ALUnit.InvertCarry = Control11;
 ALUnit.PopF = Control12;
-ALUnit.SRLowSelA = Control13;
-ALUnit.SRLowSelB = Control14;
-ALUnit.SRMidSel = Control15;
-ALUnit.SRHighSelA = Control16;
-ALUnit.SRHighSelB = Control17;
-ALUnit.SRHighSelC = Control18;
+ALUnit.[LSBselect1..LSBselect0] = [Control14..Control13];
+ALUnit.MiddleSelect = Control15;
+ALUnit.[MSBselect2..MSBselect0] = [Control18..Control16];
 
 ALUnit.Reset  =  Reset;
 ALUnit.Clock  =  Clock;
