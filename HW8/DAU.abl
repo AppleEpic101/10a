@@ -14,13 +14,13 @@ DataAccess INTERFACE  (Accum7..Accum0, Offset7..Offset0,
 Accum7..Accum0    pin;    
 Offset7..Offset0  pin;
 
-EnableInc                       pin; # Enable incrementer (1) or pass-thru (0)
-UseOffset                       pin; # UseOffset = 1, 2nd operand is offset. OffsetMode = 0, 2nd operand is 0
-AddressSel1..AddressSel0        pin; # Mux select for S, X, accum, or zero
-UseInc                          pin; # Use incrementer (1) or decrementer (0)
-UsePre                          pin; # Use pre-increment/decrement (1) or post-increment/decrement (0)
-MaskS                           pin; # Mask S register
-MaskX                           pin; # Mask X register
+EnableInc                       pin; " Enable incrementer (1) or pass-thru (0)
+UseOffset                       pin; " UseOffset = 1, 2nd operand is offset. OffsetMode = 0, 2nd operand is 0
+AddressSel1..AddressSel0        pin; " Mux select for S, X, accum, or zero
+UseInc                          pin; " Use incrementer (1) or decrementer (0)
+UsePre                          pin; " Use pre-increment/decrement (1) or post-increment/decrement (0)
+MaskS                           pin; " Mask S register
+MaskX                           pin; " Mask X register
 
 Reset                           pin;
 Clock                           pin;
