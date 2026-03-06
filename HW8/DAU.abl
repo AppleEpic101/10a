@@ -76,10 +76,10 @@ SReg.CLR = Reset;
 DataAddr.CLR = Reset;
 
 " 1st operand
-AddressOut = (!AddressOut1 & !AddressOut0 & XReg) # 
-             (!AddressOut1 & AddressOut0 & SReg) #
-             (AddressOut1 & !AddressOut0 & Accum) #
-             (AddressOut1 & AddressOut0 & 0);
+AddressOut = (!AddressSel1 & !AddressSel0 & XReg) # 
+             (!AddressSel1 & AddressSel0 & SReg) #
+             (AddressSel1 & !AddressSel0 & Accum) #
+             (AddressSel1 & AddressSel0 & 0);
 
 Operand = (UseInc & [0, 0, 0, 0, 0, 0, 0, 1]) # 
             (!UseInc & [1, 1, 1, 1, 1, 1, 1, 1]);
@@ -100,5 +100,4 @@ DataAddr = AdderSum;
 
 XReg := (!MaskX & Sum) # (MaskX & XReg);
 SReg := (!MaskS & Sum) # (MaskS & SReg);
-
 END DAU
