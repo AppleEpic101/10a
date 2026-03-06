@@ -92,7 +92,7 @@ Sum = (EnableInc & (AddressOut $ Operand $ CarryIn)) #
 
 CarryOut = (AddressOut & Operand) # (CarryIn & (AddressOut $ Operand));
 
-Result = (UsePre & Sum) # (!UsePre & AddressOut);
+Result = (UsePre & AddressOut) # (!UsePre & Sum);
 AdderSum = Result $ OffsetOut $ AdderCin;
 AdderCout = (Result & OffsetOut) # (AdderCin & (Result $ OffsetOut));
 
