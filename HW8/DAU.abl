@@ -69,11 +69,13 @@ EQUATIONS
 
 XReg.CLK = Clock;
 SReg.CLK = Clock;
-XReg.Reset = Reset;
-SReg.Reset = Reset;
+DataAddr.CLK = Clock;
+XReg.CLR = Reset;
+SReg.CLR = Reset;
+DataAddr.CLR = Reset;
 
 " 1st operand
-AddressOut = (!AddressOut1 & !AddressOut0 & XReg) #
+AddressOut = (!AddressOut1 & !AddressOut0 & XReg) # 
              (!AddressOut1 & AddressOut0 & SReg) #
              (AddressOut1 & !AddressOut0 & Accum) #
              (AddressOut1 & AddressOut0 & 0);
