@@ -1,7 +1,10 @@
 MODULE DAU
 TITLE "Data Address Unit"
 
-
+DataAccess INTERFACE  (Accum7..Accum0, Offset7..Offset0,
+            EnableInc, UseOffset, AddressSel1..AddressSel0, UseInc, UsePre,
+            MaskS, MaskX, Reset, Clock
+            -> DataAddr7..DataAddr0, XReg7..XReg0, SReg7..SReg0);
 
 
 
