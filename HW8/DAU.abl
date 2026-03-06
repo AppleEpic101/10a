@@ -26,9 +26,9 @@ Reset                           pin;
 Clock                           pin;
 
 " Outputs 
-DataAddr7..DataAddr0            pin ISTYPE 'REG';
-XReg7..XReg0                    pin ISTYPE 'REG';
-SReg7..SReg0                    pin ISTYPE 'REG';
+DataAddr7..DataAddr0            pin;
+XReg7..XReg0                    pin ISTYPE 'REG KEEP';
+SReg7..SReg0                    pin ISTYPE 'REG KEEP';
 
 " Intermediate Terms
 AddressOut7..AddressOut0        node; " 1st operand
@@ -70,10 +70,9 @@ EQUATIONS
 
 XReg.CLK = Clock;
 SReg.CLK = Clock;
-DataAddr.CLK = Clock;
+
 XReg.CLR = Reset;
 SReg.CLR = Reset;
-DataAddr.CLR = Reset;
 
 " 1st operand
 AddressOut = (!AddressSel1 & !AddressSel0 & XReg) # 
