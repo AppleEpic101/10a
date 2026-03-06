@@ -1,0 +1,98 @@
+MODULE DAU
+TITLE "Data Address Unit"
+
+
+
+
+
+" Pin/Signal Declarations
+
+" Inputs
+Accum7..Accum0    pin;    
+Offset7..Offset0  pin;
+
+EnableInc                       pin; # Enable incrementer (1) or pass-thru (0)
+UseOffset                       pin; # UseOffset = 1, 2nd operand is offset. OffsetMode = 0, 2nd operand is 0
+AddressSel1..AddressSel0        pin; # Mux select for S, X, accum, or zero
+UseInc                          pin; # Use incrementer (1) or decrementer (0)
+UsePre                          pin; # Use pre-increment/decrement (1) or post-increment/decrement (0)
+MaskS                           pin; # Mask S register
+MaskX                           pin; # Mask X register
+
+Reset                           pin;
+Clock                           pin;
+
+" Outputs 
+DataAddr7..DataAddr0            pin ISTYPE 'REG';
+XReg7..XReg0                    pin ISTYPE 'REG';
+SReg7..SReg0                    pin ISTYPE 'REG';
+
+" Intermediate Terms
+AddressOut7..AddressOut0        node; " 1st operand
+OffsetOut7..OffsetOut0          node; " 2nd operand for adder
+
+Operand7..Operand0              node; " INC or DEC constant (2nd operand of inc/dec)
+Sum7..Sum0                      node; " AddressOut + Operand
+CarryOut7..CarryOut0            node; " CarryOut of incrementer/decrementer
+
+AdderSum7..AdderSum0              node; 
+AdderCout7..AdderCout0            node;
+
+Result7..Result0                  node;
+
+
+" Buses
+Accum = [Accum7..Accum0];
+Offset = [Offset7..Offset0];
+
+DataAddr = [DataAddr7..DataAddr0];
+XReg = [XReg7..XReg0];
+SReg = [SReg7..SReg0];
+
+AddressOut = [AddressOut7..AddressOut0];
+OffsetOut = [OffsetOut7..OffsetOut0];
+
+Operand = [Operand7..Operand0];
+Sum = [Sum7..Sum0];
+CarryOut = [CarryOut7..CarryOut0];
+CarryIn = [CarryOut6..CarryOut0, 0];
+
+AdderSum = [AdderSum7..AdderSum0];
+AdderCout = [AdderCout7..AdderCout0];
+
+Result = [Result7..Result0];
+
+EQUATIONS
+
+XReg.CLK = Clock;
+SReg.CLK = Clock;
+XReg.Reset = Reset;
+SReg.Reset = Reset;
+
+" 1st operand
+AddressOut = (!AddressOut1 & !AddressOut0 & XReg) #
+             (!AddressOut1 & AddressOut0 & SReg) #
+             (AddressOut1 & !AddressOut0 & Accum) #
+             (AddressOut1 & AddressOut0 & 0);
+
+Operand = (UseInc & [0, 0, 0, 0, 0, 0, 0, 1]) # 
+            (!UseInc & [1, 1, 1, 1, 1, 1, 1, 1]);
+
+OffsetOut = (UseOffset & Offset) # (!UseOffset & 0);
+
+
+Sum = (EnableInc & (AddressOut $ Operand $ CarryIn)) # 
+      (!EnableInc & AddressOut);
+
+CarryOut = (AddressOut & Operand) # (CarryIn & (AddressOut $ Operand));
+
+Result = (UsePre & Sum) # (!UsePre & AddressOut);
+AdderSum = Result $ OffsetOut $ CarryIn;
+AdderCout = (Result & OffsetOut) # (CarryIn & (Result $ OffsetOut));
+
+DataAddr = AdderSum;
+
+XReg := (!MaskX & Sum) # (MaskX & XReg);
+SReg := (!MaskS & Sum) # (MaskS & SReg);
+
+END DAU
