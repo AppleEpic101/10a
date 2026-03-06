@@ -61,7 +61,7 @@ OffsetOut = [OffsetOut7..OffsetOut0];
 Operand = [Operand7..Operand0];
 Sum = [Sum7..Sum0];
 CarryOut = [CarryOut7..CarryOut0];
-CarryIn = [CarryIn6..CarryIn0, 0];
+CarryIn = [CarryOut6..CarryOut0, 0];
 
 AdderSum = [AdderSum7..AdderSum0];
 AdderCout = [AdderCout7..AdderCout0];
@@ -83,8 +83,8 @@ AddressOut = (!AddressSel1 & !AddressSel0 & XReg) #
              (AddressSel1 & !AddressSel0 & Accum) #
              (AddressSel1 & AddressSel0 & 0);
 
-Operand = (UseInc & [0, 0, 0, 0, 0, 0, 0, 1]) # 
-            (!UseInc & [1, 1, 1, 1, 1, 1, 1, 1]);
+Operand = (UseInc & 1) # 
+            (!UseInc & 255);
 
 OffsetOut = (UseOffset & Offset) # (!UseOffset & 0);
 
