@@ -38,9 +38,11 @@ OffsetOut7..OffsetOut0          node; " 2nd operand for adder
 Operand7..Operand0              node; " INC or DEC constant (2nd operand of inc/dec)
 Sum7..Sum0                      node; " AddressOut + Operand
 CarryOut7..CarryOut0            node; " CarryOut of incrementer/decrementer
+CarryIn7..CarryIn0              node; " CarryIn of adder
 
 AdderSum7..AdderSum0              node; 
 AdderCout7..AdderCout0            node;
+AdderCin7..AdderCin0              node;
 
 Result7..Result0                  node;
 
@@ -59,9 +61,11 @@ OffsetOut = [OffsetOut7..OffsetOut0];
 Operand = [Operand7..Operand0];
 Sum = [Sum7..Sum0];
 CarryOut = [CarryOut7..CarryOut0];
+CarryIn = [CarryIn6..CarryIn0, 0];
 
 AdderSum = [AdderSum7..AdderSum0];
 AdderCout = [AdderCout7..AdderCout0];
+AdderCin = [AdderCout6..AdderCout0, 0];
 
 Result = [Result7..Result0];
 
@@ -70,48 +74,31 @@ EQUATIONS
 XReg.CLK = Clock;
 SReg.CLK = Clock;
 
-XReg.CLR = Reset;
-SReg.CLR = Reset;
+XReg.CLR = !Reset;
+SReg.CLR = !Reset;
 
-
-
-AddressOut = (!AddressSel1 & !AddressSel0 & XReg) 
-           # (!AddressSel1 &  AddressSel0 & SReg) 
-           # ( AddressSel1 & !AddressSel0 & Accum)
-           # ( AddressSel1 &  AddressSel0 & 0);
+" 1st operand
+AddressOut = (!AddressSel1 & !AddressSel0 & XReg) # 
+             (!AddressSel1 & AddressSel0 & SReg) #
+             (AddressSel1 & !AddressSel0 & Accum) #
+             (AddressSel1 & AddressSel0 & 0);
 
 Operand = (UseInc & [0, 0, 0, 0, 0, 0, 0, 1]) # 
             (!UseInc & [1, 1, 1, 1, 1, 1, 1, 1]);
 
-
-CarryOut0 = (AddressOut0 & Operand0);
-CarryOut1 = (AddressOut1 & Operand1) # (CarryOut0 & (AddressOut1 $ Operand1));
-CarryOut2 = (AddressOut2 & Operand2) # (CarryOut1 & (AddressOut2 $ Operand2));
-CarryOut3 = (AddressOut3 & Operand3) # (CarryOut2 & (AddressOut3 $ Operand3));
-CarryOut4 = (AddressOut4 & Operand4) # (CarryOut3 & (AddressOut4 $ Operand4));
-CarryOut5 = (AddressOut5 & Operand5) # (CarryOut4 & (AddressOut5 $ Operand5));
-CarryOut6 = (AddressOut6 & Operand6) # (CarryOut5 & (AddressOut6 $ Operand6));
-
-Sum = (EnableInc & (AddressOut $ Operand $ [CarryOut6..CarryOut0, 0])) 
-    # (!EnableInc & AddressOut);
-
-
-Result = (UsePre & AddressOut) # (!UsePre & Sum);
-
-
 OffsetOut = (UseOffset & Offset) # (!UseOffset & 0);
 
-" Ripple Carry Chain for the Offset Adder
-AdderCout0 = (Result0 & OffsetOut0);
-AdderCout1 = (Result1 & OffsetOut1) # (AdderCout0 & (Result1 $ OffsetOut1));
-AdderCout2 = (Result2 & OffsetOut2) # (AdderCout1 & (Result2 $ OffsetOut2));
-AdderCout3 = (Result3 & OffsetOut3) # (AdderCout2 & (Result3 $ OffsetOut3));
-AdderCout4 = (Result4 & OffsetOut4) # (AdderCout3 & (Result4 $ OffsetOut4));
-AdderCout5 = (Result5 & OffsetOut5) # (AdderCout4 & (Result5 $ OffsetOut5));
-AdderCout6 = (Result6 & OffsetOut6) # (AdderCout5 & (Result6 $ OffsetOut6));
 
-DataAddr = Result $ OffsetOut $ [AdderCout6..AdderCout0, 0];
+Sum = (EnableInc & (AddressOut $ Operand $ CarryIn)) # 
+      (!EnableInc & AddressOut);
 
+CarryOut = (AddressOut & Operand) # (CarryIn & (AddressOut $ Operand));
+
+Result = (UsePre & AddressOut) # (!UsePre & Sum);
+AdderSum = Result $ OffsetOut $ AdderCin;
+AdderCout = (Result & OffsetOut) # (AdderCin & (Result $ OffsetOut));
+
+DataAddr = AdderSum;
 
 XReg := (!MaskX & Sum) # (MaskX & XReg);
 SReg := (!MaskS & Sum) # (MaskS & SReg);
