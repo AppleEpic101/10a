@@ -62,6 +62,7 @@ CarryIn = [CarryOut6..CarryOut0, 0];
 
 AdderSum = [AdderSum7..AdderSum0];
 AdderCout = [AdderCout7..AdderCout0];
+AdderCin = [AdderCout6..AdderCout0, 0];
 
 Result = [Result7..Result0];
 
@@ -92,8 +93,8 @@ Sum = (EnableInc & (AddressOut $ Operand $ CarryIn)) #
 CarryOut = (AddressOut & Operand) # (CarryIn & (AddressOut $ Operand));
 
 Result = (UsePre & Sum) # (!UsePre & AddressOut);
-AdderSum = Result $ OffsetOut $ CarryIn;
-AdderCout = (Result & OffsetOut) # (CarryIn & (Result $ OffsetOut));
+AdderSum = Result $ OffsetOut $ AdderCarryIn;
+AdderCout = (Result & OffsetOut) # (AdderCarryIn & (Result $ OffsetOut));
 
 DataAddr = AdderSum;
 
