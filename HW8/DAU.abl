@@ -139,8 +139,8 @@ AddressOut = (!AddressSel1 & !AddressSel0 & XReg) # " 00 -> XReg
 " POINTER MODIFICATION
 " 3:1 mux to select the operand for the adder
 " Possible operands: incrementer, decrementer, or 0
-Operand = (EnableInc & UseInc & 1) #        " 1 -> incrementer
-            (EnableInc & !UseInc & 255) #   " 0 -> decrementer (FF using 2's complement math)
+Operand = (EnableInc & UseInc & 1) #        " 1 -> incrementer (adding 0x01)
+            (EnableInc & !UseInc & 255) #   " 0 -> decrementer (adding 0xFF using 2's complement math)
             (!EnableInc & 0);               " 0 -> pass-thru
 Sum = AddressOut $ Operand $ CarryIn;       " Implements a Full Adder XOR logic for the first stage            
 CarryOut = (AddressOut & Operand) # (CarryIn & (AddressOut $ Operand));    " Carry generation for the first stage
