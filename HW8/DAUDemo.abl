@@ -27,6 +27,7 @@ TITLE      'Data Address Unit Unit Demo'
 " 02/14/18   Glen George  Specialized for Data Memory Access Unit
 " 01/08/20   Glen George  Updated comments
 " 01/04/21   Glen George  Updated comments
+" 03/07/26   Alex Du      Connected signals to control pins
 
 
 
@@ -87,7 +88,7 @@ SReg       =  [SReg7..SReg0];			"8 bit S-Register
 " declare the unit to be tested
 
 DAU INTERFACE  (Accum7..Accum0, Offset7..Offset0,
-            EnableInc, UseOffset, AddressSel1..AddressSel0, UseInc, UsePre,
+            EnableInc, UseOffset, AddressSel1..AddressSel0, UseInc, UsePost,
             MaskS, MaskX, Reset, Clock
             -> DataAddr7..DataAddr0, XReg7..XReg0, SReg7..SReg0);
 
@@ -117,7 +118,7 @@ DAUnit.EnableInc = Control0;
 DAUnit.UseOffset = Control1;
 DAUnit.[AddressSel1..AddressSel0] = [Control3..Control2];
 DAUnit.UseInc = Control4;
-DAUnit.UsePre = Control5;
+DAUnit.UsePost = Control5;
 DAUnit.MaskS = Control6;
 DAUnit.MaskX = Control7;
 
