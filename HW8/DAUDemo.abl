@@ -4,10 +4,12 @@ TITLE      'Data Address Unit Unit Demo'
 
 " Description:  This module is the top-level for the unit demos using the Unit
 "               Demo Board.  It defines the switches (inputs) and displays
-"               (outputs) for demonstrating each of the different units of the
-"               CPU.  The Unit Demo Board has a total of 51 inputs and 35
-"               outputs.  This version of the demo module is meant to be used
-"               with the Data Memory Access Unit.
+"               (outputs) for demonstrating the Data Address Unit (DAU).
+"               The Unit Demo Board has a total of 51 inputs and 35
+"               outputs. In this DAU configuration:
+"                 - 23 of 51 inputs are used (8 Data/Offset, 8 AddrData, 
+"                   8 Control (0-7), Reset, and Clock).
+"                 - 24 of 35 outputs are used (8 AccumAddr, 8 XReg, 8 SReg).
 "
 " Inputs:       DataOff[7..0]    - 8 bits of data or offset input
 "               AddrData[12..0]  - 13 bits of address or data input
