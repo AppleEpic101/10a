@@ -83,15 +83,12 @@ AddressOut = (!AddressSel1 & !AddressSel0 & XReg) #
              (AddressSel1 & !AddressSel0 & Accum) #
              (AddressSel1 & AddressSel0 & 0);
 
-Operand = (UseInc & 1) # 
-            (!UseInc & 255);
+Operand = (EnableInc & UseInc & 1) # 
+            (EnableInc & !UseInc & 255) #
+            (!EnableInc & 0);
 
 OffsetOut = (UseOffset & Offset) # (!UseOffset & 0);
-
-
-Sum = (EnableInc & (AddressOut $ Operand $ CarryIn)) # 
-      (!EnableInc & AddressOut);
-
+Sum = (AddressOut $ Operand $ CarryIn);
 CarryOut = (AddressOut & Operand) # (CarryIn & (AddressOut $ Operand));
 
 Result = (UsePre & AddressOut) # (!UsePre & Sum);
