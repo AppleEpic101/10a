@@ -1,0 +1,161 @@
+MODULE CU
+
+CU INTERFACE (ProgramDB15..ProgramDB0, Flags7..Flags0, Reset, Clock ->
+            MuxSel2..MuxSel0, Load, " PAU
+
+            UpdateAcc, OpSelect, UseAdder, F3..F0, CinSel1..CinSel0, InvertCarry, " ALU
+            LSBselect1..LSBselect0, MiddleSelect, MSBselect2..MSBselect0,
+            MaskSZ, MaskVC, PopF, 
+
+            EnableInc, UseOffset, AddressSel1..AddressSel0, UseInc, UsePost,  " DAU
+            MaskS, MaskX
+            
+            SelectDB1..SelectDB0, RD, WR, IO, Address12..Address0);
+
+TITLE 'Control Unit'
+
+" Inputs
+ProgramDB15..ProgramDB0     pin; " Program Data Bus
+Flags7..Flags0              pin; 
+
+Reset                       pin; 
+Clock                       pin; 
+
+" Outputs
+
+" PAU
+MuxSel2..MuxSel0            pin; 
+Load                        pin; 
+
+" ALU
+UpdateAcc                   pin; 
+OpSelect                    pin; 
+UseAdder                    pin; 
+F3..F0                      pin; 
+CinSel1..CinSel0            pin; 
+InvertCarry                 pin; 
+LSBselect1..LSBselect0      pin; 
+MiddleSelect                pin; 
+MSBselect2..MSBselect0      pin; 
+MaskSZ                      pin; 
+MaskVC                      pin;
+PopF                        pin; 
+
+
+" DAU
+EnableInc                   pin; 
+UseOffset                   pin; 
+AddressSel1..AddressSel0    pin; 
+UseInc                      pin; 
+UsePost                     pin; 
+MaskS                       pin; 
+MaskX                       pin; 
+
+" Control Unit 
+IR15..IR0                   pin ISTYPE 'REG'; " Instruction Register
+CallBit1..CallBit0          pin; " Call Bit
+RTSBit1..RTSBit0            pin; " RTS Bit
+SelectDB1..SelectDB0      pin; " Select lines for Data data bus
+RD                        pin; " Read 
+WR                        pin; " Write
+IO                        pin; " I/O    
+Address12..Address0       pin; " low 13-bits of IR into address units
+
+" Intermediates
+HoldIR                    pin; " Hold IR
+
+" Buses
+ProgramDB = [ProgramDB15..ProgramDB0]; " Program Data Bus
+Flags     = [Flags7..Flags0];     " Flags Bus
+IR        = [IR15..IR0];        " Instruction Register
+StateBits = [CallBit1..CallBit0, RTSBit1..RTSBit0]; " State Bits
+
+Idle      = [0,0,0,0];
+Call1     = [0,1,0,0];
+Call2     = [1,0,0,0];
+Call3     = [1,1,0,0];
+RTS1      = [0,0,0,1];
+RTS2      = [0,0,1,0];
+
+" Instructions
+
+ADCM  = [0,  1 ,  1 ,  0 ,  0 ,  0 ,  0 ,  0 , .X., .X., .X., .X., .X., .X., .X., .X.];
+ADCXO = [0,  1 ,  1 ,  0 ,  0 ,  0 ,  0 ,  1 , .X., .X., .X., .X., .X., .X., .X., .X.];
+ADCSO = [0,  1 ,  1 ,  0 ,  0 ,  0 ,  1 ,  0 , .X., .X., .X., .X., .X., .X., .X., .X.];
+ADCI = [0,  1 ,  1 ,  0 ,  0 ,  0 ,  1 ,  1 , .X., .X., .X., .X., .X., .X., .X., .X.];
+ADDM  = [0,  1 ,  1 ,  0 ,  1 ,  0 ,  0 ,  0 , .X., .X., .X., .X., .X., .X., .X., .X.];
+ADDXO = [0,  1 ,  1 ,  0 ,  1 ,  0 ,  0 ,  1 , .X., .X., .X., .X., .X., .X., .X., .X.];
+ADDSO = [0,  1 ,  1 ,  0 ,  1 ,  0 ,  1 ,  0 , .X., .X., .X., .X., .X., .X., .X., .X.];
+ADDI  = [0,  1 ,  1 ,  0 ,  1 ,  0 ,  1 ,  1 , .X., .X., .X., .X., .X., .X., .X., .X.];
+ANDM  = [0,  1 ,  0 ,  0 ,  0 ,  1 ,  0 ,  0 , .X., .X., .X., .X., .X., .X., .X., .X.];
+ANDXO = [0,  1 ,  0 ,  0 ,  0 ,  1 ,  0 ,  1 , .X., .X., .X., .X., .X., .X., .X., .X.];
+ANDSO = [0,  1 ,  0 ,  0 ,  0 ,  1 ,  1 ,  0 , .X., .X., .X., .X., .X., .X., .X., .X.];
+ANDI  = [0,  1 ,  0 ,  0 ,  0 ,  1 ,  1 ,  1 , .X., .X., .X., .X., .X., .X., .X., .X.];
+CMPM  = [0,  0 ,  1 ,  1 ,  0 ,  0 ,  0 ,  0 , .X., .X., .X., .X., .X., .X., .X., .X.];
+CMPXO = [0,  0 ,  1 ,  1 ,  0 ,  0 ,  0 ,  1 , .X., .X., .X., .X., .X., .X., .X., .X.];
+CMPSO = [0,  0 ,  1 ,  1 ,  0 ,  0 ,  1 ,  0 , .X., .X., .X., .X., .X., .X., .X., .X.];
+CMPI  = [0,  0 ,  1 ,  1 ,  0 ,  0 ,  1 ,  1 , .X., .X., .X., .X., .X., .X., .X., .X.];
+DEC   = [0,  1 ,  1 ,  1 ,  1 ,  0 ,  1 ,  1 , .X., .X., .X., .X., .X., .X., .X., .X.];
+INC   = [0,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 , .X., .X., .X., .X., .X., .X., .X., .X.];
+LSL   = [0,  1 ,  0 ,  1 ,  1 ,  0 ,  0 ,  0 , .X., .X., .X., .X., .X., .X., .X., .X.];
+NOT   = [0,  0 ,  1 ,  0 ,  1 ,  1 ,  0 ,  1 , .X., .X., .X., .X., .X., .X., .X., .X.];
+ORM   = [0,  1 ,  1 ,  1 ,  0 ,  1 ,  0 ,  0 , .X., .X., .X., .X., .X., .X., .X., .X.];
+ORXO  = [0,  1 ,  1 ,  1 ,  0 ,  1 ,  0 ,  1 , .X., .X., .X., .X., .X., .X., .X., .X.];
+ORSO  = [0,  1 ,  1 ,  1 ,  0 ,  1 ,  1 ,  0 , .X., .X., .X., .X., .X., .X., .X., .X.];
+ORI   = [0,  1 ,  1 ,  1 ,  0 ,  1 ,  1 ,  1 , .X., .X., .X., .X., .X., .X., .X., .X.];
+RLC   = [0,  1 ,  0 ,  1 ,  0 ,  0 ,  0 ,  0 , .X., .X., .X., .X., .X., .X., .X., .X.];
+SBBM  = [0,  0 ,  0 ,  1 ,  1 ,  0 ,  0 ,  0 , .X., .X., .X., .X., .X., .X., .X., .X.];
+SBBXO = [0,  0 ,  0 ,  1 ,  1 ,  0 ,  0 ,  1 , .X., .X., .X., .X., .X., .X., .X., .X.];
+SBBSO = [0,  0 ,  0 ,  1 ,  1 ,  0 ,  1 ,  0 , .X., .X., .X., .X., .X., .X., .X., .X.];
+SBBI  = [0,  0 ,  0 ,  1 ,  1 ,  0 ,  1 ,  1 , .X., .X., .X., .X., .X., .X., .X., .X.];
+SUBM  = [0,  0 ,  0 ,  1 ,  0 ,  0 ,  0 ,  0 , .X., .X., .X., .X., .X., .X., .X., .X.];
+SUBXO = [0,  0 ,  0 ,  1 ,  0 ,  0 ,  0 ,  1 , .X., .X., .X., .X., .X., .X., .X., .X.];
+SUBSO = [0,  0 ,  0 ,  1 ,  0 ,  0 ,  1 ,  0 , .X., .X., .X., .X., .X., .X., .X., .X.];
+SUBI  = [0,  0 ,  0 ,  1 ,  0 ,  0 ,  1 ,  1 , .X., .X., .X., .X., .X., .X., .X., .X.];
+TSTM  = [0,  1 ,  0 ,  0 ,  1 ,  1 ,  0 ,  0 , .X., .X., .X., .X., .X., .X., .X., .X.];
+TSTXO = [0,  1 ,  0 ,  0 ,  1 ,  1 ,  0 ,  1 , .X., .X., .X., .X., .X., .X., .X., .X.];
+TSTSO = [0,  1 ,  0 ,  0 ,  1 ,  1 ,  1 ,  0 , .X., .X., .X., .X., .X., .X., .X., .X.];
+TSTI  = [0,  1 ,  0 ,  0 ,  1 ,  1 ,  1 ,  1 , .X., .X., .X., .X., .X., .X., .X., .X.];
+XORM  = [0,  0 ,  1 ,  1 ,  0 ,  1 ,  0 ,  0 , .X., .X., .X., .X., .X., .X., .X., .X.];
+XORXO = [0,  0 ,  1 ,  1 ,  0 ,  1 ,  0 ,  1 , .X., .X., .X., .X., .X., .X., .X., .X.];
+XORSO = [0,  0 ,  1 ,  1 ,  0 ,  1 ,  1 ,  0 , .X., .X., .X., .X., .X., .X., .X., .X.];
+XORI  = [0,  0 ,  1 ,  1 ,  0 ,  1 ,  1 ,  1 , .X., .X., .X., .X., .X., .X., .X., .X.];
+
+
+
+EQUATIONS
+
+IR.CLK = Clock;
+IR.CLR = Reset;
+StateBits.CLK = Clock;
+StateBits.CLR = Reset;
+
+HoldIR = ((StateBits == Idle) & ((IR == CALL) # (IR == RTS))) #
+         ((StateBits == Call1) # (StateBits == Call2) # (StateBits == RTS1));
+
+IR = (HoldIR & IR) # (!HoldIR & ProgramDB);
+
+
+STATE_DIAGRAM  StateBits;
+
+STATE Idle:
+    IF (IR == CALL) THEN Call1;
+    IF (IR == RTS) THEN RTS1;
+    ELSE Idle;
+
+STATE Call1:
+    GOTO Call2
+
+STATE Call2:
+    GOTO Call3
+
+STATE Call3:
+    GOTO Idle;
+
+STATE RTS1:
+    GOTO RTS2
+
+STATE RTS2:
+    GOTO Idle;
+
+END CU

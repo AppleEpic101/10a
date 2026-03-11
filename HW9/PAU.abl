@@ -1,0 +1,106 @@
+MODULE      ProgramAccess
+INTERFACE   (Offset7..Offset0, Direct12..Direct0,
+            MuxSel2..MuxSel0, Load, Reset, Clock
+        -> ProgAddr12..ProgAddr0, PC12..PC0);
+
+TITLE       'PAU'
+
+" Description:  This module implements the Program Memory Access Unit for the 
+"               CPU. It manages the 13-bit Program Counter, providing 
+"               support for sequential execution, branching (relative and 
+"               direct), and RTS address reconstruction via a 13-bit adder.
+"
+" Inputs:       Offset[7..0]     - 8-bit sign-extended offset for relative jumps
+"               Direct[12..0]    - 13-bit direct address for jumps/calls
+"               MuxSel[2..0]     - Selects the source for the next PC value
+"               Load             - Control: 0 = Add PC to MuxOut, 1 = MuxOut only
+"               Reset            - Global reset
+"               Clock            - System clock 
+"
+" Outputs:      ProgAddr[12..0]  - Current memory address being accessed
+"               PC[12..0]        - Current value of the Program Counter register
+
+" Revision History:
+" Alex Du        02/21/2026      Initial Version
+" Alex Du        02/21/2026      Revised 13-bit adder logic
+
+" INPUTS
+
+Offset7..Offset0      pin;   "8 bits of data/offset
+Direct12..Direct0    pin;    "13 bits of address
+
+MuxSel2         pin;   " High bit of mux selection (input)
+MuxSel1         pin;   " 2nd bit of mux selection (input)
+MuxSel0         pin;   " Low bit of mux selection (input)
+Load               pin;   " Control signal: Active Low (0 = use PC in addition, 1 = ignore PC)
+
+Reset              pin;   " Global reset
+Clock              pin;   " System clock
+
+" OUTPUTS
+
+ProgAddr12..ProgAddr0    pin;  
+PC12..PC0                         pin; 
+
+" NODES
+
+Sum12..Sum0                   node;   
+Carry13..Carry0                node;  
+MuxOut12..MuxOut0        node;    
+
+“ VECTORS
+ProgAddr   =  [ProgAddr12..ProgAddr0];
+PC             =  [PC12..PC0];                               
+MuxOut     =  [MuxOut12..MuxOut0];                   " Selection result bus
+
+Increment  =  [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ];  " Value to add for PC + 1
+Hold           =  [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];  " Value to add for PC + 0 (stalling)
+Direct         =  [Direct12..Direct0];                 " Direct 13-bit address jump
+
+“ Sign-extend Offset7 to 13 bits for relative branching
+Relative  = [Offset7, Offset7, Offset7, Offset7, Offset7, Offset7..Offset0];        
+
+“ RTS address reconstruction
+RTS_LO      =  [PC12..PC8, Offset7..Offset0];            " Replace lower 8 bits of PC
+RTS_HI       =  [Offset4..Offset0, PC7..PC0];               " Replace upper 5 bits of PC
+
+CarryIn      =  [Carry12..Carry0];
+CarryOut   =  [Carry13..Carry1];
+Sum          =  [Sum12..Sum0];
+
+EQUATIONS
+
+PC.CLK = Clock;        " Trigger PC update on clock edge
+PC.CLR = !Reset;        " Reset the PC to 0 when reset is low
+
+" 13 x 6:1 mux
+" MuxSel = 000, Load = 0 Increment
+" MuxSel = 001, Load = 0 Hold
+" MuxSel = 010, Load = 1 Direct
+" MuxSel = 011, Load = 0 Relative
+" MuxSel = 110, Load = 1 RTS Low
+" MuxSel = 111, Load = 1 RTS High
+
+MuxOut  = (Increment & !MuxSel2 & !MuxSel1 & !MuxSel0) #   
+                  (Hold & !MuxSel2 & !MuxSel1 & MuxSel0) #    
+                  (Direct & !MuxSel2 & MuxSel1 & !MuxSel0) #    
+                  (Relative & !MuxSel2 & MuxSel1 &  MuxSel0) #   
+                  (RTS_LO & MuxSel2 & MuxSel1 & !MuxSel0) #      
+                (RTS_HI & MuxSel2 & MuxSel1 & MuxSel0);      
+
+" 13-bit Adder Logic
+Carry0 = 0;      " Initial carry-in is zero
+
+" Logic: Sum = (A XOR B) XOR CarryIn
+" If load is 1, then (PC & !Load) becomes 0. 
+" Operation: Sum = MuxOut + 0 
+Sum = ((PC & !Load) $ MuxOut) $ CarryIn;
+
+" Logic: CarryOut = ((A XOR B) AND CarryIn) OR (A AND B)
+CarryOut  = ((((PC & !Load) $ MuxOut) & CarryIn)) # (MuxOut & (PC & !Load));
+
+
+PC := Sum; " On next clock, PC takes the calculated sum 
+ProgAddr = PC; " Drive the current PC to the output bus
+
+END ProgramAccess
