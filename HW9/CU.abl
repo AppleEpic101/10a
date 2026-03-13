@@ -135,6 +135,8 @@ HoldIR = ((StateBits == Idle) & ((IR == CALL) # (IR == RTS))) #
 
 IR = (HoldIR & IR) # (!HoldIR & ProgramDB);
 
+[Address12..Address0] = [IR12..IR0];
+
 
 STATE_DIAGRAM  StateBits;
 

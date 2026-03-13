@@ -1,0 +1,162 @@
+MODULE DAU
+
+INTERFACE  (Accum7..Accum0, Offset7..Offset0,
+            EnableInc, UseOffset, AddressSel1..AddressSel0, UseInc, UsePost,
+            MaskS, MaskX, Reset, Clock
+            -> DataAddr7..DataAddr0, XReg7..XReg0, SReg7..SReg0);
+
+TITLE 'Data Address Unit'
+
+" Description: This module implements the Data Address Unit for the Caltech 10 CPU. 
+"              The DAU consists of the X and S registers (8-bits) and logic that calculates
+"              the final 8-bit address that's sent to the Data Memory Bus. This module handles
+"              pre-increment/decrement, post-increment/decrement, and offset logic, updating the X and S
+"              registers accordingly. 
+" 
+" Inputs: Accum7..Accum0 - 8 bits of accumulator data
+"         Offset7..Offset0 - 8 bits of offset data
+"         EnableInc - Enable incrementer/decrementer (1) or pass-thru (0)
+"         UseOffset - 2nd operand is offset (UseOffset=1) or 0 (UseOffset=0)
+"         AddressSel1..AddressSel0 - Mux select for S, X, accum, or zero
+"         UseInc - Use incrementer (1) or decrementer (0)
+"         UsePost - Use pre-increment/decrement (0) or post-increment/decrement (1)
+"         MaskS - Mask S register
+"         MaskX - Mask X register
+"         Reset - System reset
+"         Clock - System clock
+" Outputs: DataAddr7..DataAddr0 - 8 bits of data address
+"          XReg7..XReg0 - 8 bits of X register
+"          SReg7..SReg0 - 8 bits of S register
+"
+" Operations Table:
+" =========================================================================================
+" Mode       | EnableInc | UseOffset | AddressSel | UseInc | UsePost | MaskS | MaskX |
+" -----------|-----------|-----------|------------|--------|---------|-------|-------|
+" Post-Inc X |     1     |     1     |   00 (X)   |   1    |    1    |   1   |   0   |
+" Post-Dec X |     1     |     1     |   00 (X)   |   0    |    1    |   1   |   0   |
+" Pre-Inc  X |     1     |     1     |   00 (X)   |   1    |    0    |   1   |   0   |
+" Pre-Dec  X |     1     |     1     |   00 (X)   |   0    |    0    |   1   |   0   |
+" Post-Inc S |     1     |     1     |   01 (S)   |   1    |    1    |   0   |   1   |
+" Post-Dec S |     1     |     1     |   01 (S)   |   0    |    1    |   0   |   1   |
+" Pre-Inc  S |     1     |     1     |   01 (S)   |   1    |    0    |   0   |   1   |
+" Pre-Dec  S |     1     |     1     |   01 (S)   |   0    |    0    |   0   |   1   |
+" -----------|-----------|-----------|------------|--------|---------|-------|-------|
+" Direct     |     0     |     1     |   11 (0)   |   X    |    X    |   1   |   1   |
+" Offset by S|     0     |     1     |   01 (S)   |   0    |    0    |   1   |   1   |
+" Offset by X|     0     |     1     |   00 (X)   |   0    |    0    |   1   |   1   |
+" =========================================================================================
+"
+" Revision History:
+" 03/05/26   Alex Du  Initial Revision
+" 03/05/26   Alex Du  Fixed bugs
+" 03/07/26   Alex Du  Add comments
+
+
+" Pin/Signal Declarations
+
+" Inputs
+Accum7..Accum0                  pin; " 8-bit accumulator input         
+Offset7..Offset0                pin; " 8-bit offset input
+
+EnableInc                       pin; " Enable incrementer/decrementer (1) or pass-thru (0)
+UseOffset                       pin; " 2nd operand is offset (UseOffset=1) or 0 (UseOffset=0)
+AddressSel1..AddressSel0        pin; " Mux select for S, X, accum, or zero
+UseInc                          pin; " Use incrementer (1) or decrementer (0)
+UsePost                         pin; " Use pre-increment/decrement (0) or post-increment/decrement (1)
+MaskS                           pin; " Mask S register
+MaskX                           pin; " Mask X register
+
+Reset                           pin; " System reset
+Clock                           pin; " System clock
+
+" Outputs 
+DataAddr7..DataAddr0            pin;                " 8 bits of data address output
+XReg7..XReg0                    pin ISTYPE 'REG';   " 8 bits of X register output
+SReg7..SReg0                    pin ISTYPE 'REG';   " 8 bits of S register output
+
+" Intermediate Terms
+AddressOut7..AddressOut0        node; " The base address selected from the input Mux
+OffsetOut7..OffsetOut0          node; " The processed offset (either the input Offset or 0)
+
+Operand7..Operand0              node; " Value used to modify the base (+1, -1, or 0)
+Sum7..Sum0                      node; " AddressOut + Operand
+CarryOut7..CarryOut0            node; " Carry generation logic for the first stage of addition
+CarryIn7..CarryIn0              node; " Shifts CarryOut to the next bit
+
+Result7..Result0                node; " Selects between the original base or modified base for the final stage
+AdderSum7..AdderSum0            node; " The final sum after adding the Offset to the Modified Base
+AdderCout7..AdderCout0          node; " Carry generation logic for the second (final) stage of addition
+AdderCin7..AdderCin0            node; " Carry propagation logic for the second stage of addition
+
+
+" Buses
+Accum = [Accum7..Accum0];           " Group bits for 8-bit bus operations
+Offset = [Offset7..Offset0];        " Group bits for 8-bit bus operations
+
+DataAddr = [DataAddr7..DataAddr0];  " The final 8-bit calculated memory address
+XReg = [XReg7..XReg0];              " Group X register bits
+SReg = [SReg7..SReg0];              " Group S register bits
+
+AddressOut = [AddressOut7..AddressOut0]; " Group base selection bits
+OffsetOut = [OffsetOut7..OffsetOut0];    " Group offset selection bits
+
+Operand = [Operand7..Operand0];          " Group modification constant bits
+Sum = [Sum7..Sum0];                      " Group first stage result bits
+CarryOut = [CarryOut7..CarryOut0];       " Group carry generation bits
+CarryIn = [CarryOut6..CarryOut0, 0];     " Shifts carry bits left and pads with 0 for ripple-carry behavior
+
+Result = [Result7..Result0];             " Group intermediate result selection bits
+AdderSum = [AdderSum7..AdderSum0];       " Group final stage result bits
+AdderCout = [AdderCout7..AdderCout0];    " Group final carry generation bits
+AdderCin = [AdderCout6..AdderCout0, 0];  " Shifts carry bits left for the second stage ripple-carry
+
+EQUATIONS
+" Sync the registers to clock
+XReg.CLK = Clock;
+SReg.CLK = Clock;
+
+" Registers are cleared on Reset (active low)
+XReg.CLR = !Reset;
+SReg.CLR = !Reset;
+
+" The implementation follows a three-stage logic flow:
+" 1. SOURCE SELECTION: Choosing the base pointer
+" 2. POINTER MODIFICATION: Applying auto-increment/decrement logic.
+" 3. ADDRESS CALCULATION: Adding an external offset to the modified pointer to produce the final DataAddr
+
+" 1. Base = XReg, SReg, Accum, or 0
+" 2. Modified = Base +/- {1, 0}
+" 3. DataAddr = (Base or Modified) + Offset
+
+" SOURCE SELECTION
+" 4:1 mux to select the base pointer
+" Possible base pointers: XReg, SReg, Accum, and 0
+AddressOut = (!AddressSel1 & !AddressSel0 & XReg) # " 00 -> XReg
+             (!AddressSel1 & AddressSel0 & SReg) #  " 01 -> SReg
+             (AddressSel1 & !AddressSel0 & Accum) # " 10 -> Accum
+             (AddressSel1 & AddressSel0 & 0);       " 11 -> 0
+
+" POINTER MODIFICATION
+" 3:1 mux to select the operand for the adder
+" Possible operands: incrementer, decrementer, or 0
+Operand = (EnableInc & UseInc & 1) #        " 1 -> incrementer (adding 0x01)
+            (EnableInc & !UseInc & 255) #   " 0 -> decrementer (adding 0xFF using 2's complement math)
+            (!EnableInc & 0);               " 0 -> pass-thru
+Sum = AddressOut $ Operand $ CarryIn;       " Implements a Full Adder XOR logic for the first stage            
+CarryOut = (AddressOut & Operand) # (CarryIn & (AddressOut $ Operand));    " Carry generation for the first stage
+
+" ADDRESS CALCULATION
+OffsetOut = (UseOffset & Offset) # (!UseOffset & 0);   " 2nd operand is offset (UseOffset=1) or 0 (UseOffset=0)
+Result = (UsePost & AddressOut) # (!UsePost & Sum);    " Use pre-increment/decrement (0) or post-increment/decrement (1)
+AdderSum = Result $ OffsetOut $ AdderCin;    " Implements the final 8-bit addition of the Result and the Offset
+AdderCout = (Result & OffsetOut) # (AdderCin & (Result $ OffsetOut));   " Carry generation for the final 8-bit addition to handle potential overflows
+
+" Assigns the final calculated sum to the DataAddr output pins
+DataAddr = AdderSum;
+
+" X and S registers are updated to Sum on rising clock edge
+" When masking is active high, it preserves the register value
+XReg := (!MaskX & Sum) # (MaskX & XReg);
+SReg := (!MaskS & Sum) # (MaskS & SReg);
+
+END DAU

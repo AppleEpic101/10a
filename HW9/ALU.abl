@@ -1,0 +1,196 @@
+MODULE      ALU 
+
+INTERFACE  (Data7..Data0,
+            UpdateAcc, OpSelect, UseAdder, F3..F0, CinSel1..CinSel0, InvertCarry, 
+            LSBselect1..LSBselect0, MiddleSelect, MSBselect2..MSBselect0,
+            MaskSZ, MaskVC, PopF, 
+            Reset, Clock
+            -> Accum7..Accum0, Flags7..Flags0);
+
+TITLE      'Caltech10 ALU Unit'
+
+" Description: This module implements the ALU unit for the CPU. 
+"              It handles arithmetic, bitwise logic, and complex shifting operations. 
+"              It uses a registered Accumulator architecture and features a flexible flag-update system.
+" 
+" Inputs: Data7..Data0 - 8 bits of data input
+"         UpdateAcc - Write-enable for accumulator
+"         OpSelect - Mux select between adder and shift/rotate paths
+"         UseAdder - Pass F-block through adder when low
+"         F3..F0 - Function codes defining the bitwise relationship between Accum and Data
+"         CinSel1..CinSel0 - Mux select for carry-in
+"         InvertCarry - Invert carry flag during subtraction
+"         LSBselect1..LSBselect0 - Select pins for the value of LSB
+"         MiddleSelect - Direction control of middle bits
+"         MSBselect2..MSBselect0 - Select pins for the value of MSB
+"         MaskSZ - Prevents updates to SZ flags
+"         MaskVC - Prevents updates to VC flags
+"         PopF - Directly set flags
+"         Reset - System reset
+"         Clock - System clock
+" Outputs: Accum7..Accum0 - 8 bits of accumulator
+"          Flags7..Flags0 - 8 bits of flags
+" Revision History:
+" 03/01/26   Alex Du  Initial Revision
+" 03/03/26   Alex Du  Fixed bugs
+" 03/03/26   Alex Du  Add comments
+
+
+" Pins/Signal Declarations
+
+" Inputs 
+Data7..Data0	                pin;    " Data Input
+
+UpdateAcc		        pin;	" Write-enable for accumulator
+OpSelect		        pin;	" Mux select between adder and shift/rotate paths
+UseAdder		        pin;	" Pass F-block through adder when low
+F3..F0 		                pin;	" Function codes defining the bitwise relationship between Accum and Data
+CinSel1..CinSel0	        pin;	" Mux select for carry-in
+InvertCarry		        pin;	" Invert carry flag during subtraction
+LSBselect1..LSBselect0          pin;	" Select pins for the value of LSB
+MiddleSelect                    pin;	" Direction control of middle bits
+MSBselect2..MSBselect0          pin;	" Select pins for the value of MSB
+MaskSZ		                pin;	" Prevents updates to SZ flags
+MaskVC		                pin;	" Prevents updates to VC flags
+PopF		                pin;	" Directly set flags
+
+Reset			        pin;	" System reset
+Clock 		                pin;	" System clock
+
+" Outputs
+Accum7..Accum0	                pin ISTYPE 'REG';    " Accumulator
+Flags7..Flags0	                pin ISTYPE 'REG';    " Flags
+
+" Intermediate Terms
+
+MuxOut7..MuxOut0        node;   " Final output selected from either adder or shift/rotate
+Fop7..Fop0              node;   " Output of the bitwise logic
+
+Sum7..Sum0	        node;   " Final output from adder
+CarryOut7..CarryOut0    node;   " Carry-out bits from adder
+CarryIn7..CarryIn0      node;   " Carry-in bit from adder
+CarryIn_LO              node;   " Carry-in value for low-bit of adder
+
+ShiftOut7..ShiftOut0    node;   " Final output after shift / rotate
+
+Flag7                   node;   " Not used
+Flag6                   node;   " Not used
+Flag5                   node;   " Not used
+Flag4                   node;   " Not used
+Carry                   node;   " Carry Flag
+Overflow                node;   " Overflow Flag
+Sign                    node;   " Sign Flag
+Zero                    node;   " Zero Flag
+
+
+" Buses
+
+Data        =  [Data7..Data0];           " Data input
+Accum       =  [Accum7..Accum0];         " Accumulator
+Flags       =  [Flags7..Flags0];         " Flags
+
+MuxOut      =  [MuxOut7..MuxOut0];       " Mux output
+Fop         =  [Fop7..Fop0];             " F-block output
+ShiftOut    =  [ShiftOut7..ShiftOut0];   " Shift/rotate output
+Sum         =  [Sum7..Sum0];             " Sum output
+CarryIn     =  [CarryIn7..CarryIn0];     " Carry-in bits from adder
+CarryOut    =  [CarryOut7..CarryOut0];   " Carry-out bits from adder
+
+
+EQUATIONS
+
+" Sync clock for the output
+Accum.CLK  =  Clock;
+Flags.CLK  =  Clock;
+
+" F-block (Logical Operations)
+
+" 4:1 mux. By varying F3-F0, we can 
+" produce logic functions (AND, OR, XOR, NOT)
+" between the Accum and Data inputs.
+
+Fop  =  (F0 & !Data & !Accum) # (F1 & Data & !Accum) # (F2 & !Data & Accum) # (F3 & Data & Accum);
+
+" Shifts / Rotations
+
+" MSB mux 
+ShiftOut7  =  (MSBselect2 & !MSBselect1 & !MSBselect0 & Carry) #    " 100 MSB is carry flag
+              (!MSBselect2 & !MSBselect1 & MSBselect0 & Accum7) #  " 001 MSB remains the same
+              (!MSBselect2 & MSBselect1 & !MSBselect0 & Accum6) #  " 010 MSB is bit below (shift left)
+              (!MSBselect2 & MSBselect1 & MSBselect0 & Accum0);   " 011 MSB is LSB (rotate right)
+
+" LSB mux
+ShiftOut0  =  (!LSBselect1 & LSBselect0 & Flags3) #      " 01 LSB is carry flag
+              (LSBselect1 & !LSBselect0 & Accum1) #      " 10 LSB is bit above (shift right)
+              (LSBselect1 & LSBselect0 & Accum7);        " 11 LSB is MSB (rotate left)
+
+" Middle bits are shifted left or right 
+ShiftOut[6..1]  =  (MiddleSelect & Accum[5..0]) #   " MiddleSelect = 1: shift left
+                   (!MiddleSelect & Accum[7..2]);   " MiddleSelect = 0: shift right
+
+" Adder
+
+" 4:1 mux. Selects CarryIn for LSB of adder.
+CarryIn_LO  =  (CinSel1 & CinSel0) #             " Seed with 1 (2's complement)
+               (!CinSel1 & CinSel0 & !Flags3) #    " Seed with !Carry (Borrow)
+               (CinSel1 & !CinSel0 & Flags3);     " Seed with Carry (Addition)
+
+" Ripple-carry logic for adder. 
+CarryOut  =  ((Accum & UseAdder) & Fop) #
+             (CarryIn & ((Accum & UseAdder) $ Fop));
+
+" Ripple connection: The output of one stage is the input of the next.
+CarryIn  =  [CarryOut6..CarryOut0, CarryIn_LO];
+
+" Result from adder using the accumulator and the F-Block as operands
+" !UseAdder sets one operand to 0, allowing F-Block to pass through adder
+Sum  =  (Accum & UseAdder) $ Fop $ CarryIn;
+
+
+
+" If OpSelect is high, result is from adder, otherwise result is from shift/rotater
+MuxOut  =  (OpSelect & Sum) # (!OpSelect & ShiftOut);
+
+
+" Flag Operations
+
+" Flags7..Flags4 only update when popped. Otherwise, they are active low. 
+Flag7 = (PopF & Data7) # (!PopF & 0);
+Flag6 = (PopF & Data6) # (!PopF & 0);
+Flag5 = (PopF & Data5) # (!PopF & 0);
+Flag4 = (PopF & Data4) # (!PopF & 0);
+
+" Carry Flag: Update from Adder if selected and enabled, otherwise hold state
+Carry = (PopF & Data3) #                                                                            " Directly load Carry 
+        (!PopF & MaskVC & OpSelect & ((!InvertCarry & CarryOut7) # (InvertCarry & !CarryOut7))) #   " Arithmetic carry. Can be inverted using InvertCarry for subtraction
+        (!PopF & MaskVC & !OpSelect & ((MiddleSelect & Accum7) # (!MiddleSelect & Accum0))) #       " Bit that falls off the end of the shift/rotate moves to carry
+        (!PopF & !MaskVC & Flags3);                                                                 " Hold state for MaskVC = 0
+
+" Overflow Flag: Update from Adder if selected and enabled, otherwise hold state
+
+Overflow = (PopF & Data2) #                                  " Directly load Overflow    
+        (!PopF & MaskVC & (
+            (OpSelect & ((UseAdder & Accum7 & Fop7 & !MuxOut7) # (UseAdder & !Accum7 & !Fop7 & MuxOut7))) # " Detects sign change in adder
+            (!OpSelect & (Accum7 $ MuxOut7))                 " Detects sign change in shift/rotate
+        )) #
+        (!PopF & !MaskVC & Flags2);                         " Hold state for MaskVC = 0
+
+" Sign Flag: Update anytime MaskSZ is low
+Sign  =  (PopF & Data1) #                    " Directly load Sign 
+        (!PopF & MaskSZ & Flags1) #        " Hold state for MaskSZ = 1
+        (!PopF & !MaskSZ & MuxOut7);       " Sign if MuxOut is negative
+
+" Zero Flag: Update anytime MaskSZ is low
+Zero  =  (PopF & Data0) #                                                                                                " Directly load Zero 
+        (!PopF & MaskSZ & Flags0) #                                                                                  " Hold state for MaskSZ = 1
+        (!PopF & !MaskSZ & !MuxOut7 & !MuxOut6 & !MuxOut5 & !MuxOut4 & !MuxOut3 & !MuxOut2 & !MuxOut1 & !MuxOut0);     " Zero if MuxOut is all zeros
+
+" Update flags
+Flags  :=  [Flag7, Flag6, Flag5, Flag4, Carry, Overflow, Sign, Zero];
+
+
+" Update accumulator if UpdateAcc is active high
+Accum  :=  (!UpdateAcc & Accum) # (UpdateAcc & MuxOut);
+
+
+END ALU 
