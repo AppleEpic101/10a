@@ -1,11 +1,11 @@
 MODULE      ALU 
 
-INTERFACE  (Data7..Data0,
-            UpdateAcc, OpSelect, UseAdder, F3..F0, CinSel1..CinSel0, InvertCarry, 
-            LSBselect1..LSBselect0, MiddleSelect, MSBselect2..MSBselect0,
-            MaskSZ, MaskVC, PopF, 
-            Reset, Clock
-            -> Accum7..Accum0, Flags7..Flags0);
+ALUInterface INTERFACE  (Data7..Data0,
+                        UpdateAcc, OpSelect, UseAdder, F3..F0, CinSel1..CinSel0, InvertCarry, 
+                        LSBselect1..LSBselect0, MiddleSelect, MSBselect2..MSBselect0,
+                        MaskSZ, MaskVC, PopF, 
+                        Reset, Clock
+                        -> Accum7..Accum0, Flags7..Flags0);
 
 TITLE      'Caltech10 ALU Unit'
 

@@ -1,6 +1,6 @@
 MODULE DAU
 
-INTERFACE  (Accum7..Accum0, Offset7..Offset0,
+DAUInterface INTERFACE  (Accum7..Accum0, Offset7..Offset0,
             EnableInc, UseOffset, AddressSel1..AddressSel0, UseInc, UsePost,
             MaskS, MaskX, Reset, Clock
             -> DataAddr7..DataAddr0, XReg7..XReg0, SReg7..SReg0);

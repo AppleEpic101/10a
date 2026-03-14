@@ -65,9 +65,17 @@ SReg7..SReg0		pin;	"the 8-bit S register
 
 " declare the used modules
 
-CUInterface INTERFACE   (ProgramDB15..ProgramDB0, Reset, Clock
-            -> ProgramAB12..ProgramAB0, DataAB7..DataAB0, RD, WR, IO,
-            Accum7..Accum0, Flags7..Flags0, XReg7..XReg0, SReg7..SReg0);
+CUInterface INTERFACE (ProgramDB15..ProgramDB0, Flags7..Flags0, Reset, Clock ->
+            MuxSel2..MuxSel0, Load, " PAU
+
+            UpdateAcc, OpSelect, UseAdder, F3..F0, CinSel1..CinSel0, InvertCarry, " ALU
+            LSBselect1..LSBselect0, MiddleSelect, MSBselect2..MSBselect0,
+            MaskSZ, MaskVC, PopF, 
+
+            EnableInc, UseOffset, AddressSel1..AddressSel0, UseInc, UsePost,  " DAU
+            MaskS, MaskX
+            
+            OffsetSel, SelectDB1..SelectDB0, RD, WR, IO, Address12..Address0);
 
 PAUInterface INTERFACE   (Offset7..Offset0, Direct12..Direct0,
             MuxSel2..MuxSel0, Load, Reset, Clock
@@ -98,9 +106,77 @@ ProgramDB  =  [ProgramDB15..ProgramDB0];"16-bit Program data bus
 DataAB     =  [DataAB7..DataAB0];	"8-bit Data address bus
 DataDB     =  [DataDB7..DataDB0];	"8-bit Data data bus
 
-
+Accum = [Accum7..Accum0];
+Flags = [Flags7..Flags0];
+PC = PAU.[PC12..PC0];
+XReg = [XReg7..XReg0];
+SReg = [SReg7..SReg0];
 
 EQUATIONS
+" Inputs
+CU.Clock = Clock;
+PAU.Clock = Clock;
+ALU.Clock = Clock;
+DAU.Clock = Clock;
+
+CU.Reset = Reset;
+PAU.Reset = Reset;
+ALU.Reset = Reset;
+DAU.Reset = Reset;
+
+CU.[ProgramDB15..ProgramDB0] = ProgramDB;
+CU.[Flags7..Flags0] = Flags;
+
+PAU.[Offset7..Offset0] = (!CU.OffsetSel & CU.[Address7..Address0]) # (CU.OffsetSel & DataDB);
+PAU.[Direct12..Direct0] = CU.[Address12..Address0];
+PAU.[MuxSel2..MuxSel0] = CU.[MuxSel2..MuxSel0];
+PAU.Load = CU.Load;
+
+ALU.[Data7..Data0] = (!CU.SelectDB1 & !CU.SelectDB0 & [SReg7..SReg0]) #  " 00 S-Register
+                        (!CU.SelectDB1 & CU.SelectDB0 & [XReg7..XReg0]) # " 01 X-Register
+                        (CU.SelectDB1 & !CU.SelectDB0 & CU.[Address7..Address0]) # " 10 low-8 bits of IR
+                        (CU.SelectDB1 & CU.SelectDB0 & DataDB); " 11  Data data bus
+ALU.UpdateAcc = CU.UpdateAcc;
+ALU.OpSelect = CU.OpSelect;
+ALU.UseAdder = CU.UseAdder;
+ALU.[F3..F0] = CU.[F3..F0];
+ALU.[CinSel1..CinSel0] = CU.[CinSel1..CinSel0];
+ALU.InvertCarry = CU.InvertCarry;
+ALU.[LSBselect1..LSBselect0] = CU.[LSBselect1..LSBselect0];
+ALU.MiddleSelect = CU.MiddleSelect;
+ALU.[MSBselect2..MSBselect0] = CU.[MSBselect2..MSBselect0];
+ALU.MaskSZ = CU.MaskSZ;
+ALU.MaskVC = CU.MaskVC;
+ALU.PopF = CU.PopF;
+
+DAU.[Accum7..Accum0] = Accum;
+DAU.[Offset7..Offset0] = CU.[Address7..Address0];
+DAU.EnableInc = CU.EnableInc;
+DAU.UseOffset = CU.UseOffset;
+DAU.[AddressSel1..AddressSel0] = CU.[AddressSel1..AddressSel0];
+DAU.UseInc = CU.UseInc;
+DAU.UsePost = CU.UsePost;
+DAU.MaskS = CU.MaskS;
+DAU.MaskX = CU.MaskX;
+
+" Outputs
+Accum = ALU.[Accum7..Accum0];
+Flags = ALU.[Flags7..Flags0];
+
+DataAB = DAU.[DataAddr7..DataAddr0];
+ProgramAB = PAU.[ProgAddr12..ProgAddr0];
+
+DataDB = (!CU.SelectDB1 & !CU.SelectDB0 & PAU.[PC7..PC0]) # "00 Low-8 bits of PC
+            (!CU.SelectDB1 & CU.SelectDB0 & [0, 0, 0, PAU.PC12, PAU.PC11, PAU.PC10, PAU.PC9, PAU.PC8]) # "01 High-8 bits of PC
+            (CU.SelectDB1 & !CU.SelectDB0 & [Flags7..Flags0]) # "10 Flags
+            (CU.SelectDB1 & CU.SelectDB0 & [Accum7..Accum0]); "11 Accumulator
+
+XReg = DAU.[XReg7..XReg0];
+SReg = DAU.[SReg7..SReg0];
+
+RD = CU.RD & !Clock;
+WR = CU.WR & !Clock;
+IO = CU.IO & !Clock;
 
 
 

@@ -1,7 +1,7 @@
 MODULE      ProgramAccess
-INTERFACE   (Offset7..Offset0, Direct12..Direct0,
-            MuxSel2..MuxSel0, Load, Reset, Clock
-        -> ProgAddr12..ProgAddr0, PC12..PC0);
+PAUInterface INTERFACE   (Offset7..Offset0, Direct12..Direct0,
+                MuxSel2..MuxSel0, Load, Reset, Clock
+                -> ProgAddr12..ProgAddr0, PC12..PC0);
 
 TITLE       'PAU'
 

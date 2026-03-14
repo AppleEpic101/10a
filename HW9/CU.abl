@@ -1,6 +1,6 @@
 MODULE CU
 
-CU INTERFACE (ProgramDB15..ProgramDB0, Flags7..Flags0, Reset, Clock ->
+CUInterface INTERFACE (ProgramDB15..ProgramDB0, Flags7..Flags0, Reset, Clock ->
             MuxSel2..MuxSel0, Load, " PAU
 
             UpdateAcc, OpSelect, UseAdder, F3..F0, CinSel1..CinSel0, InvertCarry, " ALU
@@ -10,7 +10,7 @@ CU INTERFACE (ProgramDB15..ProgramDB0, Flags7..Flags0, Reset, Clock ->
             EnableInc, UseOffset, AddressSel1..AddressSel0, UseInc, UsePost,  " DAU
             MaskS, MaskX
             
-            SelectDB1..SelectDB0, RD, WR, IO, Address12..Address0);
+            OffsetSel, SelectDB1..SelectDB0, RD, WR, IO, Address12..Address0);
 
 TITLE 'Control Unit'
 
@@ -53,14 +53,13 @@ MaskX                       pin;
 
 " Control Unit 
 IR15..IR0                   pin ISTYPE 'REG'; " Instruction Register
+
+OffsetSel                   pin; " Selects between low-8 bits of IR (0) or DDB (1) going into PAU offset
 SelectDB1..SelectDB0      pin; " Select lines for Data data bus
 RD                        pin; " Read 
 WR                        pin; " Write
 IO                        pin; " I/O    
 Address12..Address0       pin; " low 13-bits of IR into address units
-
-" Intermediates
-HoldIR                    pin; " Hold IR
 
 " Buses
 ProgramDB = [ProgramDB15..ProgramDB0]; " Program Data Bus
@@ -121,37 +120,48 @@ EQUATIONS
 
 IR.CLK = Clock;
 IR.CLR = Reset;
-StateBits.CLK = Clock;
-StateBits.CLR = Reset;
 
-HoldIR = ((StateBits == Idle) & ((IR == CALL) # (IR == RTS))) #
-         ((StateBits == Call1) # (StateBits == Call2) # (StateBits == RTS1));
+IR = ProgramDB;
+[Address12..Address0] = IR[12..0];
 
-IR = (HoldIR & IR) # (!HoldIR & ProgramDB);
+WHEN (IR == ADCM) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
 
-[Address12..Address0] = [IR12..IR0];
+    " ALU: Add with carry
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 1;
+    F3 = 1;
+    F2 = 0;
+    F1 = 1;
+    F0 = 0;
+    CinSel1 = 1;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 0;
+    PopF = 0;
 
+    " DAU: Pass m on DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 1;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+}
 
-STATE_DIAGRAM  StateBits;
-
-STATE Idle:
-    IF (IR == CALL) THEN Call1;
-    IF (IR == RTS) THEN RTS1;
-    ELSE Idle;
-
-STATE Call1:
-    GOTO Call2
-
-STATE Call2:
-    GOTO Call3
-
-STATE Call3:
-    GOTO Idle;
-
-STATE RTS1:
-    GOTO RTS2
-
-STATE RTS2:
-    GOTO Idle;
-
+" to be added
 END CU
