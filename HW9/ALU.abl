@@ -162,18 +162,18 @@ Flag4 = (PopF & Data4) # (!PopF & 0);
 
 " Carry Flag: Update from Adder if selected and enabled, otherwise hold state
 Carry = (PopF & Data3) #                                                                            " Directly load Carry 
-        (!PopF & MaskVC & OpSelect & ((!InvertCarry & CarryOut7) # (InvertCarry & !CarryOut7))) #   " Arithmetic carry. Can be inverted using InvertCarry for subtraction
-        (!PopF & MaskVC & !OpSelect & ((MiddleSelect & Accum7) # (!MiddleSelect & Accum0))) #       " Bit that falls off the end of the shift/rotate moves to carry
-        (!PopF & !MaskVC & Flags3);                                                                 " Hold state for MaskVC = 0
+        (!PopF & !MaskVC & OpSelect & ((!InvertCarry & CarryOut7) # (InvertCarry & !CarryOut7))) #   " Arithmetic carry. Can be inverted using InvertCarry for subtraction
+        (!PopF & !MaskVC & !OpSelect & ((MiddleSelect & Accum7) # (!MiddleSelect & Accum0))) #       " Bit that falls off the end of the shift/rotate moves to carry
+        (!PopF & MaskVC & Flags3);                                                                 " Hold state for MaskVC = 0
 
 " Overflow Flag: Update from Adder if selected and enabled, otherwise hold state
 
 Overflow = (PopF & Data2) #                                  " Directly load Overflow    
-        (!PopF & MaskVC & (
+        (!PopF & !MaskVC & (
             (OpSelect & ((UseAdder & Accum7 & Fop7 & !MuxOut7) # (UseAdder & !Accum7 & !Fop7 & MuxOut7))) # " Detects sign change in adder
             (!OpSelect & (Accum7 $ MuxOut7))                 " Detects sign change in shift/rotate
         )) #
-        (!PopF & !MaskVC & Flags2);                         " Hold state for MaskVC = 0
+        (!PopF & MaskVC & Flags2);                         " Hold state for MaskVC = 0
 
 " Sign Flag: Update anytime MaskSZ is low
 Sign  =  (PopF & Data1) #                    " Directly load Sign 

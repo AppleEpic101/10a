@@ -103,7 +103,6 @@ DataDB     =  [DataDB7..DataDB0];	"8-bit Data data bus
 EQUATIONS
 
 
-" output enables
 
 " Data data bus is enabled when writing
 DataDB.OE  =  control unit write signal;
