@@ -3083,9 +3083,9 @@ WHEN (IR == D_STSO) THEN {
 WHEN (IR == JMP) THEN {
     " PAU: Jump to a
     MuxSel2 = 0;
-    MuxSel1 = 0;
+    MuxSel1 = 1;
     MuxSel0 = 0;
-    Load = 0;
+    Load = 1;
 
     " ALU: Dont care
     UpdateAcc = 0;
@@ -3128,10 +3128,17 @@ WHEN (IR == JMP) THEN {
 
 WHEN (IR == JA) THEN {
     " PAU: branch if above
-    MuxSel2 = 0;
-    MuxSel1 = 0;
-    MuxSel0 = 0;
-    Load = 0;
+    WHEN ((Flags3 == 0) & (Flags0 == 0)) THEN { 
+        MuxSel2 = 0;
+        MuxSel1 = 1;
+        MuxSel0 = 1;
+        Load = 0;
+    } ELSE {
+        MuxSel2 = 0;
+        MuxSel1 = 0;
+        MuxSel0 = 0;
+        Load = 0;
+    }
 
     " ALU: Dont care
     UpdateAcc = 0;
@@ -3174,10 +3181,17 @@ WHEN (IR == JA) THEN {
 
 WHEN (IR == JAE) THEN {
     " PAU: branch if above or equal (carry bit clear)
-    MuxSel2 = 0;
-    MuxSel1 = 0;
-    MuxSel0 = 0;
-    Load = 0;
+    WHEN (Flags3 == 0) THEN { 
+        MuxSel2 = 0;
+        MuxSel1 = 1;
+        MuxSel0 = 1;
+        Load = 0;
+    } ELSE {
+        MuxSel2 = 0;
+        MuxSel1 = 0;
+        MuxSel0 = 0;
+        Load = 0;
+    }
 
     " ALU: Dont care
     UpdateAcc = 0;
@@ -3220,10 +3234,17 @@ WHEN (IR == JAE) THEN {
 
 WHEN (IR == JB) THEN {
     " PAU: branch if below (carry bit set)
-    MuxSel2 = 0;
-    MuxSel1 = 0;
-    MuxSel0 = 0;
-    Load = 0;
+    WHEN (Flags3 == 1) THEN { 
+        MuxSel2 = 0;
+        MuxSel1 = 1;
+        MuxSel0 = 1;
+        Load = 0;
+    } ELSE {
+        MuxSel2 = 0;
+        MuxSel1 = 0;
+        MuxSel0 = 0;
+        Load = 0;
+    }
 
     " ALU: Dont care
     UpdateAcc = 0;
@@ -3266,10 +3287,17 @@ WHEN (IR == JB) THEN {
 
 WHEN (IR == JBE) THEN {
     " PAU: branch if below or equal
-    MuxSel2 = 0;
-    MuxSel1 = 0;
-    MuxSel0 = 0;
-    Load = 0;
+    WHEN ((Flags3 == 1) # (Flags0 == 1)) THEN { 
+        MuxSel2 = 0;
+        MuxSel1 = 1;
+        MuxSel0 = 1;
+        Load = 0;
+    } ELSE {
+        MuxSel2 = 0;
+        MuxSel1 = 0;
+        MuxSel0 = 0;
+        Load = 0;
+    }
 
     " ALU: Dont care
     UpdateAcc = 0;
@@ -3312,10 +3340,17 @@ WHEN (IR == JBE) THEN {
 
 WHEN (IR == JE) THEN {
     " PAU: branch if zero bit set (equal)
-    MuxSel2 = 0;
-    MuxSel1 = 0;
-    MuxSel0 = 0;
-    Load = 0;
+    WHEN (Flags0 == 1) THEN { 
+        MuxSel2 = 0;
+        MuxSel1 = 1;
+        MuxSel0 = 1;
+        Load = 0;
+    } ELSE {
+        MuxSel2 = 0;
+        MuxSel1 = 0;
+        MuxSel0 = 0;
+        Load = 0;
+    }
 
     " ALU: Dont care
     UpdateAcc = 0;
@@ -3358,10 +3393,17 @@ WHEN (IR == JE) THEN {
 
 WHEN (IR == JG) THEN {
     " PAU: branch if greater than
-    MuxSel2 = 0;
-    MuxSel1 = 0;
-    MuxSel0 = 0;
-    Load = 0;
+    WHEN ((Flags2 == Flags1) & (Flags0 == 0)) THEN { 
+        MuxSel2 = 0;
+        MuxSel1 = 1;
+        MuxSel0 = 1;
+        Load = 0;
+    } ELSE {
+        MuxSel2 = 0;
+        MuxSel1 = 0;
+        MuxSel0 = 0;
+        Load = 0;
+    }
 
     " ALU: Dont care
     UpdateAcc = 0;
@@ -3404,10 +3446,17 @@ WHEN (IR == JG) THEN {
 
 WHEN (IR == JGE) THEN {
     " PAU: branch if greater than or equal
-    MuxSel2 = 0;
-    MuxSel1 = 0;
-    MuxSel0 = 0;
-    Load = 0;
+    WHEN (Flags2 == Flags1) THEN { 
+        MuxSel2 = 0;
+        MuxSel1 = 1;
+        MuxSel0 = 1;
+        Load = 0;
+    } ELSE {
+        MuxSel2 = 0;
+        MuxSel1 = 0;
+        MuxSel0 = 0;
+        Load = 0;
+    }
 
     " ALU: Dont care
     UpdateAcc = 0;
@@ -3450,10 +3499,17 @@ WHEN (IR == JGE) THEN {
 
 WHEN (IR == JL) THEN {
     " PAU: branch if less than
-    MuxSel2 = 0;
-    MuxSel1 = 0;
-    MuxSel0 = 0;
-    Load = 0;
+    WHEN (Flags2 != Flags1) THEN { 
+        MuxSel2 = 0;
+        MuxSel1 = 1;
+        MuxSel0 = 1;
+        Load = 0;
+    } ELSE {
+        MuxSel2 = 0;
+        MuxSel1 = 0;
+        MuxSel0 = 0;
+        Load = 0;
+    }
 
     " ALU: Dont care
     UpdateAcc = 0;
@@ -3496,10 +3552,17 @@ WHEN (IR == JL) THEN {
 
 WHEN (IR == JLE) THEN {
     " PAU: branch if less than or equal
-    MuxSel2 = 0;
-    MuxSel1 = 0;
-    MuxSel0 = 0;
-    Load = 0;
+    WHEN ((Flags2 != Flags1) # (Flags0 == 1)) THEN { 
+        MuxSel2 = 0;
+        MuxSel1 = 1;
+        MuxSel0 = 1;
+        Load = 0;
+    } ELSE {
+        MuxSel2 = 0;
+        MuxSel1 = 0;
+        MuxSel0 = 0;
+        Load = 0;
+    }
 
     " ALU: Dont care
     UpdateAcc = 0;
@@ -3542,10 +3605,17 @@ WHEN (IR == JLE) THEN {
 
 WHEN (IR == JNE) THEN {
     " PAU: branch if zero bit clear (not equal)
-    MuxSel2 = 0;
-    MuxSel1 = 0;
-    MuxSel0 = 0;
-    Load = 0;
+    WHEN (Flags0 == 0) THEN { 
+        MuxSel2 = 0;
+        MuxSel1 = 1;
+        MuxSel0 = 1;
+        Load = 0;
+    } ELSE {
+        MuxSel2 = 0;
+        MuxSel1 = 0;
+        MuxSel0 = 0;
+        Load = 0;
+    }
 
     " ALU: Dont care
     UpdateAcc = 0;
@@ -3588,10 +3658,17 @@ WHEN (IR == JNE) THEN {
 
 WHEN (IR == JNS) THEN {
     " PAU: branch if sign bit clear (positive)
-    MuxSel2 = 0;
-    MuxSel1 = 0;
-    MuxSel0 = 0;
-    Load = 0;
+    WHEN (Flags1 == 0) THEN { 
+        MuxSel2 = 0;
+        MuxSel1 = 1;
+        MuxSel0 = 1;
+        Load = 0;
+    } ELSE {
+        MuxSel2 = 0;
+        MuxSel1 = 0;
+        MuxSel0 = 0;
+        Load = 0;
+    }
 
     " ALU: Dont care
     UpdateAcc = 0;
@@ -3634,10 +3711,17 @@ WHEN (IR == JNS) THEN {
 
 WHEN (IR == JNV) THEN {
     " PAU: branch if overflow bit clear
-    MuxSel2 = 0;
-    MuxSel1 = 0;
-    MuxSel0 = 0;
-    Load = 0;
+    WHEN (Flags2 == 0) THEN { 
+        MuxSel2 = 0;
+        MuxSel1 = 1;
+        MuxSel0 = 1;
+        Load = 0;
+    } ELSE {
+        MuxSel2 = 0;
+        MuxSel1 = 0;
+        MuxSel0 = 0;
+        Load = 0;
+    }
 
     " ALU: Dont care
     UpdateAcc = 0;
@@ -3680,10 +3764,17 @@ WHEN (IR == JNV) THEN {
 
 WHEN (IR == JS) THEN {
     " PAU: branch if sign bit set (negative)
-    MuxSel2 = 0;
-    MuxSel1 = 0;
-    MuxSel0 = 0;
-    Load = 0;
+    WHEN (Flags1 == 1) THEN { 
+        MuxSel2 = 0;
+        MuxSel1 = 1;
+        MuxSel0 = 1;
+        Load = 0;
+    } ELSE {
+        MuxSel2 = 0;
+        MuxSel1 = 0;
+        MuxSel0 = 0;
+        Load = 0;
+    }
 
     " ALU: Dont care
     UpdateAcc = 0;
@@ -3726,10 +3817,17 @@ WHEN (IR == JS) THEN {
 
 WHEN (IR == JV) THEN {
     " PAU: branch if overflow bit set
-    MuxSel2 = 0;
-    MuxSel1 = 0;
-    MuxSel0 = 0;
-    Load = 0;
+    WHEN (Flags2 == 1) THEN { 
+        MuxSel2 = 0;
+        MuxSel1 = 1;
+        MuxSel0 = 1;
+        Load = 0;
+    } ELSE {
+        MuxSel2 = 0;
+        MuxSel1 = 0;
+        MuxSel0 = 0;
+        Load = 0;
+    }
 
     " ALU: Dont care
     UpdateAcc = 0;

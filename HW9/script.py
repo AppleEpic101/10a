@@ -14,12 +14,29 @@ df = df[df['Include'] == True]
 def format_abel(row):
     get_val = lambda col: int(row[col]) if pd.notnull(row[col]) else 0
     
-    return f"""WHEN (IR == {row['Opcode']}) THEN {{
-    \" PAU: {row['PAU']}
-    MuxSel2 = {get_val('MuxSel2')};
+    condition = row['Condition'] if 'Condition' in row and pd.notnull(row['Condition']) else None
+    
+    if condition:
+        pau_block = f"""    WHEN ({condition}) THEN {{ 
+        MuxSel2 = 0;
+        MuxSel1 = 1;
+        MuxSel0 = 1;
+        Load = 0;
+    }} ELSE {{
+        MuxSel2 = 0;
+        MuxSel1 = 0;
+        MuxSel0 = 0;
+        Load = 0;
+    }}"""
+    else:
+        pau_block = f"""    MuxSel2 = {get_val('MuxSel2')};
     MuxSel1 = {get_val('MuxSel1')};
     MuxSel0 = {get_val('MuxSel0')};
-    Load = {get_val('Load')};
+    Load = {get_val('Load')};"""
+
+    return f"""WHEN (IR == {row['Opcode']}) THEN {{
+    \" PAU: {row['PAU']}
+{pau_block}
 
     \" ALU: {row['ALU']}
     UpdateAcc = {get_val('UpdateAcc')};
