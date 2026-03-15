@@ -73,7 +73,7 @@ CUInterface INTERFACE (ProgramDB15..ProgramDB0, Flags7..Flags0, Reset, Clock ->
             MaskSZ, MaskVC, PopF, 
 
             EnableInc, UseOffset, AddressSel1..AddressSel0, UseInc, UsePost,  " DAU
-            MaskS, MaskX
+            MaskS, MaskX,
             
             OffsetSel, SelectDB1..SelectDB0, RD, WR, IO, Address12..Address0);
 
@@ -181,7 +181,7 @@ IO = CU.IO & !Clock;
 
 
 " Data data bus is enabled when writing
-DataDB.OE  =  control unit write signal;
+DataDB.OE  =  WR;
 
 " most signals are always enabled
 ProgramAB.OE         =  ^h1FFF;
