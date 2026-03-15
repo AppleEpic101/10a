@@ -9,6 +9,7 @@ import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
 df = pd.read_csv(url)
 df = df.dropna(subset=['Opcode'])
+df = df[df['Include'] == True]
 
 def format_abel(row):
     get_val = lambda col: int(row[col]) if pd.notnull(row[col]) else 0
@@ -50,6 +51,13 @@ def format_abel(row):
     UsePost = {get_val('UsePost')};
     MaskS = {get_val('MaskS')};
     MaskX = {get_val('MaskX')};
+    
+    \" Control Unit Top Level
+    RD = {get_val('RD')};
+    WR = {get_val('WR')};
+    SelectDB1 = {get_val('SelectDB1')};
+    SelectDB0 = {get_val('SelectDB0')};
+    OffsetSel = {get_val('OffsetSel')};
 }}"""
 
 abel_blocks = [format_abel(row) for _, row in df.iterrows()]
