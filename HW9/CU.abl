@@ -1,16 +1,16 @@
-MODULE CU
+MODULE CUInterface
 
-CUInterface INTERFACE (ProgramDB15..ProgramDB0, Flags7..Flags0, Reset, Clock ->
-            MuxSel2..MuxSel0, Load, " PAU
+INTERFACE (ProgramDB15..ProgramDB0, Flags7..Flags0, Reset, Clock ->
+        MuxSel2..MuxSel0, Load, " PAU
 
-            UpdateAcc, OpSelect, UseAdder, F3..F0, CinSel1..CinSel0, InvertCarry, " ALU
-            LSBselect1..LSBselect0, MiddleSelect, MSBselect2..MSBselect0,
-            MaskSZ, MaskVC, PopF, 
+        UpdateAcc, OpSelect, UseAdder, F3..F0, CinSel1..CinSel0, InvertCarry, " ALU
+        LSBselect1..LSBselect0, MiddleSelect, MSBselect2..MSBselect0,
+        MaskSZ, MaskVC, PopF, 
 
-            EnableInc, UseOffset, AddressSel1..AddressSel0, UseInc, UsePost,  " DAU
-            MaskS, MaskX
-            
-            OffsetSel, SelectDB1..SelectDB0, RD, WR, IO, Address12..Address0);
+        EnableInc, UseOffset, AddressSel1..AddressSel0, UseInc, UsePost,  " DAU
+        MaskS, MaskX
+        
+        OffsetSel, SelectDB1..SelectDB0, RD, WR, IO, Address12..Address0);
 
 TITLE 'Control Unit'
 
@@ -4033,3 +4033,5 @@ WHEN (IR == JV) THEN {
     SelectDB0 = 0;
     OffsetSel = 1;
 }
+
+END CUInterface

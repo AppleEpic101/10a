@@ -77,7 +77,7 @@ CUInterface INTERFACE (ProgramDB15..ProgramDB0, Flags7..Flags0, Reset, Clock ->
             
             OffsetSel, SelectDB1..SelectDB0, RD, WR, IO, Address12..Address0);
 
-PAUInterface INTERFACE   (Offset7..Offset0, Direct12..Direct0,
+ProgramAccess INTERFACE   (Offset7..Offset0, Direct12..Direct0,
             MuxSel2..MuxSel0, Load, Reset, Clock
         -> ProgAddr12..ProgAddr0, PC12..PC0);
 
