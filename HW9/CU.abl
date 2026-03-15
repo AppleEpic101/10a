@@ -162,7 +162,7 @@ IR.CLK = Clock;
 IR.CLR = Reset;
 
 IR = ProgramDB;
-[Address12..Address0] = IR[12..0];
+[Address12..Address0] = [IR12..IR0];
 
 WHEN (IR == ADCM) THEN {
     " PAU: Increment PC

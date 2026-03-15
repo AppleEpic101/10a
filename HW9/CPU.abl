@@ -125,7 +125,7 @@ ALU.Reset = Reset;
 DAU.Reset = Reset;
 
 CU.[ProgramDB15..ProgramDB0] = ProgramDB;
-CU.[Flags7..Flags0] = Flags;
+CU.[Flags7..Flags0] = [Flags7..Flags0];
 
 PAU.[Offset7..Offset0] = (!CU.OffsetSel & CU.[Address7..Address0]) # (CU.OffsetSel & DataDB);
 PAU.[Direct12..Direct0] = CU.[Address12..Address0];
@@ -161,7 +161,7 @@ DAU.MaskX = CU.MaskX;
 
 " Outputs
 Accum = ALU.[Accum7..Accum0];
-Flags = ALU.[Flags7..Flags0];
+Flags = ALU.[Flags7, Flags6 & !WR, Flags5, Flags4 & !WR, Flags3..Flags0];
 
 DataAB = DAU.[DataAddr7..DataAddr0];
 ProgramAB = PAU.[ProgAddr12..ProgAddr0];
