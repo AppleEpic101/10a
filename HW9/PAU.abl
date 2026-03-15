@@ -40,7 +40,7 @@ Clock              pin;   " System clock
 " OUTPUTS
 
 ProgAddr12..ProgAddr0    pin;  
-PC12..PC0                         pin; 
+PC12..PC0                         pin ISTYPE 'REG'; 
 
 " NODES
 
@@ -48,7 +48,7 @@ Sum12..Sum0                   node;
 Carry13..Carry0                node;  
 MuxOut12..MuxOut0        node;    
 
-“ VECTORS
+" VECTORS
 ProgAddr   =  [ProgAddr12..ProgAddr0];
 PC             =  [PC12..PC0];                               
 MuxOut     =  [MuxOut12..MuxOut0];                   " Selection result bus
@@ -57,10 +57,10 @@ Increment  =  [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ];  " Value to add for PC 
 Hold           =  [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];  " Value to add for PC + 0 (stalling)
 Direct         =  [Direct12..Direct0];                 " Direct 13-bit address jump
 
-“ Sign-extend Offset7 to 13 bits for relative branching
+" Sign-extend Offset7 to 13 bits for relative branching
 Relative  = [Offset7, Offset7, Offset7, Offset7, Offset7, Offset7..Offset0];        
 
-“ RTS address reconstruction
+" RTS address reconstruction
 RTS_LO      =  [PC12..PC8, Offset7..Offset0];            " Replace lower 8 bits of PC
 RTS_HI       =  [Offset4..Offset0, PC7..PC0];               " Replace upper 5 bits of PC
 
