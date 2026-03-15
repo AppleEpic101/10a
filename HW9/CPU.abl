@@ -95,7 +95,7 @@ DAUInterface INTERFACE  (Accum7..Accum0, Offset7..Offset0,
 
 " create instances of the modules
 CU         FUNCTIONAL_BLOCK         CUInterface;
-PAU        FUNCTIONAL_BLOCK         PAUInterface;
+PAU        FUNCTIONAL_BLOCK         ProgramAccess;
 ALU        FUNCTIONAL_BLOCK         ALUInterface;
 DAU        FUNCTIONAL_BLOCK         DAUInterface;
 
