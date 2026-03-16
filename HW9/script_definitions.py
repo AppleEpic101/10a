@@ -13,7 +13,7 @@ df = pd.read_csv(url)
 df = df[df['Include'] == True]
 df = df.dropna(subset=['name', 'Instruction'])
 
-def format_instruction_array(name, instruction):
+def format_instruction_array(name, instruction, description):
     # Convert instruction string to list of elements
     elements = []
     for char in str(instruction):
@@ -22,17 +22,16 @@ def format_instruction_array(name, instruction):
         else:
             elements.append('.X.')
     
-    # Ensure it's 16 elements (though usually it should be)
-    # The user said "expanded into an array of 16"
-    # If it's shorter than 16, we might need to pad it, but usually these are 16 bits.
-    # If it's longer, maybe truncate?
-    # Let's just process what's there.
-    
     array_str = ", ".join(elements)
-    return f"{name:<6} = [{array_str}];"
+    
+    desc_str = str(description).strip()
+    if pd.isna(description) or not desc_str or desc_str == 'nan':
+        return f"{name:<6} = [{array_str}];"
+    else:
+        return f"{name:<6} = [{array_str}]; \" {desc_str}"
 
 # Generate lines
-lines = [format_instruction_array(row['name'], row['Instruction']) for _, row in df.iterrows()]
+lines = [format_instruction_array(row['name'], row['Instruction'], row.get('Description', '')) for _, row in df.iterrows()]
 final_output = "\n".join(lines)
 
 # Write to file

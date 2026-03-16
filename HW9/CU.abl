@@ -85,7 +85,6 @@ MaskSZ                      pin; " Prevents updates to SZ flags
 MaskVC                      pin; " Prevents updates to VC flags
 PopF                        pin; " Directly set flags
 
-
 " DAU
 EnableInc                   pin; " Enable incrementer/decrementer (1) or pass-thru (0)
 UseOffset                   pin; " 2nd operand is offset (UseOffset=1) or 0 (UseOffset=0)
@@ -112,91 +111,88 @@ Flags     = [Flags7..Flags0];     " Flags Bus
 
 " Instructions
 
-ADCM   = [0, 1, 1, 0, 0, 0, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-ADCXO  = [0, 1, 1, 0, 0, 0, 0, 1, .X., .X., .X., .X., .X., .X., .X., .X.];
-ADCSO  = [0, 1, 1, 0, 0, 0, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-ADCI   = [0, 1, 1, 0, 0, 0, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.];
-ADDM   = [0, 1, 1, 0, 1, 0, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-ADDXO  = [0, 1, 1, 0, 1, 0, 0, 1, .X., .X., .X., .X., .X., .X., .X., .X.];
-ADDSO  = [0, 1, 1, 0, 1, 0, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-ADDI   = [0, 1, 1, 0, 1, 0, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.];
-ANDM   = [0, 1, 0, 0, 0, 1, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-ANDXO  = [0, 1, 0, 0, 0, 1, 0, 1, .X., .X., .X., .X., .X., .X., .X., .X.];
-ANDSO  = [0, 1, 0, 0, 0, 1, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-ANDI   = [0, 1, 0, 0, 0, 1, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.];
-CMPM   = [0, 0, 1, 1, 0, 0, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-CMPXO  = [0, 0, 1, 1, 0, 0, 0, 1, .X., .X., .X., .X., .X., .X., .X., .X.];
-CMPSO  = [0, 0, 1, 1, 0, 0, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-CMPI   = [0, 0, 1, 1, 0, 0, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.];
-DEC    = [0, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0];
-INC    = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-LSL    = [0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-NOT    = [0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0];
-ORM    = [0, 1, 1, 1, 0, 1, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-ORXO   = [0, 1, 1, 1, 0, 1, 0, 1, .X., .X., .X., .X., .X., .X., .X., .X.];
-ORSO   = [0, 1, 1, 1, 0, 1, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-ORI    = [0, 1, 1, 1, 0, 1, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.];
-RLC    = [0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-SBBM   = [0, 0, 0, 1, 1, 0, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-SBBXO  = [0, 0, 0, 1, 1, 0, 0, 1, .X., .X., .X., .X., .X., .X., .X., .X.];
-SBBSO  = [0, 0, 0, 1, 1, 0, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-SBBI   = [0, 0, 0, 1, 1, 0, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.];
-SUBM   = [0, 0, 0, 1, 0, 0, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-SUBXO  = [0, 0, 0, 1, 0, 0, 0, 1, .X., .X., .X., .X., .X., .X., .X., .X.];
-SUBSO  = [0, 0, 0, 1, 0, 0, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-SUBI   = [0, 0, 0, 1, 0, 0, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.];
-TSTM   = [0, 1, 0, 0, 1, 1, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-TSTXO  = [0, 1, 0, 0, 1, 1, 0, 1, .X., .X., .X., .X., .X., .X., .X., .X.];
-TSTSO  = [0, 1, 0, 0, 1, 1, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-TSTI   = [0, 1, 0, 0, 1, 1, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.];
-XORM   = [0, 0, 1, 1, 0, 1, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-XORXO  = [0, 0, 1, 1, 0, 1, 0, 1, .X., .X., .X., .X., .X., .X., .X., .X.];
-XORSO  = [0, 0, 1, 1, 0, 1, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-XORI   = [0, 0, 1, 1, 0, 1, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.];
-
-POPF   = [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-PUSHF  = [0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-NOP    = [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0];
-
-LDI    = [1, 0, 0, 0, 1, 0, 0, 1, .X., .X., .X., .X., .X., .X., .X., .X.];
-LDD    = [1, 0, 0, 0, 0, 0, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-LDXO   = [1, 0, 0, 1, 0, 1, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.];
-LDXO_I = [1, 0, 0, 1, 0, 1, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-LDXO_D = [1, 0, 0, 1, 1, 1, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-I_LDXO = [1, 0, 0, 0, 0, 1, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-D_LDXO = [1, 0, 0, 0, 1, 1, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-LDSO   = [1, 0, 0, 1, 0, 0, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.];
-LDSO_I = [1, 0, 0, 1, 0, 0, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-LDSO_D = [1, 0, 0, 1, 1, 0, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-I_LDSO = [1, 0, 0, 0, 0, 0, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-D_LDSO = [1, 0, 0, 0, 1, 0, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-STD    = [1, 0, 1, 0, 0, 0, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-STXO   = [1, 0, 1, 1, 0, 1, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.];
-STXO_I = [1, 0, 1, 1, 0, 1, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-STXO_D = [1, 0, 1, 1, 1, 1, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-I_STXO = [1, 0, 1, 0, 0, 1, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-D_STXO = [1, 0, 1, 0, 1, 1, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-STSO   = [1, 0, 1, 1, 0, 0, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.];
-STSO_I = [1, 0, 1, 1, 0, 0, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-STSO_D = [1, 0, 1, 1, 1, 0, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-I_STSO = [1, 0, 1, 0, 0, 0, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-D_STSO = [1, 0, 1, 0, 1, 0, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-
-JMP    = [1, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X., .X., .X., .X., .X., .X.];
-JA     = [1, 0, 0, 0, 1, 0, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-JAE    = [1, 0, 0, 0, 1, 1, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-JB     = [1, 0, 0, 0, 1, 1, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.];
-JBE    = [1, 0, 0, 0, 1, 0, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.];
-JE     = [1, 0, 0, 1, 1, 1, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.];
-JG     = [1, 0, 1, 0, 1, 1, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.];
-JGE    = [1, 0, 1, 1, 1, 0, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.];
-JL     = [1, 0, 1, 1, 1, 0, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-JLE    = [1, 0, 1, 0, 1, 1, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-JNE    = [1, 0, 0, 1, 1, 1, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-JNS    = [1, 0, 0, 1, 1, 0, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-JNV    = [1, 0, 1, 0, 1, 0, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.];
-JS     = [1, 0, 0, 1, 1, 0, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.];
-JV     = [1, 0, 1, 0, 1, 0, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.];
+ADCM   = [0, 1, 1, 0, 0, 0, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc + (m) + C
+ADCXO  = [0, 1, 1, 0, 0, 0, 0, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc + (X + o) + C
+ADCSO  = [0, 1, 1, 0, 0, 0, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc + (S + o) + C
+ADCI   = [0, 1, 1, 0, 0, 0, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc + k + C
+ADDM   = [0, 1, 1, 0, 1, 0, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc + (m)
+ADDXO  = [0, 1, 1, 0, 1, 0, 0, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc + (X + o)
+ADDSO  = [0, 1, 1, 0, 1, 0, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc + (S + o)
+ADDI   = [0, 1, 1, 0, 1, 0, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc + k
+ANDM   = [0, 1, 0, 0, 0, 1, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc AND (m)
+ANDXO  = [0, 1, 0, 0, 0, 1, 0, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc AND (X + o)
+ANDSO  = [0, 1, 0, 0, 0, 1, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc AND (S + o)
+ANDI   = [0, 1, 0, 0, 0, 1, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc AND k
+CMPM   = [0, 0, 1, 1, 0, 0, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc – (m)
+CMPXO  = [0, 0, 1, 1, 0, 0, 0, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc – (X + o)
+CMPSO  = [0, 0, 1, 1, 0, 0, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc – (S + o)
+CMPI   = [0, 0, 1, 1, 0, 0, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc – k
+DEC    = [0, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0];                 " Acc = Acc - 1
+INC    = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];                 " Acc = Acc + 1
+LSL    = [0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];                 " logical shift left Acc
+NOT    = [0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0];                 " Acc = NOT Acc
+ORM    = [0, 1, 1, 1, 0, 1, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc OR (m)
+ORXO   = [0, 1, 1, 1, 0, 1, 0, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc OR (X + o)
+ORSO   = [0, 1, 1, 1, 0, 1, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc OR (S + o)
+ORI    = [0, 1, 1, 1, 0, 1, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc OR k
+RLC    = [0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];                 " rotate left through carry
+SBBM   = [0, 0, 0, 1, 1, 0, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc – (m) – C
+SBBXO  = [0, 0, 0, 1, 1, 0, 0, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc – (X + o) – C
+SBBSO  = [0, 0, 0, 1, 1, 0, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc – (S + o) – C
+SBBI   = [0, 0, 0, 1, 1, 0, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc – k – C
+SUBM   = [0, 0, 0, 1, 0, 0, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc – (m)
+SUBXO  = [0, 0, 0, 1, 0, 0, 0, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc – (X + o)
+SUBSO  = [0, 0, 0, 1, 0, 0, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc – (S + o)
+SUBI   = [0, 0, 0, 1, 0, 0, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc – k
+TSTM   = [0, 1, 0, 0, 1, 1, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc AND (m)
+TSTXO  = [0, 1, 0, 0, 1, 1, 0, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc AND (X + o)
+TSTSO  = [0, 1, 0, 0, 1, 1, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc AND (S + o)
+TSTI   = [0, 1, 0, 0, 1, 1, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc AND k
+XORM   = [0, 0, 1, 1, 0, 1, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc XOR (m)
+XORXO  = [0, 0, 1, 1, 0, 1, 0, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc XOR (X + o)
+XORSO  = [0, 0, 1, 1, 0, 1, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc XOR (S + o)
+XORI   = [0, 0, 1, 1, 0, 1, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc XOR k
+POPF   = [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0];                 " Flags = (S); S = S + 1
+PUSHF  = [0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0];                 " S = S – 1; (S) = Flags
+NOP    = [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0];                 " No operation
+LDI    = [1, 0, 0, 0, 1, 0, 0, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " load Accumulator with immediate value k
+LDD    = [1, 0, 0, 0, 0, 0, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " load Accumulator direct from (m)
+LDXO   = [1, 0, 0, 1, 0, 1, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " load Accumulator indirect from (X + o)
+LDXO_I = [1, 0, 0, 1, 0, 1, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " load Accumulator indirect from (X + o) then post-increment X
+LDXO_D = [1, 0, 0, 1, 1, 1, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " load Accumulator indirect from (X + o) then post-decrement X
+I_LDXO = [1, 0, 0, 0, 0, 1, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " load Accumulator indirect from (X + o) after pre-incrementing X
+D_LDXO = [1, 0, 0, 0, 1, 1, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " load Accumulator indirect from (X + o) after pre-decrementing X
+LDSO   = [1, 0, 0, 1, 0, 0, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " load Accumulator indirect from (S + o)
+LDSO_I = [1, 0, 0, 1, 0, 0, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " load Accumulator indirect from (S + o) then post-increment S
+LDSO_D = [1, 0, 0, 1, 1, 0, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " load Accumulator indirect from (S + o) then post-decrement S
+I_LDSO = [1, 0, 0, 0, 0, 0, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " load Accumulator indirect from (S + o) after pre-incrementing S
+D_LDSO = [1, 0, 0, 0, 1, 0, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " load Accumulator indirect from (S + o) after pre-decrementing S
+STD    = [1, 0, 1, 0, 0, 0, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " store Accumulator direct at (m)
+STXO   = [1, 0, 1, 1, 0, 1, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " store Accumulator indirect at (X + o)
+STXO_I = [1, 0, 1, 1, 0, 1, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " store Accumulator indirect at (X + o) then post-increment X
+STXO_D = [1, 0, 1, 1, 1, 1, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " store Accumulator indirect at (X + o) then post-decrement X
+I_STXO = [1, 0, 1, 0, 0, 1, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " store Accumulator indirect at (X + o) after pre-incrementing X
+D_STXO = [1, 0, 1, 0, 1, 1, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " store Accumulator indirect at (X + o) after pre-decrementing X
+STSO   = [1, 0, 1, 1, 0, 0, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " store Accumulator indirect at (S + o)
+STSO_I = [1, 0, 1, 1, 0, 0, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " store Accumulator indirect at (S + o) then post-increment S
+STSO_D = [1, 0, 1, 1, 1, 0, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " store Accumulator indirect at (S + o) then post-decrement S
+I_STSO = [1, 0, 1, 0, 0, 0, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " store Accumulator indirect at (S + o) after pre-incrementing S
+D_STSO = [1, 0, 1, 0, 1, 0, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " store Accumulator indirect at (S + o) after pre-decrementing S
+JMP    = [1, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X., .X., .X., .X., .X., .X.]; " Jump to a
+JA     = [1, 0, 0, 0, 1, 0, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " branch if above
+JAE    = [1, 0, 0, 0, 1, 1, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " branch if above or equal (carry bit clear)
+JB     = [1, 0, 0, 0, 1, 1, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " branch if below (carry bit set)
+JBE    = [1, 0, 0, 0, 1, 0, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " branch if below or equal
+JE     = [1, 0, 0, 1, 1, 1, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " branch if zero bit set (equal)
+JG     = [1, 0, 1, 0, 1, 1, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " branch if greater than
+JGE    = [1, 0, 1, 1, 1, 0, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " branch if greater than or equal
+JL     = [1, 0, 1, 1, 1, 0, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " branch if less than
+JLE    = [1, 0, 1, 0, 1, 1, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " branch if less than or equal
+JNE    = [1, 0, 0, 1, 1, 1, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " branch if zero bit clear (not equal)
+JNS    = [1, 0, 0, 1, 1, 0, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " branch if sign bit clear (positive)
+JNV    = [1, 0, 1, 0, 1, 0, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " branch if overflow bit clear
+JS     = [1, 0, 0, 1, 1, 0, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " branch if sign bit set (negative)
+JV     = [1, 0, 1, 0, 1, 0, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " branch if overflow bit set
 
 EQUATIONS
 
@@ -210,6 +206,7 @@ IR = ProgramDB;
 " Set address to low 13-bits of IR
 [Address12..Address0] = [IR12..IR0];
 
+" Map all instructions to control signals
 WHEN (IR == ADCM) THEN {
     " PAU: Increment PC
     MuxSel2 = 0;
