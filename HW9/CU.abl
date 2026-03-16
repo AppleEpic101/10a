@@ -18,39 +18,39 @@ INTERFACE (ProgramDB15..ProgramDB0, Flags7..Flags0, Reset, Clock ->
 " It also contains the Instruction Register (IR) and handles the fetching of instructions from memory.
 " 
 " Inputs
-" ProgramDB15..ProgramDB0     pin; " Program Data Bus
-" Flags7..Flags0              pin; " Flags 
-" Reset                       pin; " System reset
-" Clock                       pin; " System clock
+" ProgramDB15..ProgramDB0     pin;  Program Data Bus
+" Flags7..Flags0              pin;  Flags 
+" Reset                       pin;  System reset
+" Clock                       pin;  System clock
 " 
 " Outputs
-" MuxSel2..MuxSel0            pin; " Mux select lines for PAU
-" Load                        pin; " Control signal: Active Low (0 = use PC in addition, 1 = ignore PC)
-" UpdateAcc                   pin; " Write-enable for accumulator
-" OpSelect                    pin; " Mux select between adder and shift/rotate paths
-" UseAdder                    pin; " Pass F-block through adder when low
-" F3..F0                      pin; " Function codes defining the bitwise relationship between Accum and Data
-" CinSel1..CinSel0            pin; " Mux select for carry-in
-" InvertCarry                 pin; " Invert carry flag during subtraction
-" LSBselect1..LSBselect0      pin; " Select pins for the value of LSB
-" MiddleSelect                pin; " Direction control of middle bits
-" MSBselect2..MSBselect0      pin; " Select pins for the value of MSB
-" MaskSZ                      pin; " Prevents updates to SZ flags
-" MaskVC                      pin; " Prevents updates to VC flags
-" PopF                        pin; " Directly set flags
-" EnableInc                   pin; " Enable incrementer/decrementer (1) or pass-thru (0)
-" UseOffset                   pin; " 2nd operand is offset (UseOffset=1) or 0 (UseOffset=0)
-" AddressSel1..AddressSel0    pin; " Mux select for S, X, accum, or zero
-" UseInc                      pin; " Use incrementer (1) or decrementer (0)
-" UsePost                     pin; " Use pre-increment/decrement (0) or post-increment/decrement (1)
-" MaskS                       pin; " Mask S register
-" MaskX                       pin; " Mask X register
-" OffsetSel                   pin; " Selects between low-8 bits of IR (0) or DDB (1) going into PAU offset
-" SelectDB1..SelectDB0        pin; " Select lines for Data data bus
-" RD                          pin; " Read 
-" WR                          pin; " Write
-" IO                          pin; " I/O    
-" Address12..Address0         pin; " Low 13-bits of IR into address
+" MuxSel2..MuxSel0            pin;  Mux select lines for PAU
+" Load                        pin;  Control signal: Active Low (0 = use PC in addition, 1 = ignore PC)
+" UpdateAcc                   pin;  Write-enable for accumulator
+" OpSelect                    pin;  Mux select between adder and shift/rotate paths
+" UseAdder                    pin;  Pass F-block through adder when low
+" F3..F0                      pin;  Function codes defining the bitwise relationship between Accum and Data
+" CinSel1..CinSel0            pin;  Mux select for carry-in
+" InvertCarry                 pin;  Invert carry flag during subtraction
+" LSBselect1..LSBselect0      pin;  Select pins for the value of LSB
+" MiddleSelect                pin;  Direction control of middle bits
+" MSBselect2..MSBselect0      pin;  Select pins for the value of MSB
+" MaskSZ                      pin;  Prevents updates to SZ flags
+" MaskVC                      pin;  Prevents updates to VC flags
+" PopF                        pin;  Directly set flags
+" EnableInc                   pin;  Enable incrementer/decrementer (1) or pass-thru (0)
+" UseOffset                   pin;  2nd operand is offset (UseOffset=1) or 0 (UseOffset=0)
+" AddressSel1..AddressSel0    pin;  Mux select for S, X, accum, or zero
+" UseInc                      pin;  Use incrementer (1) or decrementer (0)
+" UsePost                     pin;  Use pre-increment/decrement (0) or post-increment/decrement (1)
+" MaskS                       pin;  Mask S register
+" MaskX                       pin;  Mask X register
+" OffsetSel                   pin;  Selects between low-8 bits of IR (0) or DDB (1) going into PAU offset
+" SelectDB1..SelectDB0        pin;  Select lines for Data data bus
+" RD                          pin;  Read 
+" WR                          pin;  Write
+" IO                          pin;  I/O    
+" Address12..Address0         pin;  Low 13-bits of IR into address
 "
 " Revision History:
 " 03/14/26   Alex Du  Initial Revision
