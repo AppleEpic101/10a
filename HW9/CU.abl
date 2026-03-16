@@ -3287,7 +3287,7 @@ WHEN (IR == JMP) THEN {
     WR = 0;
     SelectDB1 = 0;
     SelectDB0 = 0;
-    OffsetSel = 1;
+    OffsetSel = 0;
 }
 
 WHEN (IR == JA) THEN {
@@ -3340,7 +3340,7 @@ WHEN (IR == JA) THEN {
     WR = 0;
     SelectDB1 = 0;
     SelectDB0 = 0;
-    OffsetSel = 1;
+    OffsetSel = 0;
 }
 
 WHEN (IR == JAE) THEN {
@@ -3393,7 +3393,7 @@ WHEN (IR == JAE) THEN {
     WR = 0;
     SelectDB1 = 0;
     SelectDB0 = 0;
-    OffsetSel = 1;
+    OffsetSel = 0;
 }
 
 WHEN (IR == JB) THEN {
@@ -3446,7 +3446,7 @@ WHEN (IR == JB) THEN {
     WR = 0;
     SelectDB1 = 0;
     SelectDB0 = 0;
-    OffsetSel = 1;
+    OffsetSel = 0;
 }
 
 WHEN (IR == JBE) THEN {
@@ -3499,7 +3499,7 @@ WHEN (IR == JBE) THEN {
     WR = 0;
     SelectDB1 = 0;
     SelectDB0 = 0;
-    OffsetSel = 1;
+    OffsetSel = 0;
 }
 
 WHEN (IR == JE) THEN {
@@ -3552,7 +3552,7 @@ WHEN (IR == JE) THEN {
     WR = 0;
     SelectDB1 = 0;
     SelectDB0 = 0;
-    OffsetSel = 1;
+    OffsetSel = 0;
 }
 
 WHEN (IR == JG) THEN {
@@ -3605,7 +3605,7 @@ WHEN (IR == JG) THEN {
     WR = 0;
     SelectDB1 = 0;
     SelectDB0 = 0;
-    OffsetSel = 1;
+    OffsetSel = 0;
 }
 
 WHEN (IR == JGE) THEN {
@@ -3658,7 +3658,7 @@ WHEN (IR == JGE) THEN {
     WR = 0;
     SelectDB1 = 0;
     SelectDB0 = 0;
-    OffsetSel = 1;
+    OffsetSel = 0;
 }
 
 WHEN (IR == JL) THEN {
@@ -3711,7 +3711,7 @@ WHEN (IR == JL) THEN {
     WR = 0;
     SelectDB1 = 0;
     SelectDB0 = 0;
-    OffsetSel = 1;
+    OffsetSel = 0;
 }
 
 WHEN (IR == JLE) THEN {
@@ -3764,7 +3764,7 @@ WHEN (IR == JLE) THEN {
     WR = 0;
     SelectDB1 = 0;
     SelectDB0 = 0;
-    OffsetSel = 1;
+    OffsetSel = 0;
 }
 
 WHEN (IR == JNE) THEN {
@@ -3817,7 +3817,7 @@ WHEN (IR == JNE) THEN {
     WR = 0;
     SelectDB1 = 0;
     SelectDB0 = 0;
-    OffsetSel = 1;
+    OffsetSel = 0;
 }
 
 WHEN (IR == JNS) THEN {
@@ -3870,7 +3870,7 @@ WHEN (IR == JNS) THEN {
     WR = 0;
     SelectDB1 = 0;
     SelectDB0 = 0;
-    OffsetSel = 1;
+    OffsetSel = 0;
 }
 
 WHEN (IR == JNV) THEN {
@@ -3923,7 +3923,7 @@ WHEN (IR == JNV) THEN {
     WR = 0;
     SelectDB1 = 0;
     SelectDB0 = 0;
-    OffsetSel = 1;
+    OffsetSel = 0;
 }
 
 WHEN (IR == JS) THEN {
@@ -3976,7 +3976,7 @@ WHEN (IR == JS) THEN {
     WR = 0;
     SelectDB1 = 0;
     SelectDB0 = 0;
-    OffsetSel = 1;
+    OffsetSel = 0;
 }
 
 WHEN (IR == JV) THEN {
@@ -4029,7 +4029,7 @@ WHEN (IR == JV) THEN {
     WR = 0;
     SelectDB1 = 0;
     SelectDB0 = 0;
-    OffsetSel = 1;
+    OffsetSel = 0;
 }
 
 END CUInterface
