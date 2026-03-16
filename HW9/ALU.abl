@@ -175,11 +175,11 @@ MuxOut  =  (OpSelect & Sum) # (!OpSelect & ShiftOut);
 
 " Flag Operations
 
-" Flags7..Flags4 only update when popped. Otherwise, they are active low. 
-Flag7 = (PopF & Data7) # (!PopF & 0);
-Flag6 = (PopF & Data6) # (!PopF & 0);
-Flag5 = (PopF & Data5) # (!PopF & 0);
-Flag4 = (PopF & Data4) # (!PopF & 0);
+" Flags7..Flags4 only update when popped. Otherwise, they retain their value. 
+Flag7 = (PopF & Data7) # (!PopF & Flags7);
+Flag6 = (PopF & Data6) # (!PopF & Flags6);
+Flag5 = (PopF & Data5) # (!PopF & Flags5);
+Flag4 = (PopF & Data4) # (!PopF & Flags4);
 
 " Carry Flag: Update from Adder if selected and enabled, otherwise hold state
 Carry = (PopF & Data3) #                                                                            " Directly load Carry 
