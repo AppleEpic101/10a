@@ -137,7 +137,10 @@ CU.[ProgramDB15..ProgramDB0] = ProgramDB;
 CU.[Flags7..Flags0] = [Flags7..Flags0];
 
 " Connect PAU inputs (Offset, Direct, MuxSel, Load)
-PAU.[Offset7..Offset0] = (!CU.OffsetSel & CU.[Address7..Address0]) # (CU.OffsetSel & DataDB);
+" 2:1 mux for offset into PAU using OffsetSel from Control Unit. 
+" The 2 possible inputs are low-8 bits of IR (0) or Data data bus (1)
+PAU.[Offset7..Offset0] = (!CU.OffsetSel & CU.[Address7..Address0]) #
+                        (CU.OffsetSel & DataDB);
 PAU.[Direct12..Direct0] = CU.[Address12..Address0];
 PAU.[MuxSel2..MuxSel0] = CU.[MuxSel2..MuxSel0];
 PAU.Load = CU.Load;
@@ -148,8 +151,7 @@ PAU.Load = CU.Load;
 ALU.[Data7..Data0] = (!CU.SelectDB1 & !CU.SelectDB0 & [SReg7..SReg0]) #                 " 00 S-Register
                         (!CU.SelectDB1 & CU.SelectDB0 & [XReg7..XReg0]) #               " 01 X-Register
                         (CU.SelectDB1 & !CU.SelectDB0 & CU.[Address7..Address0]) #      " 10 low-8 bits of IR
-                        (CU.SelectDB1 & CU.SelectDB0 & DataDB); #                       " 11  Data data bus
-
+                        (CU.SelectDB1 & CU.SelectDB0 & DataDB);                         " 11  Data data bus
 ALU.UpdateAcc = CU.UpdateAcc;
 ALU.OpSelect = CU.OpSelect;
 ALU.UseAdder = CU.UseAdder;
@@ -165,7 +167,7 @@ ALU.PopF = CU.PopF;
 
 " Connect DAU inputs
 DAU.[Accum7..Accum0] = Accum;
-DAU.[Offset7..Offset0] = CU.[Address7..Address0];
+DAU.[Offset7..Offset0] = CU.[Address7..Address0]; " 
 DAU.EnableInc = CU.EnableInc;
 DAU.UseOffset = CU.UseOffset;
 DAU.[AddressSel1..AddressSel0] = CU.[AddressSel1..AddressSel0];

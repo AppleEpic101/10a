@@ -117,7 +117,7 @@ EQUATIONS
 XReg.CLK = Clock;
 SReg.CLK = Clock;
 
-" Registers are cleared on Reset (active low)
+" Registers are cleared on Reset
 XReg.CLR = Reset;
 SReg.CLR = Reset;
 
