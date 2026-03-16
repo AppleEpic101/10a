@@ -2126,7 +2126,7 @@ WHEN (IR == PUSHF) THEN {
     EnableInc = 1;
     UseOffset = 1;
     AddressSel1 = 0;
-    AddressSel0 = 0;
+    AddressSel0 = 1;
     UseInc = 0;
     UsePost = 0;
     MaskS = 0;
