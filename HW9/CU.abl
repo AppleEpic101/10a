@@ -2122,13 +2122,13 @@ WHEN (IR == PUSHF) THEN {
     MaskVC = 1;
     PopF = 0;
 
-    " DAU: Post-dec S
+    " DAU: Pre-dec S
     EnableInc = 1;
-    UseOffset = 0;
+    UseOffset = 1;
     AddressSel1 = 0;
     AddressSel0 = 0;
-    UseInc = 1;
-    UsePost = 1;
+    UseInc = 0;
+    UsePost = 0;
     MaskS = 0;
     MaskX = 1;
     
