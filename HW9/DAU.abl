@@ -110,6 +110,8 @@ AdderSum = [AdderSum7..AdderSum0];       " Group final stage result bits
 AdderCout = [AdderCout7..AdderCout0];    " Group final carry generation bits
 AdderCin = [AdderCout6..AdderCout0, 0];  " Shifts carry bits left for the second stage ripple-carry
 
+IncVal = [0,0,0,0,0,0,0,1];
+DecVal = [1,1,1,1,1,1,1,1];
 EQUATIONS
 " Sync the registers to clock
 XReg.CLK = Clock;
@@ -139,8 +141,7 @@ AddressOut = (!AddressSel1 & !AddressSel0 & XReg) # " 00 -> XReg
 " POINTER MODIFICATION
 " 3:1 mux to select the operand for the adder
 " Possible operands: incrementer, decrementer, or 0
-IncVal = [0,0,0,0,0,0,0,1];
-DecVal = [1,1,1,1,1,1,1,1];
+
 Operand = ((EnableInc & UseInc) & IncVal) #        " 1 -> incrementer (adding 0x01)
             ((EnableInc & !UseInc) & DecVal);      " 0 -> decrementer (adding 0xFF using 2's complement math)
 
