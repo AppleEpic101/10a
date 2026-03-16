@@ -1,10 +1,16 @@
 MODULE      CPU
 TITLE      'Caltech10 CPU'
 
-
 " Description:  This is a template file for implementing the Caltech10 CPU.
 "               It is the top-level module which will instantiate and connect
-"               all other modules.
+"               all other modules. The Caltech10 is an 8-bit Harvard-architecture, 
+"               accumulator-based CPU designed for the EE/CS 10a course. Its 
+"               architecture features separate memory spaces for program, data, 
+"               and I/O, supporting 8192 16-bit program words and 256 bytes each 
+"               for data and I/O. The register set includes an 8-bit accumulator, 
+"               two 8-bit index registers (X and S) for flexible data addressing, 
+"               and a 13-bit program counter. Most instructions are 16 bits long 
+"               and execute in a single clock cycle, with the exceptions of CALL and RTS.
 "
 " Inputs:         ProgramDB[15..0]  - the 16-bit program data bus
 "                 Reset             - system reset signal
@@ -22,12 +28,13 @@ TITLE      'Caltech10 CPU'
 "                 Flags[7..0]       - the 8-bit flag register
 "                 XReg[7..0]        - the 8-bit X register
 "                 SReg[7..0]        - the 8-bit S register
-
-
+" 
 " Revision History:
 " 02/15/18   Glen George  Initial Revision
 " 01/05/21   Glen George  Updated comments
-" 03/15/26   Alex Du      Implmented top level module
+" 03/14/26   Alex Du      Implemented top level module
+" 03/15/26   Alex Du      Fixed bugs
+" 03/15/26   Alex Du      Add comments
 
 " Pin/Signal Declarations
 
@@ -100,41 +107,49 @@ DAU        FUNCTIONAL_BLOCK         DAUInterface;
 
 " Busses
 
-ProgramAB  =  [ProgramAB12..ProgramAB0];"13-bit Program address bus
-ProgramDB  =  [ProgramDB15..ProgramDB0];"16-bit Program data bus
-DataAB     =  [DataAB7..DataAB0];	"8-bit Data address bus
-DataDB     =  [DataDB7..DataDB0];	"8-bit Data data bus
+ProgramAB  =  [ProgramAB12..ProgramAB0]; " 13-bit Program address bus
+ProgramDB  =  [ProgramDB15..ProgramDB0]; " 16-bit Program data bus
+DataAB     =  [DataAB7..DataAB0];	     " 8-bit Data address bus
+DataDB     =  [DataDB7..DataDB0];	     " 8-bit Data data bus
 
-Accum = [Accum7..Accum0];
-Flags = [Flags7..Flags0];
-PC = PAU.[PC12..PC0];
-XReg = [XReg7..XReg0];
-SReg = [SReg7..SReg0];
+Accum = [Accum7..Accum0];                " 8-bit Accumulator
+Flags = [Flags7..Flags0];                " 8-bit Flags
+PC = PAU.[PC12..PC0];                    " 13-bit Program Counter
+XReg = [XReg7..XReg0];                   " 8-bit X Register
+SReg = [SReg7..SReg0];                   " 8-bit S Register
 
 EQUATIONS
-" Inputs
+
+" Connect clock to all modules
 CU.Clock = Clock;
 PAU.Clock = Clock;
 ALU.Clock = Clock;
 DAU.Clock = Clock;
 
+" Connect reset to all modules
 CU.Reset = Reset;
 PAU.Reset = Reset;
 ALU.Reset = Reset;
 DAU.Reset = Reset;
 
+" Connect CU inputs (ProgramDB and Flags)
 CU.[ProgramDB15..ProgramDB0] = ProgramDB;
 CU.[Flags7..Flags0] = [Flags7..Flags0];
 
+" Connect PAU inputs (Offset, Direct, MuxSel, Load)
 PAU.[Offset7..Offset0] = (!CU.OffsetSel & CU.[Address7..Address0]) # (CU.OffsetSel & DataDB);
 PAU.[Direct12..Direct0] = CU.[Address12..Address0];
 PAU.[MuxSel2..MuxSel0] = CU.[MuxSel2..MuxSel0];
 PAU.Load = CU.Load;
 
-ALU.[Data7..Data0] = (!CU.SelectDB1 & !CU.SelectDB0 & [SReg7..SReg0]) #  " 00 S-Register
-                        (!CU.SelectDB1 & CU.SelectDB0 & [XReg7..XReg0]) # " 01 X-Register
-                        (CU.SelectDB1 & !CU.SelectDB0 & CU.[Address7..Address0]) # " 10 low-8 bits of IR
-                        (CU.SelectDB1 & CU.SelectDB0 & DataDB); " 11  Data data bus
+" Connect ALU inputs 
+" 4:1 mux for data into ALU using SelectDB1 and SelectDB0 from Control Unit. 
+" The 4 possible inputs are S-Register (00), X-Register (01), low-8 bits of IR (10), and Data data bus (11)
+ALU.[Data7..Data0] = (!CU.SelectDB1 & !CU.SelectDB0 & [SReg7..SReg0]) #                 " 00 S-Register
+                        (!CU.SelectDB1 & CU.SelectDB0 & [XReg7..XReg0]) #               " 01 X-Register
+                        (CU.SelectDB1 & !CU.SelectDB0 & CU.[Address7..Address0]) #      " 10 low-8 bits of IR
+                        (CU.SelectDB1 & CU.SelectDB0 & DataDB); #                       " 11  Data data bus
+
 ALU.UpdateAcc = CU.UpdateAcc;
 ALU.OpSelect = CU.OpSelect;
 ALU.UseAdder = CU.UseAdder;
@@ -148,6 +163,7 @@ ALU.MaskSZ = CU.MaskSZ;
 ALU.MaskVC = CU.MaskVC;
 ALU.PopF = CU.PopF;
 
+" Connect DAU inputs
 DAU.[Accum7..Accum0] = Accum;
 DAU.[Offset7..Offset0] = CU.[Address7..Address0];
 DAU.EnableInc = CU.EnableInc;
@@ -158,21 +174,32 @@ DAU.UsePost = CU.UsePost;
 DAU.MaskS = CU.MaskS;
 DAU.MaskX = CU.MaskX;
 
+
 " Outputs
-Accum = ALU.[Accum7..Accum0];
-Flags = ALU.[Flags7, Flags6 & !WR, Flags5, Flags4 & !WR, Flags3..Flags0];
 
+" Update Accumulator and Flags from ALU
+Accum = ALU.[Accum7..Accum0];    
+" Flags6 and Flags4 are unused, so they are not updated
+Flags = ALU.[Flags7, Flags6 & !WR, Flags5, Flags4 & !WR, Flags3..Flags0]; 
+
+" Update Data Address Bus and XReg and SReg from DAU
 DataAB = DAU.[DataAddr7..DataAddr0];
-ProgramAB = PAU.[ProgAddr12..ProgAddr0];
-
-DataDB = (!CU.SelectDB1 & !CU.SelectDB0 & PAU.[PC7..PC0]) # "00 Low-8 bits of PC
-            (!CU.SelectDB1 & CU.SelectDB0 & [0, 0, 0, PAU.PC12, PAU.PC11, PAU.PC10, PAU.PC9, PAU.PC8]) # "01 High-8 bits of PC
-            (CU.SelectDB1 & !CU.SelectDB0 & [Flags7..Flags0]) # "10 Flags
-            (CU.SelectDB1 & CU.SelectDB0 & [Accum7..Accum0]); "11 Accumulator
-
 XReg = DAU.[XReg7..XReg0];
 SReg = DAU.[SReg7..SReg0];
 
+" Update Program Address Bus from PAU
+ProgramAB = PAU.[ProgAddr12..ProgAddr0];
+
+" Update Data Data Bus from CU
+" 4:1 mux for data into Data Data Bus using SelectDB1 and SelectDB0 from Control Unit.
+" The 4 possible inputs are low-8 bits of PC (00), high-8 bits of PC (01), Flags (10), and Accumulator (11)
+DataDB = (!CU.SelectDB1 & !CU.SelectDB0 & PAU.[PC7..PC0]) #                                              "00 Low-8 bits of PC
+            (!CU.SelectDB1 & CU.SelectDB0 & [0, 0, 0, PAU.PC12, PAU.PC11, PAU.PC10, PAU.PC9, PAU.PC8]) # "01 High-8 bits of PC
+            (CU.SelectDB1 & !CU.SelectDB0 & [Flags7..Flags0]) #                                          "10 Flags
+            (CU.SelectDB1 & CU.SelectDB0 & [Accum7..Accum0]);                                            "11 Accumulator
+
+
+" Output Enable when clock is active low
 RD = CU.RD & !Clock;
 WR = CU.WR & !Clock;
 IO = CU.IO & !Clock;
