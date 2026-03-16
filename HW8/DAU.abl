@@ -116,8 +116,8 @@ XReg.CLK = Clock;
 SReg.CLK = Clock;
 
 " Registers are cleared on Reset (active low)
-XReg.CLR = !Reset;
-SReg.CLR = !Reset;
+XReg.CLR = Reset;
+SReg.CLR = Reset;
 
 " The implementation follows a three-stage logic flow:
 " 1. SOURCE SELECTION: Choosing the base pointer
