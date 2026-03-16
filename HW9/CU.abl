@@ -4031,5 +4031,4 @@ WHEN (IR == JV) THEN {
     SelectDB0 = 0;
     OffsetSel = 0;
 }
-
 END CUInterface
