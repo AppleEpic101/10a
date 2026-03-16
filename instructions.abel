@@ -2046,8 +2046,8 @@ WHEN (IR == LDI) THEN {
     MSBselect2 = 0;
     MSBselect1 = 0;
     MSBselect0 = 0;
-    MaskSZ = 0;
-    MaskVC = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
     PopF = 0;
 
     " DAU: Pass k to DAB
@@ -2092,8 +2092,8 @@ WHEN (IR == LDD) THEN {
     MSBselect2 = 0;
     MSBselect1 = 0;
     MSBselect0 = 0;
-    MaskSZ = 0;
-    MaskVC = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
     PopF = 0;
 
     " DAU: Pass m to DAB
@@ -2138,8 +2138,8 @@ WHEN (IR == LDXO) THEN {
     MSBselect2 = 0;
     MSBselect1 = 0;
     MSBselect0 = 0;
-    MaskSZ = 0;
-    MaskVC = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
     PopF = 0;
 
     " DAU: Pass (X+o) to DAB
@@ -2184,8 +2184,8 @@ WHEN (IR == LDXO_I) THEN {
     MSBselect2 = 0;
     MSBselect1 = 0;
     MSBselect0 = 0;
-    MaskSZ = 0;
-    MaskVC = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
     PopF = 0;
 
     " DAU: Pass (post-inc X+o) to DAB
@@ -2230,8 +2230,8 @@ WHEN (IR == LDXO_D) THEN {
     MSBselect2 = 0;
     MSBselect1 = 0;
     MSBselect0 = 0;
-    MaskSZ = 0;
-    MaskVC = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
     PopF = 0;
 
     " DAU: Pass (post-dec X+o) to DAB
@@ -2276,8 +2276,8 @@ WHEN (IR == I_LDXO) THEN {
     MSBselect2 = 0;
     MSBselect1 = 0;
     MSBselect0 = 0;
-    MaskSZ = 0;
-    MaskVC = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
     PopF = 0;
 
     " DAU: Pass (pre-inc X+o) to DAB
@@ -2322,8 +2322,8 @@ WHEN (IR == D_LDXO) THEN {
     MSBselect2 = 0;
     MSBselect1 = 0;
     MSBselect0 = 0;
-    MaskSZ = 0;
-    MaskVC = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
     PopF = 0;
 
     " DAU: Pass (pre-dec X+o) to DAB
@@ -2368,8 +2368,8 @@ WHEN (IR == LDSO) THEN {
     MSBselect2 = 0;
     MSBselect1 = 0;
     MSBselect0 = 0;
-    MaskSZ = 0;
-    MaskVC = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
     PopF = 0;
 
     " DAU: Pass (S+o) to DAB
@@ -2414,8 +2414,8 @@ WHEN (IR == LDSO_I) THEN {
     MSBselect2 = 0;
     MSBselect1 = 0;
     MSBselect0 = 0;
-    MaskSZ = 0;
-    MaskVC = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
     PopF = 0;
 
     " DAU: Pass (post-inc S+o) to DAB
@@ -2460,8 +2460,8 @@ WHEN (IR == LDSO_D) THEN {
     MSBselect2 = 0;
     MSBselect1 = 0;
     MSBselect0 = 0;
-    MaskSZ = 0;
-    MaskVC = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
     PopF = 0;
 
     " DAU: Pass (post-dec S+o) to DAB
@@ -2506,8 +2506,8 @@ WHEN (IR == I_LDSO) THEN {
     MSBselect2 = 0;
     MSBselect1 = 0;
     MSBselect0 = 0;
-    MaskSZ = 0;
-    MaskVC = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
     PopF = 0;
 
     " DAU: Pass (pre-inc S+o) to DAB
@@ -2552,8 +2552,8 @@ WHEN (IR == D_LDSO) THEN {
     MSBselect2 = 0;
     MSBselect1 = 0;
     MSBselect0 = 0;
-    MaskSZ = 0;
-    MaskVC = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
     PopF = 0;
 
     " DAU: Pass (pre-dec S+o) to DAB

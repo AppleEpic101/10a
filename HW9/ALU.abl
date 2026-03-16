@@ -30,6 +30,27 @@ TITLE      'Caltech10 ALU Unit'
 "         Clock - System clock
 " Outputs: Accum7..Accum0 - 8 bits of accumulator
 "          Flags7..Flags0 - 8 bits of flags
+" =========================================================================================================================
+" Instruction | UpAcc | OpSelect | UseAdder | F3..F0 | CinSel | InvC | MaskSZ | MaskVC | LSBsel | MidSel | MSBsel |
+" ------------|-------|----------|----------|--------|--------|------|--------|--------|--------|--------|--------|
+" ADD         |   1   |    1     |    1     |  1010  |   00   |  0   |   0    |   0    |   XX   |   X    |  XXX   |
+" ADC         |   1   |    1     |    1     |  1010  |   10   |  0   |   0    |   0    |   XX   |   X    |  XXX   |
+" SUB         |   1   |    1     |    1     |  0101  |   11   |  1   |   0    |   0    |   XX   |   X    |  XXX   |
+" SBB         |   1   |    1     |    1     |  0101  |   01   |  1   |   0    |   0    |   XX   |   X    |  XXX   |
+" INC         |   1   |    1     |    1     |  0000  |   11   |  0   |   0    |   0    |   XX   |   X    |  XXX   |
+" DEC         |   1   |    1     |    1     |  1111  |   00   |  1   |   0    |   0    |   XX   |   X    |  XXX   |
+" CMP         |   0   |    1     |    1     |  0101  |   11   |  1   |   0    |   0    |   XX   |   X    |  XXX   |
+" TST         |   0   |    1     |    0     |  1000  |   00   |  0   |   0    |   1    |   XX   |   X    |  XXX   |
+" LSL         |   1   |    0     |    X     |  XXXX  |   XX   |  X   |   0    |   0    |   00   |   1    |  010   |
+" RLC         |   1   |    0     |    X     |  XXXX  |   XX   |  X   |   0    |   0    |   01   |   1    |  010   |
+" AND         |   1   |    1     |    0     |  1000  |   00   |  0   |   0    |   1    |   XX   |   X    |  XXX   |
+" OR          |   1   |    1     |    0     |  1110  |   00   |  0   |   0    |   1    |   XX   |   X    |  XXX   |
+" XOR         |   1   |    1     |    0     |  0110  |   00   |  0   |   0    |   1    |   XX   |   X    |  XXX   |
+" NOT         |   1   |    1     |    0     |  0011  |   00   |  0   |   0    |   1    |   XX   |   X    |  XXX   |
+" POPF        |   0   |    X     |    X     |  XXXX  |   XX   |  X   |   X    |   X    |   XX   |   X    |  XXX   |
+" LDD / LD    |   1   |    1     |    0     |  1010  |   00   |  0   |   1    |   1    |   XX   |   X    |  XXX   |
+" STD / ST    |   0   |    X     |    X     |  XXXX  |   XX   |  X   |   1    |   1    |   XX   |   X    |  XXX   |
+" =========================================================================================================================
 " Revision History:
 " 03/01/26   Alex Du  Initial Revision
 " 03/03/26   Alex Du  Fixed bugs
