@@ -71,7 +71,7 @@ Sum          =  [Sum12..Sum0];
 EQUATIONS
 
 PC.CLK = Clock;        " Trigger PC update on clock edge
-PC.CLR = !Reset;        " Reset the PC to 0 when reset is low
+PC.CLR = Reset;        " Reset the PC to 0 when reset is low
 
 " 13 x 6:1 mux
 " MuxSel = 000, Load = 0 Increment
