@@ -1,0 +1,4079 @@
+MODULE CUInterface
+
+INTERFACE (ProgramDB15..ProgramDB0, Flags7..Flags0, Reset, Clock ->
+        MuxSel2..MuxSel0, Load, " PAU
+
+        UpdateAcc, OpSelect, UseAdder, F3..F0, CinSel1..CinSel0, InvertCarry, " ALU
+        LSBselect1..LSBselect0, MiddleSelect, MSBselect2..MSBselect0,
+        MaskSZ, MaskVC, PopF, 
+
+        EnableInc, UseOffset, AddressSel1..AddressSel0, UseInc, UsePost,  " DAU
+        MaskS, MaskX,
+        
+        OffsetSel, SelectDB1..SelectDB0, RD, WR, IO, Address12..Address0);
+
+" Description
+" This module implements the Control Unit for the Caltech 10 CPU. 
+" The Control Unit is responsible for decoding instructions and generating control signals for the other units.
+" It also contains the Instruction Register (IR) and handles the fetching of instructions from memory.
+" 
+" Inputs
+" ProgramDB15..ProgramDB0     pin;  Program Data Bus
+" Flags7..Flags0              pin;  Flags 
+" Reset                       pin;  System reset
+" Clock                       pin;  System clock
+" 
+" Outputs
+" MuxSel2..MuxSel0            pin;  Mux select lines for PAU
+" Load                        pin;  Control signal: Active Low (0 = use PC in addition, 1 = ignore PC)
+" UpdateAcc                   pin;  Write-enable for accumulator
+" OpSelect                    pin;  Mux select between adder and shift/rotate paths
+" UseAdder                    pin;  Pass F-block through adder when low
+" F3..F0                      pin;  Function codes defining the bitwise relationship between Accum and Data
+" CinSel1..CinSel0            pin;  Mux select for carry-in
+" InvertCarry                 pin;  Invert carry flag during subtraction
+" LSBselect1..LSBselect0      pin;  Select pins for the value of LSB
+" MiddleSelect                pin;  Direction control of middle bits
+" MSBselect2..MSBselect0      pin;  Select pins for the value of MSB
+" MaskSZ                      pin;  Prevents updates to SZ flags
+" MaskVC                      pin;  Prevents updates to VC flags
+" PopF                        pin;  Directly set flags
+" EnableInc                   pin;  Enable incrementer/decrementer (1) or pass-thru (0)
+" UseOffset                   pin;  2nd operand is offset (UseOffset=1) or 0 (UseOffset=0)
+" AddressSel1..AddressSel0    pin;  Mux select for S, X, accum, or zero
+" UseInc                      pin;  Use incrementer (1) or decrementer (0)
+" UsePost                     pin;  Use pre-increment/decrement (0) or post-increment/decrement (1)
+" MaskS                       pin;  Mask S register
+" MaskX                       pin;  Mask X register
+" OffsetSel                   pin;  Selects between low-8 bits of IR (0) or DDB (1) going into PAU offset
+" SelectDB1..SelectDB0        pin;  Select lines for Data data bus
+" RD                          pin;  Read 
+" WR                          pin;  Write
+" IO                          pin;  I/O    
+" Address12..Address0         pin;  Low 13-bits of IR into address
+"
+" Revision History:
+" 03/14/26   Alex Du  Initial Revision
+" 03/15/26   Alex Du  Fixed bugs
+" 03/15/26   Alex Du  Add comments
+
+TITLE 'Control Unit'
+
+" Inputs
+ProgramDB15..ProgramDB0     pin; " Program Data Bus
+Flags7..Flags0              pin; " Flags 
+Reset                       pin; " System reset
+Clock                       pin; " System clock
+
+" Outputs
+
+" PAU control signals
+MuxSel2..MuxSel0            pin; " Mux select lines for PAU
+Load                        pin; " Control signal: Active Low (0 = use PC in addition, 1 = ignore PC)
+
+" ALU control signals
+UpdateAcc                   pin; " Write-enable for accumulator
+OpSelect                    pin; " Mux select between adder and shift/rotate paths
+UseAdder                    pin; " Pass F-block through adder when low
+F3..F0                      pin; " Function codes defining the bitwise relationship between Accum and Data
+CinSel1..CinSel0            pin; " Mux select for carry-in
+InvertCarry                 pin; " Invert carry flag during subtraction
+LSBselect1..LSBselect0      pin; " Select pins for the value of LSB
+MiddleSelect                pin; " Direction control of middle bits
+MSBselect2..MSBselect0      pin; " Select pins for the value of MSB
+MaskSZ                      pin; " Prevents updates to SZ flags
+MaskVC                      pin; " Prevents updates to VC flags
+PopF                        pin; " Directly set flags
+
+" DAU
+EnableInc                   pin; " Enable incrementer/decrementer (1) or pass-thru (0)
+UseOffset                   pin; " 2nd operand is offset (UseOffset=1) or 0 (UseOffset=0)
+AddressSel1..AddressSel0    pin; " Mux select for S, X, accum, or zero
+UseInc                      pin; " Use incrementer (1) or decrementer (0)
+UsePost                     pin; " Use pre-increment/decrement (0) or post-increment/decrement (1)
+MaskS                       pin; " Mask S register
+MaskX                       pin; " Mask X register
+
+" Control Unit 
+IR15..IR0                   pin ISTYPE 'REG'; " Instruction Register
+
+OffsetSel                   pin; " Selects between low-8 bits of IR (0) or DDB (1) going into PAU offset
+SelectDB1..SelectDB0        pin; " Select lines for Data data bus
+Address12..Address0         pin; " Low 13-bits of IR into address
+RD                          pin; " Read 
+WR                          pin; " Write
+IO                          pin; " I/O    
+
+" Buses
+IR        = [IR15..IR0];        " Instruction Register
+ProgramDB = [ProgramDB15..ProgramDB0]; " Program Data Bus
+Flags     = [Flags7..Flags0];     " Flags Bus
+
+" Instructions
+
+ADCM   = [0, 1, 1, 0, 0, 0, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc + (m) + C
+ADCXO  = [0, 1, 1, 0, 0, 0, 0, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc + (X + o) + C
+ADCSO  = [0, 1, 1, 0, 0, 0, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc + (S + o) + C
+ADCI   = [0, 1, 1, 0, 0, 0, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc + k + C
+ADDM   = [0, 1, 1, 0, 1, 0, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc + (m)
+ADDXO  = [0, 1, 1, 0, 1, 0, 0, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc + (X + o)
+ADDSO  = [0, 1, 1, 0, 1, 0, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc + (S + o)
+ADDI   = [0, 1, 1, 0, 1, 0, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc + k
+ANDM   = [0, 1, 0, 0, 0, 1, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc AND (m)
+ANDXO  = [0, 1, 0, 0, 0, 1, 0, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc AND (X + o)
+ANDSO  = [0, 1, 0, 0, 0, 1, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc AND (S + o)
+ANDI   = [0, 1, 0, 0, 0, 1, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc AND k
+CMPM   = [0, 0, 1, 1, 0, 0, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc – (m)
+CMPXO  = [0, 0, 1, 1, 0, 0, 0, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc – (X + o)
+CMPSO  = [0, 0, 1, 1, 0, 0, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc – (S + o)
+CMPI   = [0, 0, 1, 1, 0, 0, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc – k
+DEC    = [0, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0];                 " Acc = Acc - 1
+INC    = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];                 " Acc = Acc + 1
+LSL    = [0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];                 " logical shift left Acc
+NOT    = [0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0];                 " Acc = NOT Acc
+ORM    = [0, 1, 1, 1, 0, 1, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc OR (m)
+ORXO   = [0, 1, 1, 1, 0, 1, 0, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc OR (X + o)
+ORSO   = [0, 1, 1, 1, 0, 1, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc OR (S + o)
+ORI    = [0, 1, 1, 1, 0, 1, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc OR k
+RLC    = [0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];                 " rotate left through carry
+SBBM   = [0, 0, 0, 1, 1, 0, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc – (m) – C
+SBBXO  = [0, 0, 0, 1, 1, 0, 0, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc – (X + o) – C
+SBBSO  = [0, 0, 0, 1, 1, 0, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc – (S + o) – C
+SBBI   = [0, 0, 0, 1, 1, 0, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc – k – C
+SUBM   = [0, 0, 0, 1, 0, 0, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc – (m)
+SUBXO  = [0, 0, 0, 1, 0, 0, 0, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc – (X + o)
+SUBSO  = [0, 0, 0, 1, 0, 0, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc – (S + o)
+SUBI   = [0, 0, 0, 1, 0, 0, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc = Acc – k
+TSTM   = [0, 1, 0, 0, 1, 1, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc AND (m)
+TSTXO  = [0, 1, 0, 0, 1, 1, 0, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc AND (X + o)
+TSTSO  = [0, 1, 0, 0, 1, 1, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc AND (S + o)
+TSTI   = [0, 1, 0, 0, 1, 1, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc AND k
+XORM   = [0, 0, 1, 1, 0, 1, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc XOR (m)
+XORXO  = [0, 0, 1, 1, 0, 1, 0, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc XOR (X + o)
+XORSO  = [0, 0, 1, 1, 0, 1, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc XOR (S + o)
+XORI   = [0, 0, 1, 1, 0, 1, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " Acc XOR k
+POPF   = [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0];                 " Flags = (S); S = S + 1
+PUSHF  = [0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0];                 " S = S – 1; (S) = Flags
+NOP    = [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0];                 " No operation
+LDI    = [1, 0, 0, 0, 1, 0, 0, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " load Accumulator with immediate value k
+LDD    = [1, 0, 0, 0, 0, 0, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " load Accumulator direct from (m)
+LDXO   = [1, 0, 0, 1, 0, 1, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " load Accumulator indirect from (X + o)
+LDXO_I = [1, 0, 0, 1, 0, 1, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " load Accumulator indirect from (X + o) then post-increment X
+LDXO_D = [1, 0, 0, 1, 1, 1, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " load Accumulator indirect from (X + o) then post-decrement X
+I_LDXO = [1, 0, 0, 0, 0, 1, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " load Accumulator indirect from (X + o) after pre-incrementing X
+D_LDXO = [1, 0, 0, 0, 1, 1, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " load Accumulator indirect from (X + o) after pre-decrementing X
+LDSO   = [1, 0, 0, 1, 0, 0, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " load Accumulator indirect from (S + o)
+LDSO_I = [1, 0, 0, 1, 0, 0, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " load Accumulator indirect from (S + o) then post-increment S
+LDSO_D = [1, 0, 0, 1, 1, 0, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " load Accumulator indirect from (S + o) then post-decrement S
+I_LDSO = [1, 0, 0, 0, 0, 0, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " load Accumulator indirect from (S + o) after pre-incrementing S
+D_LDSO = [1, 0, 0, 0, 1, 0, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " load Accumulator indirect from (S + o) after pre-decrementing S
+STD    = [1, 0, 1, 0, 0, 0, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " store Accumulator direct at (m)
+STXO   = [1, 0, 1, 1, 0, 1, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " store Accumulator indirect at (X + o)
+STXO_I = [1, 0, 1, 1, 0, 1, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " store Accumulator indirect at (X + o) then post-increment X
+STXO_D = [1, 0, 1, 1, 1, 1, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " store Accumulator indirect at (X + o) then post-decrement X
+I_STXO = [1, 0, 1, 0, 0, 1, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " store Accumulator indirect at (X + o) after pre-incrementing X
+D_STXO = [1, 0, 1, 0, 1, 1, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " store Accumulator indirect at (X + o) after pre-decrementing X
+STSO   = [1, 0, 1, 1, 0, 0, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " store Accumulator indirect at (S + o)
+STSO_I = [1, 0, 1, 1, 0, 0, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " store Accumulator indirect at (S + o) then post-increment S
+STSO_D = [1, 0, 1, 1, 1, 0, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " store Accumulator indirect at (S + o) then post-decrement S
+I_STSO = [1, 0, 1, 0, 0, 0, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " store Accumulator indirect at (S + o) after pre-incrementing S
+D_STSO = [1, 0, 1, 0, 1, 0, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " store Accumulator indirect at (S + o) after pre-decrementing S
+JMP    = [1, 1, 0, .X., .X., .X., .X., .X., .X., .X., .X., .X., .X., .X., .X., .X.]; " Jump to a
+JA     = [1, 0, 0, 0, 1, 0, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " branch if above
+JAE    = [1, 0, 0, 0, 1, 1, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " branch if above or equal (carry bit clear)
+JB     = [1, 0, 0, 0, 1, 1, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " branch if below (carry bit set)
+JBE    = [1, 0, 0, 0, 1, 0, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " branch if below or equal
+JE     = [1, 0, 0, 1, 1, 1, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " branch if zero bit set (equal)
+JG     = [1, 0, 1, 0, 1, 1, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " branch if greater than
+JGE    = [1, 0, 1, 1, 1, 0, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " branch if greater than or equal
+JL     = [1, 0, 1, 1, 1, 0, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " branch if less than
+JLE    = [1, 0, 1, 0, 1, 1, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " branch if less than or equal
+JNE    = [1, 0, 0, 1, 1, 1, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " branch if zero bit clear (not equal)
+JNS    = [1, 0, 0, 1, 1, 0, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " branch if sign bit clear (positive)
+JNV    = [1, 0, 1, 0, 1, 0, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " branch if overflow bit clear
+JS     = [1, 0, 0, 1, 1, 0, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " branch if sign bit set (negative)
+JV     = [1, 0, 1, 0, 1, 0, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " branch if overflow bit set
+
+EQUATIONS
+
+" Clock and reset
+IR.CLK = Clock;
+IR.CLR = Reset;
+
+" Set instruction register to ProgramDB
+IR = ProgramDB;
+
+" Set address to low 13-bits of IR
+[Address12..Address0] = [IR12..IR0];
+
+" Map all instructions to control signals
+WHEN (IR == ADCM) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Add with carry
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 1;
+    F3 = 1;
+    F2 = 0;
+    F1 = 1;
+    F0 = 0;
+    CinSel1 = 1;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 0;
+    PopF = 0;
+
+    " DAU: Pass m to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 1;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == ADCXO) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Add with carry
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 1;
+    F3 = 1;
+    F2 = 0;
+    F1 = 1;
+    F0 = 0;
+    CinSel1 = 1;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 0;
+    PopF = 0;
+
+    " DAU: Pass (X+o) to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 0;
+    
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == ADCSO) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Add with carry
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 1;
+    F3 = 1;
+    F2 = 0;
+    F1 = 1;
+    F0 = 0;
+    CinSel1 = 1;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 0;
+    PopF = 0;
+
+    " DAU: Pass (S+o) to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 0;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == ADCI) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Add with carry
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 1;
+    F3 = 1;
+    F2 = 0;
+    F1 = 1;
+    F0 = 0;
+    CinSel1 = 1;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 0;
+    PopF = 0;
+
+    " DAU: Pass k to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 1;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == ADDM) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Add
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 1;
+    F3 = 1;
+    F2 = 0;
+    F1 = 1;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 0;
+    PopF = 0;
+
+    " DAU: Pass m to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 1;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == ADDXO) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Add
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 1;
+    F3 = 1;
+    F2 = 0;
+    F1 = 1;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 0;
+    PopF = 0;
+
+    " DAU: Pass (X+o) to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 0;
+    
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == ADDSO) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Add
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 1;
+    F3 = 1;
+    F2 = 0;
+    F1 = 1;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 0;
+    PopF = 0;
+
+    " DAU: Pass (S+o) to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 0;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == ADDI) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Add
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 1;
+    F3 = 1;
+    F2 = 0;
+    F1 = 1;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 0;
+    PopF = 0;
+
+    " DAU: Pass k to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 1;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == ANDM) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: And
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 1;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass m to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 1;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == ANDXO) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: And
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 1;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass (X+o) to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 0;
+    
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == ANDSO) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: And
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 1;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass (S+o) to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 0;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == ANDI) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: And
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 1;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass k to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 1;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == CMPM) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Compare
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 1;
+    F3 = 0;
+    F2 = 1;
+    F1 = 0;
+    F0 = 1;
+    CinSel1 = 1;
+    CinSel0 = 1;
+    InvertCarry = 1;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 0;
+    PopF = 0;
+
+    " DAU: Pass m to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 1;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == CMPXO) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Compare
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 1;
+    F3 = 0;
+    F2 = 1;
+    F1 = 0;
+    F0 = 1;
+    CinSel1 = 1;
+    CinSel0 = 1;
+    InvertCarry = 1;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 0;
+    PopF = 0;
+
+    " DAU: Pass (X+o) to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 0;
+    
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == CMPSO) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Compare
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 1;
+    F3 = 0;
+    F2 = 1;
+    F1 = 0;
+    F0 = 1;
+    CinSel1 = 1;
+    CinSel0 = 1;
+    InvertCarry = 1;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 0;
+    PopF = 0;
+
+    " DAU: Pass (S+o) to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 0;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == CMPI) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Compare
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 1;
+    F3 = 0;
+    F2 = 1;
+    F1 = 0;
+    F0 = 1;
+    CinSel1 = 1;
+    CinSel0 = 1;
+    InvertCarry = 1;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 0;
+    PopF = 0;
+
+    " DAU: Pass k to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 1;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == DEC) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Decrement
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 1;
+    F3 = 1;
+    F2 = 1;
+    F1 = 1;
+    F0 = 1;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 1;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 0;
+    PopF = 0;
+
+    " DAU: Dont care
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 0;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == INC) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Increment
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 1;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 1;
+    CinSel0 = 1;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 0;
+    PopF = 0;
+
+    " DAU: Dont care
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 0;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == LSL) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Shift bits left
+    UpdateAcc = 1;
+    OpSelect = 0;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 1;
+    MSBselect2 = 0;
+    MSBselect1 = 1;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 0;
+    PopF = 0;
+
+    " DAU: Dont care
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 0;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == NOT) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Not
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 1;
+    F0 = 1;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Dont care
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 0;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == ORM) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Or
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 1;
+    F2 = 1;
+    F1 = 1;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass m to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 1;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == ORXO) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Or
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 1;
+    F2 = 1;
+    F1 = 1;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass (X+o) to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 0;
+    
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == ORSO) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Or
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 1;
+    F2 = 1;
+    F1 = 1;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass (S+o) to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 0;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == ORI) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Or
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 1;
+    F2 = 1;
+    F1 = 1;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass k to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 1;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == RLC) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Rotate left with carry
+    UpdateAcc = 1;
+    OpSelect = 0;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 1;
+    MiddleSelect = 1;
+    MSBselect2 = 0;
+    MSBselect1 = 1;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 0;
+    PopF = 0;
+
+    " DAU: Dont care
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 0;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == SBBM) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Subtract with borrow
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 1;
+    F3 = 0;
+    F2 = 1;
+    F1 = 0;
+    F0 = 1;
+    CinSel1 = 0;
+    CinSel0 = 1;
+    InvertCarry = 1;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 0;
+    PopF = 0;
+
+    " DAU: Pass m to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 1;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == SBBXO) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Subtract with borrow
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 1;
+    F3 = 0;
+    F2 = 1;
+    F1 = 0;
+    F0 = 1;
+    CinSel1 = 0;
+    CinSel0 = 1;
+    InvertCarry = 1;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 0;
+    PopF = 0;
+
+    " DAU: Pass (X+o) to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 0;
+    
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == SBBSO) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Subtract with borrow
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 1;
+    F3 = 0;
+    F2 = 1;
+    F1 = 0;
+    F0 = 1;
+    CinSel1 = 0;
+    CinSel0 = 1;
+    InvertCarry = 1;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 0;
+    PopF = 0;
+
+    " DAU: Pass (S+o) to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 0;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == SBBI) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Subtract with borrow
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 1;
+    F3 = 0;
+    F2 = 1;
+    F1 = 0;
+    F0 = 1;
+    CinSel1 = 0;
+    CinSel0 = 1;
+    InvertCarry = 1;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 0;
+    PopF = 0;
+
+    " DAU: Pass k to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 1;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == SUBM) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Subtract  
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 1;
+    F3 = 0;
+    F2 = 1;
+    F1 = 0;
+    F0 = 1;
+    CinSel1 = 1;
+    CinSel0 = 1;
+    InvertCarry = 1;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 0;
+    PopF = 0;
+
+    " DAU: Pass m to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 1;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == SUBXO) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Subtract  
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 1;
+    F3 = 0;
+    F2 = 1;
+    F1 = 0;
+    F0 = 1;
+    CinSel1 = 1;
+    CinSel0 = 1;
+    InvertCarry = 1;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 0;
+    PopF = 0;
+
+    " DAU: Pass (X+o) to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 0;
+    
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == SUBSO) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Subtract  
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 1;
+    F3 = 0;
+    F2 = 1;
+    F1 = 0;
+    F0 = 1;
+    CinSel1 = 1;
+    CinSel0 = 1;
+    InvertCarry = 1;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 0;
+    PopF = 0;
+
+    " DAU: Pass (S+o) to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 0;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == SUBI) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Subtract  
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 1;
+    F3 = 0;
+    F2 = 1;
+    F1 = 0;
+    F0 = 1;
+    CinSel1 = 1;
+    CinSel0 = 1;
+    InvertCarry = 1;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 0;
+    PopF = 0;
+
+    " DAU: Pass k to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 1;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == TSTM) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Test
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 1;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass m to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 1;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == TSTXO) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Test
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 1;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass (X+o) to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 0;
+    
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == TSTSO) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Test
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 1;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass (S+o) to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 0;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == TSTI) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Test
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 1;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass k to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 1;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == XORM) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: XOR with acc
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 1;
+    F1 = 1;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass m to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 1;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == XORXO) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: XOR with acc
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 1;
+    F1 = 1;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass (X+o) to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 0;
+    
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == XORSO) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: XOR with acc
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 1;
+    F1 = 1;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass (S+o) to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 0;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == XORI) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: XOR with acc
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 1;
+    F1 = 1;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass k to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 1;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == POPF) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Pass DDB thru
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 1;
+    F2 = 0;
+    F1 = 1;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 0;
+    PopF = 1;
+
+    " DAU: Post-inc S
+    EnableInc = 1;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 1;
+    UseInc = 1;
+    UsePost = 1;
+    MaskS = 0;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == PUSHF) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Dont care
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 1;
+    F2 = 0;
+    F1 = 1;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pre-dec S
+    EnableInc = 1;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 0;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 1;
+    SelectDB1 = 1;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == NOP) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Dont care
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Dont care
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 0;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == LDI) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Load acc with DDB
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 1;
+    F2 = 0;
+    F1 = 1;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass k to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 1;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == LDD) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Load acc with DDB
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 1;
+    F2 = 0;
+    F1 = 1;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass m to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 1;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == LDXO) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Load acc with DDB
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 1;
+    F2 = 0;
+    F1 = 1;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass (X+o) to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == LDXO_I) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Load acc with DDB
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 1;
+    F2 = 0;
+    F1 = 1;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass (post-inc X+o) to DAB
+    EnableInc = 1;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 1;
+    UsePost = 1;
+    MaskS = 1;
+    MaskX = 0;
+    
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == LDXO_D) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Load acc with DDB
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 1;
+    F2 = 0;
+    F1 = 1;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass (post-dec X+o) to DAB
+    EnableInc = 1;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 1;
+    MaskS = 1;
+    MaskX = 0;
+    
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == I_LDXO) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Load acc with DDB
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 1;
+    F2 = 0;
+    F1 = 1;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass (pre-inc X+o) to DAB
+    EnableInc = 1;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 1;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 0;
+    
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == D_LDXO) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Load acc with DDB
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 1;
+    F2 = 0;
+    F1 = 1;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass (pre-dec X+o) to DAB
+    EnableInc = 1;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 0;
+    
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == LDSO) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Load acc with DDB
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 1;
+    F2 = 0;
+    F1 = 1;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass (S+o) to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == LDSO_I) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Load acc with DDB
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 1;
+    F2 = 0;
+    F1 = 1;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass (post-inc S+o) to DAB
+    EnableInc = 1;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 1;
+    UseInc = 1;
+    UsePost = 1;
+    MaskS = 0;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == LDSO_D) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Load acc with DDB
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 1;
+    F2 = 0;
+    F1 = 1;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass (post-dec S+o) to DAB
+    EnableInc = 1;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 1;
+    MaskS = 0;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == I_LDSO) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Load acc with DDB
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 1;
+    F2 = 0;
+    F1 = 1;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass (pre-inc S+o) to DAB
+    EnableInc = 1;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 1;
+    UseInc = 1;
+    UsePost = 0;
+    MaskS = 0;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == D_LDSO) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Load acc with DDB
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 1;
+    F2 = 0;
+    F1 = 1;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass (pre-dec S+o) to DAB
+    EnableInc = 1;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 0;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == STD) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Dont care
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass m to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 1;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 1;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == STXO) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Dont care
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass (X+o) to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 1;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == STXO_I) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Dont care
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass (post-inc X+o) to DAB
+    EnableInc = 1;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 1;
+    UsePost = 1;
+    MaskS = 1;
+    MaskX = 0;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 1;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == STXO_D) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Dont care
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass (post-dec X+o) to DAB
+    EnableInc = 1;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 1;
+    MaskS = 1;
+    MaskX = 0;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 1;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == I_STXO) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Dont care
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass (pre-inc X+o) to DAB
+    EnableInc = 1;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 1;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 0;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 1;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == D_STXO) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Dont care
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass (pre-dec X+o) to DAB
+    EnableInc = 1;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 0;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 1;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == STSO) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Dont care
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass (S+o) to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 1;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == STSO_I) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Dont care
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass (post-inc S+o) to DAB
+    EnableInc = 1;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 1;
+    UseInc = 1;
+    UsePost = 1;
+    MaskS = 0;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 1;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == STSO_D) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Dont care
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass (post-dec S+o) to DAB
+    EnableInc = 1;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 1;
+    MaskS = 0;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 1;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == I_STSO) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Dont care
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass (pre-inc S+o) to DAB
+    EnableInc = 1;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 1;
+    UseInc = 1;
+    UsePost = 0;
+    MaskS = 0;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 1;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == D_STSO) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Dont care
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass (pre-dec S+o) to DAB
+    EnableInc = 1;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 0;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 1;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == JMP) THEN {
+    " PAU: Jump to a
+    MuxSel2 = 0;
+    MuxSel1 = 1;
+    MuxSel0 = 0;
+    Load = 1;
+
+    " ALU: Dont care
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Dont care
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 0;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == JA) THEN {
+    " PAU: branch if above
+    WHEN ((Flags3 == 0) & (Flags0 == 0)) THEN { 
+        MuxSel2 = 0;
+        MuxSel1 = 1;
+        MuxSel0 = 1;
+        Load = 0;
+    } ELSE {
+        MuxSel2 = 0;
+        MuxSel1 = 0;
+        MuxSel0 = 0;
+        Load = 0;
+    }
+
+    " ALU: Dont care
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Dont care
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 0;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == JAE) THEN {
+    " PAU: branch if above or equal (carry bit clear)
+    WHEN (Flags3 == 0) THEN { 
+        MuxSel2 = 0;
+        MuxSel1 = 1;
+        MuxSel0 = 1;
+        Load = 0;
+    } ELSE {
+        MuxSel2 = 0;
+        MuxSel1 = 0;
+        MuxSel0 = 0;
+        Load = 0;
+    }
+
+    " ALU: Dont care
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Dont care
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 0;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == JB) THEN {
+    " PAU: branch if below (carry bit set)
+    WHEN (Flags3 == 1) THEN { 
+        MuxSel2 = 0;
+        MuxSel1 = 1;
+        MuxSel0 = 1;
+        Load = 0;
+    } ELSE {
+        MuxSel2 = 0;
+        MuxSel1 = 0;
+        MuxSel0 = 0;
+        Load = 0;
+    }
+
+    " ALU: Dont care
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Dont care
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 0;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == JBE) THEN {
+    " PAU: branch if below or equal
+    WHEN ((Flags3 == 1) # (Flags0 == 1)) THEN { 
+        MuxSel2 = 0;
+        MuxSel1 = 1;
+        MuxSel0 = 1;
+        Load = 0;
+    } ELSE {
+        MuxSel2 = 0;
+        MuxSel1 = 0;
+        MuxSel0 = 0;
+        Load = 0;
+    }
+
+    " ALU: Dont care
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Dont care
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 0;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == JE) THEN {
+    " PAU: branch if zero bit set (equal)
+    WHEN (Flags0 == 1) THEN { 
+        MuxSel2 = 0;
+        MuxSel1 = 1;
+        MuxSel0 = 1;
+        Load = 0;
+    } ELSE {
+        MuxSel2 = 0;
+        MuxSel1 = 0;
+        MuxSel0 = 0;
+        Load = 0;
+    }
+
+    " ALU: Dont care
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Dont care
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 0;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == JG) THEN {
+    " PAU: branch if greater than
+    WHEN ((Flags2 == Flags1) & (Flags0 == 0)) THEN { 
+        MuxSel2 = 0;
+        MuxSel1 = 1;
+        MuxSel0 = 1;
+        Load = 0;
+    } ELSE {
+        MuxSel2 = 0;
+        MuxSel1 = 0;
+        MuxSel0 = 0;
+        Load = 0;
+    }
+
+    " ALU: Dont care
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Dont care
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 0;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == JGE) THEN {
+    " PAU: branch if greater than or equal
+    WHEN (Flags2 == Flags1) THEN { 
+        MuxSel2 = 0;
+        MuxSel1 = 1;
+        MuxSel0 = 1;
+        Load = 0;
+    } ELSE {
+        MuxSel2 = 0;
+        MuxSel1 = 0;
+        MuxSel0 = 0;
+        Load = 0;
+    }
+
+    " ALU: Dont care
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Dont care
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 0;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == JL) THEN {
+    " PAU: branch if less than
+    WHEN (Flags2 != Flags1) THEN { 
+        MuxSel2 = 0;
+        MuxSel1 = 1;
+        MuxSel0 = 1;
+        Load = 0;
+    } ELSE {
+        MuxSel2 = 0;
+        MuxSel1 = 0;
+        MuxSel0 = 0;
+        Load = 0;
+    }
+
+    " ALU: Dont care
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Dont care
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 0;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == JLE) THEN {
+    " PAU: branch if less than or equal
+    WHEN ((Flags2 != Flags1) # (Flags0 == 1)) THEN { 
+        MuxSel2 = 0;
+        MuxSel1 = 1;
+        MuxSel0 = 1;
+        Load = 0;
+    } ELSE {
+        MuxSel2 = 0;
+        MuxSel1 = 0;
+        MuxSel0 = 0;
+        Load = 0;
+    }
+
+    " ALU: Dont care
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Dont care
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 0;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == JNE) THEN {
+    " PAU: branch if zero bit clear (not equal)
+    WHEN (Flags0 == 0) THEN { 
+        MuxSel2 = 0;
+        MuxSel1 = 1;
+        MuxSel0 = 1;
+        Load = 0;
+    } ELSE {
+        MuxSel2 = 0;
+        MuxSel1 = 0;
+        MuxSel0 = 0;
+        Load = 0;
+    }
+
+    " ALU: Dont care
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Dont care
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 0;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == JNS) THEN {
+    " PAU: branch if sign bit clear (positive)
+    WHEN (Flags1 == 0) THEN { 
+        MuxSel2 = 0;
+        MuxSel1 = 1;
+        MuxSel0 = 1;
+        Load = 0;
+    } ELSE {
+        MuxSel2 = 0;
+        MuxSel1 = 0;
+        MuxSel0 = 0;
+        Load = 0;
+    }
+
+    " ALU: Dont care
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Dont care
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 0;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == JNV) THEN {
+    " PAU: branch if overflow bit clear
+    WHEN (Flags2 == 0) THEN { 
+        MuxSel2 = 0;
+        MuxSel1 = 1;
+        MuxSel0 = 1;
+        Load = 0;
+    } ELSE {
+        MuxSel2 = 0;
+        MuxSel1 = 0;
+        MuxSel0 = 0;
+        Load = 0;
+    }
+
+    " ALU: Dont care
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Dont care
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 0;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == JS) THEN {
+    " PAU: branch if sign bit set (negative)
+    WHEN (Flags1 == 1) THEN { 
+        MuxSel2 = 0;
+        MuxSel1 = 1;
+        MuxSel0 = 1;
+        Load = 0;
+    } ELSE {
+        MuxSel2 = 0;
+        MuxSel1 = 0;
+        MuxSel0 = 0;
+        Load = 0;
+    }
+
+    " ALU: Dont care
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Dont care
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 0;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == JV) THEN {
+    " PAU: branch if overflow bit set
+    WHEN (Flags2 == 1) THEN { 
+        MuxSel2 = 0;
+        MuxSel1 = 1;
+        MuxSel0 = 1;
+        Load = 0;
+    } ELSE {
+        MuxSel2 = 0;
+        MuxSel1 = 0;
+        MuxSel0 = 0;
+        Load = 0;
+    }
+
+    " ALU: Dont care
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Dont care
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 0;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+END CUInterface
