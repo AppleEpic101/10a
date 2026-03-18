@@ -98,8 +98,8 @@ MaskX                       pin; " Mask X register
 
 " Control Unit 
 IR15..IR0                   pin ISTYPE 'REG'; " Instruction Register
-CallBit1..CallBit0          pin; " State bits for CALL instruction
-RTSBit1..RTSBit0            pin; " State bits for RTS instruction
+CallBit1..CallBit0          pin ISTYPE 'REG'; " State bits for CALL instruction
+RTSBit1..RTSBit0            pin ISTYPE 'REG'; " State bits for RTS instruction
 
 OffsetSel                   pin; " Selects between low-8 bits of IR (0) or DDB (1) going into PAU offset
 SelectDB1..SelectDB0        pin; " Select lines for Data data bus
@@ -233,10 +233,16 @@ EQUATIONS
 
 " Clock and reset
 IR.CLK = Clock;
+StateBits.CLK = Clock;
 IR.CLR = Reset;
+StateBits.CLR = Reset;
 
-" Set instruction register to ProgramDB
-IR = ProgramDB;
+" Set instruction register to ProgramDB if MaskIR is 0, else keep current IR value
+IR = (!MaskIR & ProgramDB) # (MaskIR & IR);
+
+MaskIR = ((StateBits == Idle) & ((IR == CALL) # (IR == RTS))) #
+         ((StateBits == Call1) # (StateBits == Call2) # (StateBits == RTS1));
+
 
 " Set address to low 13-bits of IR
 [Address12..Address0] = [IR12..IR0];
