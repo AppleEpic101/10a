@@ -4444,23 +4444,23 @@ STATE_DIAGRAM StateBits; " Finite state machine for CALL and RTS instructions
 STATE Idle:
     IF (IR == CALL) THEN Call1
     ELSE IF (IR == RTS) THEN RTS1
-    ELSE Idle
+    ELSE Idle;
 
 " CALL progresses from Idle to Call1 to Call2 to Call3 to Idle
 STATE Call1:
-    GOTO Call2
+    GOTO Call2;
 
 STATE Call2:
-    GOTO Call3
+    GOTO Call3;
 
 STATE Call3:
-    GOTO Idle
+    GOTO Idle;
 
 " RTS progresses from Idle to RTS1 to RTS2 to Idle
 STATE RTS1:
-    GOTO RTS2
+    GOTO RTS2;
 
 STATE RTS2:
-    GOTO Idle
+    GOTO Idle;
 
 END CUInterface
