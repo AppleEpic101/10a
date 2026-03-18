@@ -241,7 +241,7 @@ TAS    = [0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0]; " S = Accumulator
 TSA    = [0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0]; " Accumulator = S
 INS    = [0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0]; " S = S + 1
 DES    = [0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0]; " S = S - 1
-IN     = [1, 0, 0, 1, 0, 0, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " Accumulator = IO port
+INPUT     = [1, 0, 0, 1, 0, 0, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " Accumulator = IO port
 OUT    = [1, 0, 1, 1, 0, 0, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " IO port = Accumulator
 
 " Call subroutine (4 clock cycles)
@@ -274,7 +274,7 @@ OverrideUser      = (IR == STU) # (IR == CLU);
 SetUser           = (IR == STU);
 OverrideCarry     = (IR == STC) # (IR == CLC);
 SetCarry          = (IR == STC);
-IO                = (IR == IN) # (IR == OUT);
+IO                = (IR == INPUT) # (IR == OUT);
 
 " Set instruction register to ProgramDB if MaskIR is 0, else keep current IR value
 IR = (!MaskIR & ProgramDB) # (MaskIR & IR);
@@ -5505,7 +5505,7 @@ WHEN (IR == DES) THEN {
     OffsetSel = 0;
 }
 
-WHEN (IR == IN) THEN {
+WHEN (IR == INPUT) THEN {
     " PAU: Increment PC
     MuxSel2 = 0;
     MuxSel1 = 0;
