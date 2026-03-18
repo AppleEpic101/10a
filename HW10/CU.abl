@@ -305,12 +305,6 @@ WHEN (IR == ADCM) THEN {
     CinSel1 = 1;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 0;
     MaskVC = 0;
     PopF = 0;
@@ -324,7 +318,7 @@ WHEN (IR == ADCM) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 1;
     WR = 0;
@@ -351,12 +345,6 @@ WHEN (IR == ADCXO) THEN {
     CinSel1 = 1;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 0;
     MaskVC = 0;
     PopF = 0;
@@ -370,7 +358,7 @@ WHEN (IR == ADCXO) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 0;
-    
+
     " Control Unit Top Level
     RD = 1;
     WR = 0;
@@ -397,12 +385,6 @@ WHEN (IR == ADCSO) THEN {
     CinSel1 = 1;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 0;
     MaskVC = 0;
     PopF = 0;
@@ -416,7 +398,7 @@ WHEN (IR == ADCSO) THEN {
     UsePost = 0;
     MaskS = 0;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 1;
     WR = 0;
@@ -443,12 +425,6 @@ WHEN (IR == ADCI) THEN {
     CinSel1 = 1;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 0;
     MaskVC = 0;
     PopF = 0;
@@ -462,7 +438,7 @@ WHEN (IR == ADCI) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 0;
@@ -489,12 +465,6 @@ WHEN (IR == ADDM) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 0;
     MaskVC = 0;
     PopF = 0;
@@ -508,7 +478,7 @@ WHEN (IR == ADDM) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 1;
     WR = 0;
@@ -535,12 +505,6 @@ WHEN (IR == ADDXO) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 0;
     MaskVC = 0;
     PopF = 0;
@@ -554,7 +518,7 @@ WHEN (IR == ADDXO) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 0;
-    
+
     " Control Unit Top Level
     RD = 1;
     WR = 0;
@@ -581,12 +545,6 @@ WHEN (IR == ADDSO) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 0;
     MaskVC = 0;
     PopF = 0;
@@ -600,7 +558,7 @@ WHEN (IR == ADDSO) THEN {
     UsePost = 0;
     MaskS = 0;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 1;
     WR = 0;
@@ -627,12 +585,6 @@ WHEN (IR == ADDI) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 0;
     MaskVC = 0;
     PopF = 0;
@@ -646,7 +598,7 @@ WHEN (IR == ADDI) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 0;
@@ -673,12 +625,6 @@ WHEN (IR == ANDM) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 0;
     MaskVC = 1;
     PopF = 0;
@@ -692,7 +638,7 @@ WHEN (IR == ANDM) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 1;
     WR = 0;
@@ -719,12 +665,6 @@ WHEN (IR == ANDXO) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 0;
     MaskVC = 1;
     PopF = 0;
@@ -738,7 +678,7 @@ WHEN (IR == ANDXO) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 0;
-    
+
     " Control Unit Top Level
     RD = 1;
     WR = 0;
@@ -765,12 +705,6 @@ WHEN (IR == ANDSO) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 0;
     MaskVC = 1;
     PopF = 0;
@@ -784,7 +718,7 @@ WHEN (IR == ANDSO) THEN {
     UsePost = 0;
     MaskS = 0;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 1;
     WR = 0;
@@ -811,12 +745,6 @@ WHEN (IR == ANDI) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 0;
     MaskVC = 1;
     PopF = 0;
@@ -830,7 +758,7 @@ WHEN (IR == ANDI) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 0;
@@ -857,12 +785,6 @@ WHEN (IR == CMPM) THEN {
     CinSel1 = 1;
     CinSel0 = 1;
     InvertCarry = 1;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 0;
     MaskVC = 0;
     PopF = 0;
@@ -876,7 +798,7 @@ WHEN (IR == CMPM) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 1;
     WR = 0;
@@ -903,12 +825,6 @@ WHEN (IR == CMPXO) THEN {
     CinSel1 = 1;
     CinSel0 = 1;
     InvertCarry = 1;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 0;
     MaskVC = 0;
     PopF = 0;
@@ -922,7 +838,7 @@ WHEN (IR == CMPXO) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 0;
-    
+
     " Control Unit Top Level
     RD = 1;
     WR = 0;
@@ -949,12 +865,6 @@ WHEN (IR == CMPSO) THEN {
     CinSel1 = 1;
     CinSel0 = 1;
     InvertCarry = 1;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 0;
     MaskVC = 0;
     PopF = 0;
@@ -968,7 +878,7 @@ WHEN (IR == CMPSO) THEN {
     UsePost = 0;
     MaskS = 0;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 1;
     WR = 0;
@@ -995,12 +905,6 @@ WHEN (IR == CMPI) THEN {
     CinSel1 = 1;
     CinSel0 = 1;
     InvertCarry = 1;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 0;
     MaskVC = 0;
     PopF = 0;
@@ -1014,7 +918,7 @@ WHEN (IR == CMPI) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 0;
@@ -1041,12 +945,6 @@ WHEN (IR == DEC) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 1;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 0;
     MaskVC = 0;
     PopF = 0;
@@ -1060,7 +958,7 @@ WHEN (IR == DEC) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 0;
@@ -1087,12 +985,6 @@ WHEN (IR == INC) THEN {
     CinSel1 = 1;
     CinSel0 = 1;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 0;
     MaskVC = 0;
     PopF = 0;
@@ -1106,7 +998,7 @@ WHEN (IR == INC) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 0;
@@ -1152,7 +1044,7 @@ WHEN (IR == LSL) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 0;
@@ -1179,12 +1071,6 @@ WHEN (IR == NOT) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 0;
     MaskVC = 1;
     PopF = 0;
@@ -1198,7 +1084,7 @@ WHEN (IR == NOT) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 0;
@@ -1225,12 +1111,6 @@ WHEN (IR == ORM) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 0;
     MaskVC = 1;
     PopF = 0;
@@ -1244,7 +1124,7 @@ WHEN (IR == ORM) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 1;
     WR = 0;
@@ -1271,12 +1151,6 @@ WHEN (IR == ORXO) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 0;
     MaskVC = 1;
     PopF = 0;
@@ -1290,7 +1164,7 @@ WHEN (IR == ORXO) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 0;
-    
+
     " Control Unit Top Level
     RD = 1;
     WR = 0;
@@ -1317,12 +1191,6 @@ WHEN (IR == ORSO) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 0;
     MaskVC = 1;
     PopF = 0;
@@ -1336,7 +1204,7 @@ WHEN (IR == ORSO) THEN {
     UsePost = 0;
     MaskS = 0;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 1;
     WR = 0;
@@ -1363,12 +1231,6 @@ WHEN (IR == ORI) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 0;
     MaskVC = 1;
     PopF = 0;
@@ -1382,7 +1244,7 @@ WHEN (IR == ORI) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 0;
@@ -1428,7 +1290,7 @@ WHEN (IR == RLC) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 0;
@@ -1455,12 +1317,6 @@ WHEN (IR == SBBM) THEN {
     CinSel1 = 0;
     CinSel0 = 1;
     InvertCarry = 1;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 0;
     MaskVC = 0;
     PopF = 0;
@@ -1474,7 +1330,7 @@ WHEN (IR == SBBM) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 1;
     WR = 0;
@@ -1501,12 +1357,6 @@ WHEN (IR == SBBXO) THEN {
     CinSel1 = 0;
     CinSel0 = 1;
     InvertCarry = 1;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 0;
     MaskVC = 0;
     PopF = 0;
@@ -1520,7 +1370,7 @@ WHEN (IR == SBBXO) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 0;
-    
+
     " Control Unit Top Level
     RD = 1;
     WR = 0;
@@ -1547,12 +1397,6 @@ WHEN (IR == SBBSO) THEN {
     CinSel1 = 0;
     CinSel0 = 1;
     InvertCarry = 1;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 0;
     MaskVC = 0;
     PopF = 0;
@@ -1566,7 +1410,7 @@ WHEN (IR == SBBSO) THEN {
     UsePost = 0;
     MaskS = 0;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 1;
     WR = 0;
@@ -1593,12 +1437,6 @@ WHEN (IR == SBBI) THEN {
     CinSel1 = 0;
     CinSel0 = 1;
     InvertCarry = 1;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 0;
     MaskVC = 0;
     PopF = 0;
@@ -1612,7 +1450,7 @@ WHEN (IR == SBBI) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 0;
@@ -1639,12 +1477,6 @@ WHEN (IR == SUBM) THEN {
     CinSel1 = 1;
     CinSel0 = 1;
     InvertCarry = 1;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 0;
     MaskVC = 0;
     PopF = 0;
@@ -1658,7 +1490,7 @@ WHEN (IR == SUBM) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 1;
     WR = 0;
@@ -1685,12 +1517,6 @@ WHEN (IR == SUBXO) THEN {
     CinSel1 = 1;
     CinSel0 = 1;
     InvertCarry = 1;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 0;
     MaskVC = 0;
     PopF = 0;
@@ -1704,7 +1530,7 @@ WHEN (IR == SUBXO) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 0;
-    
+
     " Control Unit Top Level
     RD = 1;
     WR = 0;
@@ -1731,12 +1557,6 @@ WHEN (IR == SUBSO) THEN {
     CinSel1 = 1;
     CinSel0 = 1;
     InvertCarry = 1;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 0;
     MaskVC = 0;
     PopF = 0;
@@ -1750,7 +1570,7 @@ WHEN (IR == SUBSO) THEN {
     UsePost = 0;
     MaskS = 0;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 1;
     WR = 0;
@@ -1777,12 +1597,6 @@ WHEN (IR == SUBI) THEN {
     CinSel1 = 1;
     CinSel0 = 1;
     InvertCarry = 1;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 0;
     MaskVC = 0;
     PopF = 0;
@@ -1796,7 +1610,7 @@ WHEN (IR == SUBI) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 0;
@@ -1823,12 +1637,6 @@ WHEN (IR == TSTM) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 0;
     MaskVC = 1;
     PopF = 0;
@@ -1842,7 +1650,7 @@ WHEN (IR == TSTM) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 1;
     WR = 0;
@@ -1869,12 +1677,6 @@ WHEN (IR == TSTXO) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 0;
     MaskVC = 1;
     PopF = 0;
@@ -1888,7 +1690,7 @@ WHEN (IR == TSTXO) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 0;
-    
+
     " Control Unit Top Level
     RD = 1;
     WR = 0;
@@ -1915,12 +1717,6 @@ WHEN (IR == TSTSO) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 0;
     MaskVC = 1;
     PopF = 0;
@@ -1934,7 +1730,7 @@ WHEN (IR == TSTSO) THEN {
     UsePost = 0;
     MaskS = 0;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 1;
     WR = 0;
@@ -1961,12 +1757,6 @@ WHEN (IR == TSTI) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 0;
     MaskVC = 1;
     PopF = 0;
@@ -1980,7 +1770,7 @@ WHEN (IR == TSTI) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 0;
@@ -2007,12 +1797,6 @@ WHEN (IR == XORM) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 0;
     MaskVC = 1;
     PopF = 0;
@@ -2026,7 +1810,7 @@ WHEN (IR == XORM) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 1;
     WR = 0;
@@ -2053,12 +1837,6 @@ WHEN (IR == XORXO) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 0;
     MaskVC = 1;
     PopF = 0;
@@ -2072,7 +1850,7 @@ WHEN (IR == XORXO) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 0;
-    
+
     " Control Unit Top Level
     RD = 1;
     WR = 0;
@@ -2099,12 +1877,6 @@ WHEN (IR == XORSO) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 0;
     MaskVC = 1;
     PopF = 0;
@@ -2118,7 +1890,7 @@ WHEN (IR == XORSO) THEN {
     UsePost = 0;
     MaskS = 0;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 1;
     WR = 0;
@@ -2145,12 +1917,6 @@ WHEN (IR == XORI) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 0;
     MaskVC = 1;
     PopF = 0;
@@ -2164,7 +1930,7 @@ WHEN (IR == XORI) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 0;
@@ -2191,12 +1957,6 @@ WHEN (IR == POPF) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 0;
     MaskVC = 0;
     PopF = 1;
@@ -2210,7 +1970,7 @@ WHEN (IR == POPF) THEN {
     UsePost = 1;
     MaskS = 0;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 1;
     WR = 0;
@@ -2237,12 +1997,6 @@ WHEN (IR == PUSHF) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 1;
     MaskVC = 1;
     PopF = 0;
@@ -2256,7 +2010,7 @@ WHEN (IR == PUSHF) THEN {
     UsePost = 0;
     MaskS = 0;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 1;
@@ -2283,12 +2037,6 @@ WHEN (IR == NOP) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 1;
     MaskVC = 1;
     PopF = 0;
@@ -2302,7 +2050,7 @@ WHEN (IR == NOP) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 0;
@@ -2329,12 +2077,6 @@ WHEN (IR == LDI) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 1;
     MaskVC = 1;
     PopF = 0;
@@ -2348,7 +2090,7 @@ WHEN (IR == LDI) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 0;
@@ -2375,12 +2117,6 @@ WHEN (IR == LDD) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 1;
     MaskVC = 1;
     PopF = 0;
@@ -2394,7 +2130,7 @@ WHEN (IR == LDD) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 1;
     WR = 0;
@@ -2421,12 +2157,6 @@ WHEN (IR == LDXO) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 1;
     MaskVC = 1;
     PopF = 0;
@@ -2440,7 +2170,7 @@ WHEN (IR == LDXO) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 1;
     WR = 0;
@@ -2467,12 +2197,6 @@ WHEN (IR == LDXO_I) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 1;
     MaskVC = 1;
     PopF = 0;
@@ -2486,7 +2210,7 @@ WHEN (IR == LDXO_I) THEN {
     UsePost = 1;
     MaskS = 1;
     MaskX = 0;
-    
+
     " Control Unit Top Level
     RD = 1;
     WR = 0;
@@ -2513,12 +2237,6 @@ WHEN (IR == LDXO_D) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 1;
     MaskVC = 1;
     PopF = 0;
@@ -2532,7 +2250,7 @@ WHEN (IR == LDXO_D) THEN {
     UsePost = 1;
     MaskS = 1;
     MaskX = 0;
-    
+
     " Control Unit Top Level
     RD = 1;
     WR = 0;
@@ -2559,12 +2277,6 @@ WHEN (IR == I_LDXO) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 1;
     MaskVC = 1;
     PopF = 0;
@@ -2578,7 +2290,7 @@ WHEN (IR == I_LDXO) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 0;
-    
+
     " Control Unit Top Level
     RD = 1;
     WR = 0;
@@ -2605,12 +2317,6 @@ WHEN (IR == D_LDXO) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 1;
     MaskVC = 1;
     PopF = 0;
@@ -2624,7 +2330,7 @@ WHEN (IR == D_LDXO) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 0;
-    
+
     " Control Unit Top Level
     RD = 1;
     WR = 0;
@@ -2651,12 +2357,6 @@ WHEN (IR == LDSO) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 1;
     MaskVC = 1;
     PopF = 0;
@@ -2670,7 +2370,7 @@ WHEN (IR == LDSO) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 1;
     WR = 0;
@@ -2697,12 +2397,6 @@ WHEN (IR == LDSO_I) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 1;
     MaskVC = 1;
     PopF = 0;
@@ -2716,7 +2410,7 @@ WHEN (IR == LDSO_I) THEN {
     UsePost = 1;
     MaskS = 0;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 1;
     WR = 0;
@@ -2743,12 +2437,6 @@ WHEN (IR == LDSO_D) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 1;
     MaskVC = 1;
     PopF = 0;
@@ -2762,7 +2450,7 @@ WHEN (IR == LDSO_D) THEN {
     UsePost = 1;
     MaskS = 0;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 1;
     WR = 0;
@@ -2789,12 +2477,6 @@ WHEN (IR == I_LDSO) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 1;
     MaskVC = 1;
     PopF = 0;
@@ -2808,7 +2490,7 @@ WHEN (IR == I_LDSO) THEN {
     UsePost = 0;
     MaskS = 0;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 1;
     WR = 0;
@@ -2835,12 +2517,6 @@ WHEN (IR == D_LDSO) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 1;
     MaskVC = 1;
     PopF = 0;
@@ -2854,7 +2530,7 @@ WHEN (IR == D_LDSO) THEN {
     UsePost = 0;
     MaskS = 0;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 1;
     WR = 0;
@@ -2881,12 +2557,6 @@ WHEN (IR == STD) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 1;
     MaskVC = 1;
     PopF = 0;
@@ -2900,7 +2570,7 @@ WHEN (IR == STD) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 1;
@@ -2927,12 +2597,6 @@ WHEN (IR == STXO) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 1;
     MaskVC = 1;
     PopF = 0;
@@ -2946,7 +2610,7 @@ WHEN (IR == STXO) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 1;
@@ -2973,12 +2637,6 @@ WHEN (IR == STXO_I) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 1;
     MaskVC = 1;
     PopF = 0;
@@ -2992,7 +2650,7 @@ WHEN (IR == STXO_I) THEN {
     UsePost = 1;
     MaskS = 1;
     MaskX = 0;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 1;
@@ -3019,12 +2677,6 @@ WHEN (IR == STXO_D) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 1;
     MaskVC = 1;
     PopF = 0;
@@ -3038,7 +2690,7 @@ WHEN (IR == STXO_D) THEN {
     UsePost = 1;
     MaskS = 1;
     MaskX = 0;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 1;
@@ -3065,12 +2717,6 @@ WHEN (IR == I_STXO) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 1;
     MaskVC = 1;
     PopF = 0;
@@ -3084,7 +2730,7 @@ WHEN (IR == I_STXO) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 0;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 1;
@@ -3111,12 +2757,6 @@ WHEN (IR == D_STXO) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 1;
     MaskVC = 1;
     PopF = 0;
@@ -3130,7 +2770,7 @@ WHEN (IR == D_STXO) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 0;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 1;
@@ -3157,12 +2797,6 @@ WHEN (IR == STSO) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 1;
     MaskVC = 1;
     PopF = 0;
@@ -3176,7 +2810,7 @@ WHEN (IR == STSO) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 1;
@@ -3203,12 +2837,6 @@ WHEN (IR == STSO_I) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 1;
     MaskVC = 1;
     PopF = 0;
@@ -3222,7 +2850,7 @@ WHEN (IR == STSO_I) THEN {
     UsePost = 1;
     MaskS = 0;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 1;
@@ -3249,12 +2877,6 @@ WHEN (IR == STSO_D) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 1;
     MaskVC = 1;
     PopF = 0;
@@ -3268,7 +2890,7 @@ WHEN (IR == STSO_D) THEN {
     UsePost = 1;
     MaskS = 0;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 1;
@@ -3295,12 +2917,6 @@ WHEN (IR == I_STSO) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 1;
     MaskVC = 1;
     PopF = 0;
@@ -3314,7 +2930,7 @@ WHEN (IR == I_STSO) THEN {
     UsePost = 0;
     MaskS = 0;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 1;
@@ -3341,12 +2957,6 @@ WHEN (IR == D_STSO) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 1;
     MaskVC = 1;
     PopF = 0;
@@ -3360,7 +2970,7 @@ WHEN (IR == D_STSO) THEN {
     UsePost = 0;
     MaskS = 0;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 1;
@@ -3387,12 +2997,6 @@ WHEN (IR == JMP) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 1;
     MaskVC = 1;
     PopF = 0;
@@ -3406,7 +3010,7 @@ WHEN (IR == JMP) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 0;
@@ -3418,15 +3022,9 @@ WHEN (IR == JMP) THEN {
 WHEN (IR == JA) THEN {
     " PAU: branch if above
     WHEN ((Flags3 == 0) & (Flags0 == 0)) THEN { 
-        MuxSel2 = 0;
-        MuxSel1 = 1;
-        MuxSel0 = 1;
-        Load = 0;
+        MuxSel2 = 0; MuxSel1 = 1; MuxSel0 = 1; Load = 0;
     } ELSE {
-        MuxSel2 = 0;
-        MuxSel1 = 0;
-        MuxSel0 = 0;
-        Load = 0;
+        MuxSel2 = 0; MuxSel1 = 0; MuxSel0 = 0; Load = 0;
     }
 
     " ALU: Dont care
@@ -3440,12 +3038,6 @@ WHEN (IR == JA) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 1;
     MaskVC = 1;
     PopF = 0;
@@ -3459,7 +3051,7 @@ WHEN (IR == JA) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 0;
@@ -3471,15 +3063,9 @@ WHEN (IR == JA) THEN {
 WHEN (IR == JAE) THEN {
     " PAU: branch if above or equal (carry bit clear)
     WHEN (Flags3 == 0) THEN { 
-        MuxSel2 = 0;
-        MuxSel1 = 1;
-        MuxSel0 = 1;
-        Load = 0;
+        MuxSel2 = 0; MuxSel1 = 1; MuxSel0 = 1; Load = 0;
     } ELSE {
-        MuxSel2 = 0;
-        MuxSel1 = 0;
-        MuxSel0 = 0;
-        Load = 0;
+        MuxSel2 = 0; MuxSel1 = 0; MuxSel0 = 0; Load = 0;
     }
 
     " ALU: Dont care
@@ -3493,12 +3079,6 @@ WHEN (IR == JAE) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 1;
     MaskVC = 1;
     PopF = 0;
@@ -3512,7 +3092,7 @@ WHEN (IR == JAE) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 0;
@@ -3524,15 +3104,9 @@ WHEN (IR == JAE) THEN {
 WHEN (IR == JB) THEN {
     " PAU: branch if below (carry bit set)
     WHEN (Flags3 == 1) THEN { 
-        MuxSel2 = 0;
-        MuxSel1 = 1;
-        MuxSel0 = 1;
-        Load = 0;
+        MuxSel2 = 0; MuxSel1 = 1; MuxSel0 = 1; Load = 0;
     } ELSE {
-        MuxSel2 = 0;
-        MuxSel1 = 0;
-        MuxSel0 = 0;
-        Load = 0;
+        MuxSel2 = 0; MuxSel1 = 0; MuxSel0 = 0; Load = 0;
     }
 
     " ALU: Dont care
@@ -3546,12 +3120,6 @@ WHEN (IR == JB) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 1;
     MaskVC = 1;
     PopF = 0;
@@ -3565,7 +3133,7 @@ WHEN (IR == JB) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 0;
@@ -3577,15 +3145,9 @@ WHEN (IR == JB) THEN {
 WHEN (IR == JBE) THEN {
     " PAU: branch if below or equal
     WHEN ((Flags3 == 1) # (Flags0 == 1)) THEN { 
-        MuxSel2 = 0;
-        MuxSel1 = 1;
-        MuxSel0 = 1;
-        Load = 0;
+        MuxSel2 = 0; MuxSel1 = 1; MuxSel0 = 1; Load = 0;
     } ELSE {
-        MuxSel2 = 0;
-        MuxSel1 = 0;
-        MuxSel0 = 0;
-        Load = 0;
+        MuxSel2 = 0; MuxSel1 = 0; MuxSel0 = 0; Load = 0;
     }
 
     " ALU: Dont care
@@ -3599,12 +3161,6 @@ WHEN (IR == JBE) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 1;
     MaskVC = 1;
     PopF = 0;
@@ -3618,7 +3174,7 @@ WHEN (IR == JBE) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 0;
@@ -3630,15 +3186,9 @@ WHEN (IR == JBE) THEN {
 WHEN (IR == JE) THEN {
     " PAU: branch if zero bit set (equal)
     WHEN (Flags0 == 1) THEN { 
-        MuxSel2 = 0;
-        MuxSel1 = 1;
-        MuxSel0 = 1;
-        Load = 0;
+        MuxSel2 = 0; MuxSel1 = 1; MuxSel0 = 1; Load = 0;
     } ELSE {
-        MuxSel2 = 0;
-        MuxSel1 = 0;
-        MuxSel0 = 0;
-        Load = 0;
+        MuxSel2 = 0; MuxSel1 = 0; MuxSel0 = 0; Load = 0;
     }
 
     " ALU: Dont care
@@ -3652,12 +3202,6 @@ WHEN (IR == JE) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 1;
     MaskVC = 1;
     PopF = 0;
@@ -3671,7 +3215,7 @@ WHEN (IR == JE) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 0;
@@ -3683,15 +3227,9 @@ WHEN (IR == JE) THEN {
 WHEN (IR == JG) THEN {
     " PAU: branch if greater than
     WHEN ((Flags2 == Flags1) & (Flags0 == 0)) THEN { 
-        MuxSel2 = 0;
-        MuxSel1 = 1;
-        MuxSel0 = 1;
-        Load = 0;
+        MuxSel2 = 0; MuxSel1 = 1; MuxSel0 = 1; Load = 0;
     } ELSE {
-        MuxSel2 = 0;
-        MuxSel1 = 0;
-        MuxSel0 = 0;
-        Load = 0;
+        MuxSel2 = 0; MuxSel1 = 0; MuxSel0 = 0; Load = 0;
     }
 
     " ALU: Dont care
@@ -3705,12 +3243,6 @@ WHEN (IR == JG) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 1;
     MaskVC = 1;
     PopF = 0;
@@ -3724,7 +3256,7 @@ WHEN (IR == JG) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 0;
@@ -3736,15 +3268,9 @@ WHEN (IR == JG) THEN {
 WHEN (IR == JGE) THEN {
     " PAU: branch if greater than or equal
     WHEN (Flags2 == Flags1) THEN { 
-        MuxSel2 = 0;
-        MuxSel1 = 1;
-        MuxSel0 = 1;
-        Load = 0;
+        MuxSel2 = 0; MuxSel1 = 1; MuxSel0 = 1; Load = 0;
     } ELSE {
-        MuxSel2 = 0;
-        MuxSel1 = 0;
-        MuxSel0 = 0;
-        Load = 0;
+        MuxSel2 = 0; MuxSel1 = 0; MuxSel0 = 0; Load = 0;
     }
 
     " ALU: Dont care
@@ -3758,12 +3284,6 @@ WHEN (IR == JGE) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 1;
     MaskVC = 1;
     PopF = 0;
@@ -3777,7 +3297,7 @@ WHEN (IR == JGE) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 0;
@@ -3789,15 +3309,9 @@ WHEN (IR == JGE) THEN {
 WHEN (IR == JL) THEN {
     " PAU: branch if less than
     WHEN (Flags2 != Flags1) THEN { 
-        MuxSel2 = 0;
-        MuxSel1 = 1;
-        MuxSel0 = 1;
-        Load = 0;
+        MuxSel2 = 0; MuxSel1 = 1; MuxSel0 = 1; Load = 0;
     } ELSE {
-        MuxSel2 = 0;
-        MuxSel1 = 0;
-        MuxSel0 = 0;
-        Load = 0;
+        MuxSel2 = 0; MuxSel1 = 0; MuxSel0 = 0; Load = 0;
     }
 
     " ALU: Dont care
@@ -3811,12 +3325,6 @@ WHEN (IR == JL) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 1;
     MaskVC = 1;
     PopF = 0;
@@ -3830,7 +3338,7 @@ WHEN (IR == JL) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 0;
@@ -3842,15 +3350,9 @@ WHEN (IR == JL) THEN {
 WHEN (IR == JLE) THEN {
     " PAU: branch if less than or equal
     WHEN ((Flags2 != Flags1) # (Flags0 == 1)) THEN { 
-        MuxSel2 = 0;
-        MuxSel1 = 1;
-        MuxSel0 = 1;
-        Load = 0;
+        MuxSel2 = 0; MuxSel1 = 1; MuxSel0 = 1; Load = 0;
     } ELSE {
-        MuxSel2 = 0;
-        MuxSel1 = 0;
-        MuxSel0 = 0;
-        Load = 0;
+        MuxSel2 = 0; MuxSel1 = 0; MuxSel0 = 0; Load = 0;
     }
 
     " ALU: Dont care
@@ -3864,12 +3366,6 @@ WHEN (IR == JLE) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 1;
     MaskVC = 1;
     PopF = 0;
@@ -3883,7 +3379,7 @@ WHEN (IR == JLE) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 0;
@@ -3895,15 +3391,9 @@ WHEN (IR == JLE) THEN {
 WHEN (IR == JNE) THEN {
     " PAU: branch if zero bit clear (not equal)
     WHEN (Flags0 == 0) THEN { 
-        MuxSel2 = 0;
-        MuxSel1 = 1;
-        MuxSel0 = 1;
-        Load = 0;
+        MuxSel2 = 0; MuxSel1 = 1; MuxSel0 = 1; Load = 0;
     } ELSE {
-        MuxSel2 = 0;
-        MuxSel1 = 0;
-        MuxSel0 = 0;
-        Load = 0;
+        MuxSel2 = 0; MuxSel1 = 0; MuxSel0 = 0; Load = 0;
     }
 
     " ALU: Dont care
@@ -3917,12 +3407,6 @@ WHEN (IR == JNE) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 1;
     MaskVC = 1;
     PopF = 0;
@@ -3936,7 +3420,7 @@ WHEN (IR == JNE) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 0;
@@ -3948,15 +3432,9 @@ WHEN (IR == JNE) THEN {
 WHEN (IR == JNS) THEN {
     " PAU: branch if sign bit clear (positive)
     WHEN (Flags1 == 0) THEN { 
-        MuxSel2 = 0;
-        MuxSel1 = 1;
-        MuxSel0 = 1;
-        Load = 0;
+        MuxSel2 = 0; MuxSel1 = 1; MuxSel0 = 1; Load = 0;
     } ELSE {
-        MuxSel2 = 0;
-        MuxSel1 = 0;
-        MuxSel0 = 0;
-        Load = 0;
+        MuxSel2 = 0; MuxSel1 = 0; MuxSel0 = 0; Load = 0;
     }
 
     " ALU: Dont care
@@ -3970,12 +3448,6 @@ WHEN (IR == JNS) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 1;
     MaskVC = 1;
     PopF = 0;
@@ -3989,7 +3461,7 @@ WHEN (IR == JNS) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 0;
@@ -4001,15 +3473,9 @@ WHEN (IR == JNS) THEN {
 WHEN (IR == JNV) THEN {
     " PAU: branch if overflow bit clear
     WHEN (Flags2 == 0) THEN { 
-        MuxSel2 = 0;
-        MuxSel1 = 1;
-        MuxSel0 = 1;
-        Load = 0;
+        MuxSel2 = 0; MuxSel1 = 1; MuxSel0 = 1; Load = 0;
     } ELSE {
-        MuxSel2 = 0;
-        MuxSel1 = 0;
-        MuxSel0 = 0;
-        Load = 0;
+        MuxSel2 = 0; MuxSel1 = 0; MuxSel0 = 0; Load = 0;
     }
 
     " ALU: Dont care
@@ -4023,12 +3489,6 @@ WHEN (IR == JNV) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 1;
     MaskVC = 1;
     PopF = 0;
@@ -4042,7 +3502,7 @@ WHEN (IR == JNV) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 0;
@@ -4054,15 +3514,9 @@ WHEN (IR == JNV) THEN {
 WHEN (IR == JS) THEN {
     " PAU: branch if sign bit set (negative)
     WHEN (Flags1 == 1) THEN { 
-        MuxSel2 = 0;
-        MuxSel1 = 1;
-        MuxSel0 = 1;
-        Load = 0;
+        MuxSel2 = 0; MuxSel1 = 1; MuxSel0 = 1; Load = 0;
     } ELSE {
-        MuxSel2 = 0;
-        MuxSel1 = 0;
-        MuxSel0 = 0;
-        Load = 0;
+        MuxSel2 = 0; MuxSel1 = 0; MuxSel0 = 0; Load = 0;
     }
 
     " ALU: Dont care
@@ -4076,12 +3530,6 @@ WHEN (IR == JS) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 1;
     MaskVC = 1;
     PopF = 0;
@@ -4095,7 +3543,7 @@ WHEN (IR == JS) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 0;
@@ -4107,15 +3555,9 @@ WHEN (IR == JS) THEN {
 WHEN (IR == JV) THEN {
     " PAU: branch if overflow bit set
     WHEN (Flags2 == 1) THEN { 
-        MuxSel2 = 0;
-        MuxSel1 = 1;
-        MuxSel0 = 1;
-        Load = 0;
+        MuxSel2 = 0; MuxSel1 = 1; MuxSel0 = 1; Load = 0;
     } ELSE {
-        MuxSel2 = 0;
-        MuxSel1 = 0;
-        MuxSel0 = 0;
-        Load = 0;
+        MuxSel2 = 0; MuxSel1 = 0; MuxSel0 = 0; Load = 0;
     }
 
     " ALU: Dont care
@@ -4129,12 +3571,6 @@ WHEN (IR == JV) THEN {
     CinSel1 = 0;
     CinSel0 = 0;
     InvertCarry = 0;
-    LSBselect1 = .X.;
-    LSBselect0 = .X.;
-    MiddleSelect = .X.;
-    MSBselect2 = .X.;
-    MSBselect1 = .X.;
-    MSBselect0 = .X.;
     MaskSZ = 1;
     MaskVC = 1;
     PopF = 0;
@@ -4148,7 +3584,7 @@ WHEN (IR == JV) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    
+
     " Control Unit Top Level
     RD = 0;
     WR = 0;
