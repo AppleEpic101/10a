@@ -2,7 +2,7 @@ import pandas as pd
 import ssl
 
 # Fetch data
-sheet_id = '1TnKetCAg2NvMBcMc5EvTSCexvkHO4fWfMF46lFpzFjY'
+sheet_id = '1yYmfFwq5_bMKeojHUvYkk4ksbMl_yaIAT2HGvagZAHo'
 gid = '0'
 url = f'https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv&gid={gid}'
 
@@ -35,7 +35,7 @@ lines = [format_instruction_array(row['name'], row['Instruction'], row.get('Desc
 final_output = "\n".join(lines)
 
 # Write to file
-output_file = "instruction_definitions.abel"
+output_file = "HW10/instruction_definitions.abel"
 with open(output_file, "w") as f:
     f.write(final_output)
 

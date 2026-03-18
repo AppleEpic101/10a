@@ -50,11 +50,20 @@ TITLE      'Caltech10 ALU Unit'
 " POPF        |   0   |    X     |    X     |  XXXX  |   XX   |  X   |   X    |   X    |   XX   |   X    |  XXX   |
 " LDD / LD    |   1   |    1     |    0     |  1010  |   00   |  0   |   1    |   1    |   XX   |   X    |  XXX   |
 " STD / ST    |   0   |    X     |    X     |  XXXX  |   XX   |  X   |   1    |   1    |   XX   |   X    |  XXX   |
+" -------------------------------------------------------------------------------------------------------------------       
+" NEG         |   1   |    1     |    0     |  0011  |   11   |  1   |   0    |   0    |   XX   |   X    |  XXX   |
+" ASR         |   1   |    0     |    X     |  XXXX  |   XX   |  X   |   0    |   0    |   10   |   0    |  001   |
+" LSR         |   1   |    0     |    X     |  XXXX  |   XX   |  X   |   0    |   0    |   10   |   0    |  000   |
+" ROL         |   1   |    0     |    X     |  XXXX  |   XX   |  X   |   0    |   0    |   11   |   1    |  010   |
+" ROR         |   1   |    0     |    X     |  XXXX  |   XX   |  X   |   0    |   0    |   10   |   0    |  011   |
+" RRC         |   1   |    0     |    X     |  XXXX  |   XX   |  X   |   0    |   0    |   10   |   0    |  100   |
 " =========================================================================================================================
 " Revision History:
 " 03/01/26   Alex Du  Initial Revision
 " 03/03/26   Alex Du  Fixed bugs
 " 03/03/26   Alex Du  Add comments
+" 03/15/26   Alex Du  Add operations table
+" 03/18/26   Alex Du  Expand table to include extra credit instructions
 
 
 " Pins/Signal Declarations

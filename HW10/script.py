@@ -1,6 +1,6 @@
 import pandas as pd
 
-sheet_id = '1TnKetCAg2NvMBcMc5EvTSCexvkHO4fWfMF46lFpzFjY'
+sheet_id = '1yYmfFwq5_bMKeojHUvYkk4ksbMl_yaIAT2HGvagZAHo'
 gid = '0'
 url = f'https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv&gid={gid}'
 
@@ -80,7 +80,7 @@ def format_abel(row):
 abel_blocks = [format_abel(row) for _, row in df.iterrows()]
 final_output = "\n\n".join(abel_blocks)
 
-with open("/HW10/instructions.abel", "w") as f:
+with open("HW10/instructions.abel", "w") as f:
     f.write(final_output)
 
 print("Final ABEL file generated successfully.")

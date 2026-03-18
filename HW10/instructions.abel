@@ -1,0 +1,275 @@
+WHEN (IR == NEG) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Negate
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 1;
+    F0 = 1;
+    CinSel1 = 1;
+    CinSel0 = 1;
+    InvertCarry = 1;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 0;
+    PopF = 0;
+
+    " DAU: Dont care
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 0;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == ASR) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: arithmetic shift right Acc
+    UpdateAcc = 1;
+    OpSelect = 0;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 1;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 1;
+    MaskSZ = 0;
+    MaskVC = 0;
+    PopF = 0;
+
+    " DAU: Dont care
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 0;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == LSR) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: logical shift right Acc
+    UpdateAcc = 1;
+    OpSelect = 0;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 1;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 0;
+    PopF = 0;
+
+    " DAU: Dont care
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 0;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == ROL) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: rotate left Acc
+    UpdateAcc = 1;
+    OpSelect = 0;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 1;
+    LSBselect0 = 1;
+    MiddleSelect = 1;
+    MSBselect2 = 0;
+    MSBselect1 = 1;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 0;
+    PopF = 0;
+
+    " DAU: Dont care
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 0;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == ROR) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: rotate right Acc
+    UpdateAcc = 1;
+    OpSelect = 0;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 1;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 1;
+    MSBselect0 = 1;
+    MaskSZ = 0;
+    MaskVC = 0;
+    PopF = 0;
+
+    " DAU: Dont care
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 0;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == RRC) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: rotate right Acc thru carry
+    UpdateAcc = 1;
+    OpSelect = 0;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 1;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 1;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 0;
+    PopF = 0;
+
+    " DAU: Dont care
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 0;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
