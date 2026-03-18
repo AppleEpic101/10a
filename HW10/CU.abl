@@ -5222,7 +5222,7 @@ WHEN (IR == TXA) THEN {
     RD = 0;
     WR = 0;
     SelectDB1 = 0;
-    SelectDB0 = 0;
+    SelectDB0 = 1;
     OffsetSel = 0;
 }
 
