@@ -3,7 +3,7 @@ MODULE      ALUInterface
 INTERFACE  (Data7..Data0,
         UpdateAcc, OpSelect, UseAdder, F3..F0, CinSel1..CinSel0, InvertCarry, 
         LSBselect1..LSBselect0, MiddleSelect, MSBselect2..MSBselect0,
-        MaskSZ, MaskVC, PopF, 
+        MaskSZ, MaskVC, PopF, OverrideInterrupt, OverrideUser, OverrideCarry, SetInterrupt, SetUser, SetCarry,
         Reset, Clock
         -> Accum7..Accum0, Flags7..Flags0);
 
@@ -26,6 +26,12 @@ TITLE      'Caltech10 ALU Unit'
 "         MaskSZ - Prevents updates to SZ flags
 "         MaskVC - Prevents updates to VC flags
 "         PopF - Directly set flags
+"         OverrideInterrupt - Manually set interrupt flag
+"         OverrideUser - Manually set user flag
+"         OverrideCarry - Manually set carry flag
+"         SetInterrupt - Set interrupt flag
+"         SetUser - Set user flag
+"         SetCarry - Set carry flag
 "         Reset - System reset
 "         Clock - System clock
 " Outputs: Accum7..Accum0 - 8 bits of accumulator
@@ -83,6 +89,13 @@ MSBselect2..MSBselect0          pin;	" Select pins for the value of MSB
 MaskSZ		                pin;	" Prevents updates to SZ flags
 MaskVC		                pin;	" Prevents updates to VC flags
 PopF		                pin;	" Directly set flags
+
+OverrideInterrupt		pin;	" Manually set interrupt flag
+OverrideUser		        pin;	" Manually set user flag
+OverrideCarry		        pin;	" Manually set carry flag
+SetInterrupt		        pin;	" Set interrupt flag
+SetUser		                pin;	" Set user flag
+SetCarry		        pin;	" Set carry flag
 
 Reset			        pin;	" System reset
 Clock 		                pin;	" System clock
@@ -187,16 +200,24 @@ MuxOut  =  (OpSelect & Sum) # (!OpSelect & ShiftOut);
 " Flag Operations
 
 " Flags7..Flags4 only update when popped. Otherwise, they retain their value. 
-Flag7 = (PopF & Data7) # (!PopF & Flags7);
+Flag7 = (OverrideInterrupt & SetInterrupt & 1) # 
+        (OverrideInterrupt & !SetInterupt & 0) #
+        (!OverrideInterrupt & PopF & Data7) # 
+        (!OverrideInterrupt & !PopF & Flags7);
 Flag6 = (PopF & Data6) # (!PopF & Flags6);
-Flag5 = (PopF & Data5) # (!PopF & Flags5);
+Flag5 = (OverrideUser & SetUser & 1) # 
+        (OverrideUser & !SetUser & 0) #
+        (!OverrideUser & PopF & Data5) # 
+        (!OverrideUser & !PopF & Flags5);
 Flag4 = (PopF & Data4) # (!PopF & Flags4);
 
 " Carry Flag: Update from Adder if selected and enabled, otherwise hold state
-Carry = (PopF & Data3) #                                                                            " Directly load Carry 
-        (!PopF & !MaskVC & OpSelect & ((!InvertCarry & CarryOut7) # (InvertCarry & !CarryOut7))) #   " Arithmetic carry. Can be inverted using InvertCarry for subtraction
-        (!PopF & !MaskVC & !OpSelect & ((MiddleSelect & Accum7) # (!MiddleSelect & Accum0))) #       " Bit that falls off the end of the shift/rotate moves to carry
-        (!PopF & MaskVC & Flags3);                                                                 " Hold state for MaskVC = 1
+Carry = (OverrideCarry & SetCarry & 1) # 
+        (OverrideCarry & !SetCarry & 0) #
+        (!OverrideCarry & PopF & Data3) #                                                                            " Directly load Carry 
+        (!OverrideCarry & !PopF & !MaskVC & OpSelect & ((!InvertCarry & CarryOut7) # (InvertCarry & !CarryOut7))) #   " Arithmetic carry. Can be inverted using InvertCarry for subtraction
+        (!OverrideCarry & !PopF & !MaskVC & !OpSelect & ((MiddleSelect & Accum7) # (!MiddleSelect & Accum0))) #       " Bit that falls off the end of the shift/rotate moves to carry
+        (!OverrideCarry & !PopF & MaskVC & Flags3);                                                                 " Hold state for MaskVC = 1
 
 " Overflow Flag: Update from Adder if selected and enabled, otherwise hold state
 

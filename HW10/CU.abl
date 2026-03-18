@@ -5,7 +5,7 @@ INTERFACE (ProgramDB15..ProgramDB0, Flags7..Flags0, Reset, Clock ->
 
         UpdateAcc, OpSelect, UseAdder, F3..F0, CinSel1..CinSel0, InvertCarry, " ALU
         LSBselect1..LSBselect0, MiddleSelect, MSBselect2..MSBselect0,
-        MaskSZ, MaskVC, PopF, 
+        MaskSZ, MaskVC, PopF, OverrideInterrupt, OverrideUser, OverrideCarry, SetInterrupt, SetUser, SetCarry,
 
         EnableInc, UseOffset, AddressSel1..AddressSel0, UseInc, UsePost,  " DAU
         MaskS, MaskX,
@@ -219,6 +219,12 @@ LSR    = [0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0]; " logical shift right
 ROL    = [0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]; " rotate left Acc
 ROR    = [0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0]; " rotate right Acc
 RRC    = [0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1]; " rotate right Acc thru carry
+STI    = [0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1];
+CLI    = [0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 1, 0, 0, 1];
+STU    = [0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 1, 0];
+CLU    = [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 0];
+STC    = [0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0];
+CLC    = [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0];
 
 " Call subroutine (4 clock cycles)
 " Saves address of next instruction onto stack so program knows what to return later
@@ -2322,6 +2328,32 @@ WHEN (IR == LDI) THEN {
     SelectDB1 = 1;
     SelectDB0 = 0;
     OffsetSel = 0;
+}
+
+WHEN (IR == STI) # (IR == STU) # (IR == STC) THEN {
+    " PC: Increment
+    MuxSel2 = 0; MuxSel1 = 0; MuxSel0 = 0; Load = 0;
+
+    " ALU: Bitwise OR on Flags
+    UpdateAcc = 0; OpSelect = 1; UseAdder = 0;
+    F3 = 1; F2 = 0; F1 = 1; F0 = 0; " Pass thru IR8
+    MaskSZ = 1; MaskVC = 0; PopF = 1;
+
+    " Top Level
+    SelectDB1 = 1; SelectDB0 = 0; RD = 0; WR = 0;
+}
+
+WHEN (IR == CLI) # (IR == CLU) # (IR == CLC) THEN {
+    " PC: Increment
+    MuxSel2 = 0; MuxSel1 = 0; MuxSel0 = 0; Load = 0;
+
+    " ALU: Bitwise AND on Flags
+    UpdateAcc = 0; OpSelect = 1; UseAdder = 0;
+    F3 = 1; F2 = 0; F1 = 1; F0 = 0; " Pass thru IR8
+    MaskSZ = 0; MaskVC = 1; PopF = 1;
+
+    " Top Level
+    SelectDB1 = 1; SelectDB0 = 0; RD = 0; WR = 0;
 }
 
 WHEN (IR == LDD) THEN {
@@ -4702,6 +4734,388 @@ WHEN (IR == RRC) THEN {
     MSBselect0 = 0;
     MaskSZ = 0;
     MaskVC = 0;
+    PopF = 0;
+
+    " DAU: Dont care
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 0;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == STI) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Set interrupt flag
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 0;
+    PopF = 0;
+
+    " DAU: Dont care
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 0;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == CLI) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Clear interrupt flag
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 0;
+    PopF = 0;
+
+    " DAU: Dont care
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 0;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == STU) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Set user flag
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 0;
+    PopF = 0;
+
+    " DAU: Dont care
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 0;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == CLU) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Clear user flag
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 0;
+    PopF = 0;
+
+    " DAU: Dont care
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 0;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == STC) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Set carry flag
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 0;
+    PopF = 0;
+
+    " DAU: Dont care
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 0;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == CLC) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Clear carry flag
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 0;
+    MaskVC = 0;
+    PopF = 0;
+
+    " DAU: Dont care
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 0;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == JNU) THEN {
+    " PAU: branch if U-bit clear
+    WHEN (Flags5 == 0) THEN { 
+        MuxSel2 = 0;
+        MuxSel1 = 1;
+        MuxSel0 = 1;
+        Load = 0;
+    } ELSE {
+        MuxSel2 = 0;
+        MuxSel1 = 0;
+        MuxSel0 = 0;
+        Load = 0;
+    }
+
+    " ALU: Dont care
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Dont care
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+    
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 0;
+    SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == JU) THEN {
+    " PAU: branch if U-bit set
+    WHEN (Flags5 == 1) THEN { 
+        MuxSel2 = 0;
+        MuxSel1 = 1;
+        MuxSel0 = 1;
+        Load = 0;
+    } ELSE {
+        MuxSel2 = 0;
+        MuxSel1 = 0;
+        MuxSel0 = 0;
+        Load = 0;
+    }
+
+    " ALU: Dont care
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
     PopF = 0;
 
     " DAU: Dont care
