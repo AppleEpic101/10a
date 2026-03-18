@@ -98,8 +98,7 @@ MaskX                       pin; " Mask X register
 
 " Control Unit 
 IR15..IR0                   pin ISTYPE 'REG'; " Instruction Register
-CallBit1..CallBit0          pin ISTYPE 'REG'; " State bits for CALL instruction
-RTSBit1..RTSBit0            pin ISTYPE 'REG'; " State bits for RTS instruction
+StateBits2..StateBits0      pin ISTYPE 'REG'; " State bits for finite state machine
 
 OffsetSel                   pin; " Selects between low-8 bits of IR (0) or DDB (1) going into PAU offset
 SelectDB1..SelectDB0        pin; " Select lines for Data data bus
@@ -115,7 +114,7 @@ MaskIR                        node; " Prevents updates to IR
 IR        = [IR15..IR0];        " Instruction Register
 ProgramDB = [ProgramDB15..ProgramDB0]; " Program Data Bus
 Flags     = [Flags7..Flags0];     " Flags Bus
-StateBits = [CallBit1..CallBit0, RTSBit1..RTSBit0]; " State bits for CALL and RTS instructions
+StateBits = [StateBits2..StateBits0]; " State bits for finite state machine
 
 " Define state bits
 Idle = [0, 0, 0];
