@@ -4118,53 +4118,7 @@ WHEN (IR == JV) THEN {
 }
 
 WHEN ((StateBits == Idle) & (IR == CALL)) THEN {
-    " PAU: Increment PC (A + 1)
-    MuxSel2 = 0;
-    MuxSel1 = 0;
-    MuxSel0 = 0;
-    Load = 0;
-
-    " ALU: Dont care
-    UpdateAcc = 0;
-    OpSelect = 1;
-    UseAdder = 0;
-    F3 = 0;
-    F2 = 0;
-    F1 = 0;
-    F0 = 0;
-    CinSel1 = 0;
-    CinSel0 = 0;
-    InvertCarry = 0;
-    LSBselect1 = 0;
-    LSBselect0 = 0;
-    MiddleSelect = 0;
-    MSBselect2 = 0;
-    MSBselect1 = 0;
-    MSBselect0 = 0;
-    MaskSZ = 1;
-    MaskVC = 1;
-    PopF = 0;
-
-    " DAU: Dont care
-    EnableInc = 0;
-    UseOffset = 0;
-    AddressSel1 = 0;
-    AddressSel0 = 0;
-    UseInc = 0;
-    UsePost = 0;
-    MaskS = 1;
-    MaskX = 1;
-
-    " Control Unit Top Level
-    RD = 0;
-    WR = 0;
-    SelectDB1 = 0;
-    SelectDB0 = 1;
-    OffsetSel = 1;
-}
-
-WHEN (StateBits == Call1) THEN {
-    " PAU: Hold PC (A + 1)
+    " PAU: Hold PC
     MuxSel2 = 0;
     MuxSel1 = 0;
     MuxSel0 = 1;
@@ -4191,13 +4145,59 @@ WHEN (StateBits == Call1) THEN {
     MaskVC = 1;
     PopF = 0;
 
-    " DAU: Pre-dec S (Store High)
+    " DAU: Dont care
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 0;
+    SelectDB0 = 1;
+    OffsetSel = 1;
+}
+
+WHEN (StateBits == Call1) THEN {
+    " PAU: Hold PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 1;
+    Load = 0;
+
+    " ALU: Dont care
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Post-dec S
     EnableInc = 1;
-    UseOffset = 0;
+    UseOffset = 1;
     AddressSel1 = 0;
     AddressSel0 = 1;
     UseInc = 0;
-    UsePost = 0;
+    UsePost = 1;
     MaskS = 0;
     MaskX = 1;
 
@@ -4210,7 +4210,7 @@ WHEN (StateBits == Call1) THEN {
 }
 
 WHEN (StateBits == Call2) THEN {
-    " PAU: Direct jump to target address
+    " PAU: Direct jump to 13-bit address
     MuxSel2 = 0;
     MuxSel1 = 1;
     MuxSel0 = 0;
@@ -4237,13 +4237,13 @@ WHEN (StateBits == Call2) THEN {
     MaskVC = 1;
     PopF = 0;
 
-    " DAU: Pre-dec S (Store Low)
+    " DAU: Post-dec S
     EnableInc = 1;
-    UseOffset = 0;
+    UseOffset = 1;
     AddressSel1 = 0;
     AddressSel0 = 1;
     UseInc = 0;
-    UsePost = 0;
+    UsePost = 1;
     MaskS = 0;
     MaskX = 1;
 
@@ -4256,10 +4256,10 @@ WHEN (StateBits == Call2) THEN {
 }
 
 WHEN (StateBits == Call3) THEN {
-    " PAU: Hold PC (Target Address)
+    " PAU: Increment PC
     MuxSel2 = 0;
     MuxSel1 = 0;
-    MuxSel0 = 1;
+    MuxSel0 = 0;
     Load = 0;
 
     " ALU: Dont care
@@ -4285,7 +4285,7 @@ WHEN (StateBits == Call3) THEN {
 
     " DAU: Dont care
     EnableInc = 0;
-    UseOffset = 0;
+    UseOffset = 1;
     AddressSel1 = 0;
     AddressSel0 = 0;
     UseInc = 0;
@@ -4331,7 +4331,7 @@ WHEN ((StateBits == Idle) & (IR == RTS)) THEN {
 
     " DAU: Post-increment S
     EnableInc = 1;
-    UseOffset = 0;
+    UseOffset = 1;
     AddressSel1 = 0;
     AddressSel0 = 1;
     UseInc = 1;
@@ -4377,7 +4377,7 @@ WHEN (StateBits == RTS1) THEN {
 
     " DAU: Post-increment S
     EnableInc = 1;
-    UseOffset = 0;
+    UseOffset = 1;
     AddressSel1 = 0;
     AddressSel0 = 1;
     UseInc = 1;
@@ -4394,10 +4394,10 @@ WHEN (StateBits == RTS1) THEN {
 }
 
 WHEN (StateBits == RTS2) THEN {
-    " PAU: Hold PC (Return Address)
+    " PAU: Increment PC
     MuxSel2 = 0;
     MuxSel1 = 0;
-    MuxSel0 = 1;
+    MuxSel0 = 0;
     Load = 0;
 
     " ALU: Dont care
@@ -4423,7 +4423,7 @@ WHEN (StateBits == RTS2) THEN {
 
     " DAU: Dont care
     EnableInc = 0;
-    UseOffset = 0;
+    UseOffset = 1;
     AddressSel1 = 0;
     AddressSel0 = 0;
     UseInc = 0;
