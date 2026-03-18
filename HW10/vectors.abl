@@ -736,5 +736,80 @@
 [ 0, 1, ^H8961, ^H96 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;branch slot, load accumulator
 [ 0, 0, ^HA0AA, ^HB5 ] -> [ ^H12EF,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    STD	$AA
 [ 0, 1, ^HA0AA, ^H35 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;store 61 at AA
-[ 0, 0, ^H1F80,  .Z. ] -> [ ^H12F0, ^HAA,  0 ,  1 ,  0 , ^H61 ]; "    NOP
+[ 0, 0, ^HFFFC,  .Z. ] -> [ ^H12F0, ^HAA,  0 ,  1 ,  0 , ^H61 ]; "    CALL	$1FFC
+[ 0, 1, ^HFFFC, ^H43 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;call subroutine at 1FFC
+[ 0, 0, ^HC111, ^HB4 ] -> [    .X.,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    JMP     $0111
+[ 0, 1, ^HC111, ^HFF ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;ignored, cycle 2 of CALL
+[ 0, 0, ^HA0AA,  .Z. ] -> [    .X., ^HCA,  0 ,  1 ,  0 , ^H12 ]; "    STD     $AA
+[ 0, 1, ^HA0AA, ^H4E ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;ignored, cycle 3 of CALL
+[ 0, 0, ^H8023,  .Z. ] -> [    .X., ^HC9,  0 ,  1 ,  0 , ^HF1 ]; "    LDD     $23
+[ 0, 1, ^H8023, ^H68 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;ignored, cycle 4 of CALL
+[ 0, 0, ^H8955, ^H2D ] -> [ ^H1FFC,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    LDI	$55
+[ 0, 1, ^H8955, ^H7B ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;put 55 in accumulator
+[ 0, 0, ^H7733, ^H2E ] -> [ ^H1FFD,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    ORI	$33
+[ 0, 1, ^H7733, ^H46 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;accumulator is 77
+[ 0, 0, ^H0E00, ^HAB ] -> [ ^H1FFE,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    PUSHF
+[ 0, 1, ^H0E00, ^H5F ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check flags (V)
+[ 0, 0, ^HA055,  .Z. ] -> [ ^H1FFF, ^HC8,  0 ,  1 ,  0 , ^H04 ]; "    STD	$55
+[ 0, 1, ^HA055, ^H08 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;store 77 at 55
+[ 0, 0, ^H376D,  .Z. ] -> [ ^H0000, ^H55,  0 ,  1 ,  0 , ^H77 ]; "    XORI	$6D
+[ 0, 1, ^H376D, ^H50 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " 
+[ 0, 0, ^HA04B, ^HFB ] -> [ ^H0001,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    STD	$4B
+[ 0, 1, ^HA04B, ^H4B ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;store 1A at 4B
+[ 0, 0, ^H1F00,  .Z. ] -> [ ^H0002, ^H4B,  0 ,  1 ,  0 , ^H1A ]; "    RTS
+[ 0, 1, ^H1F00, ^HC2 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;return from subroutine
+[ 0, 0, ^HA055, ^H00 ] -> [    .X., ^HC8,  1 ,  0 ,  0 ,  .X. ]; "    STD	$55
+[ 0, 1, ^HA055, ^H00 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;ignored, cycle 2 of RTS
+[ 0, 0, ^H8076, ^H04 ] -> [    .X., ^HC9,  1 ,  0 ,  0 ,  .X. ]; "    LDD	$76
+[ 0, 1, ^H8076, ^H04 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;ignored, cycle 3 of RTS
+[ 0, 0, ^H0E00, ^HCA ] -> [ ^H0400,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    PUSHF
+[ 0, 1, ^H0E00, ^HC1 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check flags haven't changed
+[ 0, 0, ^H8943,  .Z. ] -> [ ^H0401, ^HC9,  0 ,  1 ,  0 , ^H04 ]; "    LDI	$43
+[ 0, 1, ^H8943, ^HE5 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;put 43 in accumulator
+[ 0, 0, ^H6B3D, ^H45 ] -> [ ^H0402,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    ADDI	$3D
+[ 0, 1, ^H6B3D, ^H85 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;accumulator is 80
+[ 0, 0, ^H0E00, ^H5D ] -> [ ^H0403,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    PUSHF
+[ 0, 1, ^H0E00, ^HB9 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check flags (S, V)
+[ 0, 0, ^HA033,  .Z. ] -> [ ^H0404, ^HC8,  0 ,  1 ,  0 , ^H06 ]; "    STD	$33
+[ 0, 1, ^HA033, ^H04 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;store 80 at 33
+[ 0, 0, ^HE123,  .Z. ] -> [ ^H0405, ^H33,  0 ,  1 ,  0 , ^H80 ]; "    CALL	$0123
+[ 0, 1, ^HE123, ^HDC ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;call subroutine at 0123
+[ 0, 0, ^HC111, ^H18 ] -> [    .X.,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    JMP     $0111
+[ 0, 1, ^HC111, ^H4F ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;ignored, cycle 2 of CALL
+[ 0, 0, ^HA0AA,  .Z. ] -> [    .X., ^HC7,  0 ,  1 ,  0 , ^H04 ]; "    STD     $AA
+[ 0, 1, ^HA0AA, ^HCB ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;ignored, cycle 3 of CALL
+[ 0, 0, ^H8023,  .Z. ] -> [    .X., ^HC6,  0 ,  1 ,  0 , ^H06 ]; "    LDD     $23
+[ 0, 1, ^H8023, ^HEF ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;ignored, cycle 4 of CALL
+[ 0, 0, ^H8973, ^H93 ] -> [ ^H0123,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    LDI	$73
+[ 0, 1, ^H8973, ^H8E ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;put 73 in accumulator
+[ 0, 0, ^H775C, ^HCA ] -> [ ^H0124,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    ORI	$5C
+[ 0, 1, ^H775C, ^H1F ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;accumulator is 7F
+[ 0, 0, ^H0E00, ^H72 ] -> [ ^H0125,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    PUSHF
+[ 0, 1, ^H0E00, ^H51 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check flags (V still set)
+[ 0, 0, ^HA02E,  .Z. ] -> [ ^H0126, ^HC5,  0 ,  1 ,  0 , ^H04 ]; "    STD	$2E
+[ 0, 1, ^HA02E, ^HE1 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;store 7F at 2E
+[ 0, 0, ^H373E,  .Z. ] -> [ ^H0127, ^H2E,  0 ,  1 ,  0 , ^H7F ]; "    XORI	$3E
+[ 0, 1, ^H373E, ^HCA ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " 
+[ 0, 0, ^HA0B6, ^H44 ] -> [ ^H0128,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    STD	$B6
+[ 0, 1, ^HA0B6, ^H47 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;store 41 at B6
+[ 0, 0, ^H1F00,  .Z. ] -> [ ^H0129, ^HB6,  0 ,  1 ,  0 , ^H41 ]; "    RTS
+[ 0, 1, ^H1F00, ^H2E ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;return from subroutine
+[ 0, 0, ^HA055, ^H74 ] -> [    .X., ^HC5,  1 ,  0 ,  0 ,  .X. ]; "    STD	$55
+[ 0, 1, ^HA055, ^H74 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;ignored, cycle 2 of RTS
+[ 0, 0, ^H8076, ^H18 ] -> [    .X., ^HC6,  1 ,  0 ,  0 ,  .X. ]; "    LDD	$76
+[ 0, 1, ^H8076, ^H18 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;ignored, cycle 3 of RTS
+[ 0, 0, ^H0E00, ^H48 ] -> [ ^H1874,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    PUSHF
+[ 0, 1, ^H0E00, ^HB6 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check flags haven't changed
+[ 0, 0, ^H8934,  .Z. ] -> [ ^H1875, ^HC6,  0 ,  1 ,  0 , ^H04 ]; "    LDI	$34
+[ 0, 1, ^H8934, ^H10 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;put 34 in accumulator
+[ 0, 0, ^H6B9B, ^HD5 ] -> [ ^H1876,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    ADDI	$9B
+[ 0, 1, ^H6B9B, ^H26 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;accumulator is CF
+[ 0, 0, ^H0E00, ^HF9 ] -> [ ^H1877,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    PUSHF
+[ 0, 1, ^H0E00, ^H96 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check flags (S)
+[ 0, 0, ^HA099,  .Z. ] -> [ ^H1878, ^HC5,  0 ,  1 ,  0 , ^H02 ]; "    STD	$99
+[ 0, 1, ^HA099, ^H0F ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;store CF at 99
+[ 0, 0, ^H1F80,  .Z. ] -> [ ^H1879, ^H99,  0 ,  1 ,  0 , ^HCF ]; "    NOP
 [ 0, 1, ^H1F80, ^HA1 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;NOP to flush out the write before ending
+
+
+END  CPU
