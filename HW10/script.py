@@ -68,12 +68,6 @@ def format_abel(row):
     UsePost = {get_val('UsePost')};
     MaskS = {get_val('MaskS')};
     MaskX = {get_val('MaskX')};
-    OverrideInterrupt = {get_val('OverrideInterrupt')};
-    OverrideUser = {get_val('OverrideUser')};
-    OverrideCarry = {get_val('OverrideCarry')};
-    SetInterrupt = {get_val('SetInterrupt')};
-    SetUser = {get_val('SetUser')};
-    SetCarry = {get_val('SetCarry')};
     
     \" Control Unit Top Level
     RD = {get_val('RD')};

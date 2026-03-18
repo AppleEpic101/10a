@@ -35,12 +35,6 @@ WHEN (IR == ADCM) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 1;
@@ -87,12 +81,6 @@ WHEN (IR == ADCXO) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 0;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 1;
@@ -139,12 +127,6 @@ WHEN (IR == ADCSO) THEN {
     UsePost = 0;
     MaskS = 0;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 1;
@@ -191,12 +173,6 @@ WHEN (IR == ADCI) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -243,12 +219,6 @@ WHEN (IR == ADDM) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 1;
@@ -295,12 +265,6 @@ WHEN (IR == ADDXO) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 0;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 1;
@@ -347,12 +311,6 @@ WHEN (IR == ADDSO) THEN {
     UsePost = 0;
     MaskS = 0;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 1;
@@ -399,12 +357,6 @@ WHEN (IR == ADDI) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -451,12 +403,6 @@ WHEN (IR == ANDM) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 1;
@@ -503,12 +449,6 @@ WHEN (IR == ANDXO) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 0;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 1;
@@ -555,12 +495,6 @@ WHEN (IR == ANDSO) THEN {
     UsePost = 0;
     MaskS = 0;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 1;
@@ -607,12 +541,6 @@ WHEN (IR == ANDI) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -659,12 +587,6 @@ WHEN (IR == CMPM) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 1;
@@ -711,12 +633,6 @@ WHEN (IR == CMPXO) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 0;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 1;
@@ -763,12 +679,6 @@ WHEN (IR == CMPSO) THEN {
     UsePost = 0;
     MaskS = 0;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 1;
@@ -815,12 +725,6 @@ WHEN (IR == CMPI) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -867,12 +771,6 @@ WHEN (IR == DEC) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -919,12 +817,6 @@ WHEN (IR == INC) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -971,12 +863,6 @@ WHEN (IR == LSL) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -1023,12 +909,6 @@ WHEN (IR == NOT) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -1075,12 +955,6 @@ WHEN (IR == ORM) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 1;
@@ -1127,12 +1001,6 @@ WHEN (IR == ORXO) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 0;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 1;
@@ -1179,12 +1047,6 @@ WHEN (IR == ORSO) THEN {
     UsePost = 0;
     MaskS = 0;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 1;
@@ -1231,12 +1093,6 @@ WHEN (IR == ORI) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -1283,12 +1139,6 @@ WHEN (IR == RLC) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -1335,12 +1185,6 @@ WHEN (IR == SBBM) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 1;
@@ -1387,12 +1231,6 @@ WHEN (IR == SBBXO) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 0;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 1;
@@ -1439,12 +1277,6 @@ WHEN (IR == SBBSO) THEN {
     UsePost = 0;
     MaskS = 0;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 1;
@@ -1491,12 +1323,6 @@ WHEN (IR == SBBI) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -1543,12 +1369,6 @@ WHEN (IR == SUBM) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 1;
@@ -1595,12 +1415,6 @@ WHEN (IR == SUBXO) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 0;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 1;
@@ -1647,12 +1461,6 @@ WHEN (IR == SUBSO) THEN {
     UsePost = 0;
     MaskS = 0;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 1;
@@ -1699,12 +1507,6 @@ WHEN (IR == SUBI) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -1751,12 +1553,6 @@ WHEN (IR == TSTM) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 1;
@@ -1803,12 +1599,6 @@ WHEN (IR == TSTXO) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 0;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 1;
@@ -1855,12 +1645,6 @@ WHEN (IR == TSTSO) THEN {
     UsePost = 0;
     MaskS = 0;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 1;
@@ -1907,12 +1691,6 @@ WHEN (IR == TSTI) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -1959,12 +1737,6 @@ WHEN (IR == XORM) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 1;
@@ -2011,12 +1783,6 @@ WHEN (IR == XORXO) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 0;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 1;
@@ -2063,12 +1829,6 @@ WHEN (IR == XORSO) THEN {
     UsePost = 0;
     MaskS = 0;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 1;
@@ -2115,12 +1875,6 @@ WHEN (IR == XORI) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -2167,12 +1921,6 @@ WHEN (IR == POPF) THEN {
     UsePost = 1;
     MaskS = 0;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 1;
@@ -2219,12 +1967,6 @@ WHEN (IR == PUSHF) THEN {
     UsePost = 0;
     MaskS = 0;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -2271,12 +2013,6 @@ WHEN (IR == NOP) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -2323,12 +2059,6 @@ WHEN (IR == LDI) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -2375,12 +2105,6 @@ WHEN (IR == LDD) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 1;
@@ -2427,12 +2151,6 @@ WHEN (IR == LDXO) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 1;
@@ -2479,12 +2197,6 @@ WHEN (IR == LDXO_I) THEN {
     UsePost = 1;
     MaskS = 1;
     MaskX = 0;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 1;
@@ -2531,12 +2243,6 @@ WHEN (IR == LDXO_D) THEN {
     UsePost = 1;
     MaskS = 1;
     MaskX = 0;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 1;
@@ -2583,12 +2289,6 @@ WHEN (IR == I_LDXO) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 0;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 1;
@@ -2635,12 +2335,6 @@ WHEN (IR == D_LDXO) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 0;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 1;
@@ -2687,12 +2381,6 @@ WHEN (IR == LDSO) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 1;
@@ -2739,12 +2427,6 @@ WHEN (IR == LDSO_I) THEN {
     UsePost = 1;
     MaskS = 0;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 1;
@@ -2791,12 +2473,6 @@ WHEN (IR == LDSO_D) THEN {
     UsePost = 1;
     MaskS = 0;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 1;
@@ -2843,12 +2519,6 @@ WHEN (IR == I_LDSO) THEN {
     UsePost = 0;
     MaskS = 0;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 1;
@@ -2895,12 +2565,6 @@ WHEN (IR == D_LDSO) THEN {
     UsePost = 0;
     MaskS = 0;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 1;
@@ -2947,12 +2611,6 @@ WHEN (IR == STD) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -2999,12 +2657,6 @@ WHEN (IR == STXO) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -3051,12 +2703,6 @@ WHEN (IR == STXO_I) THEN {
     UsePost = 1;
     MaskS = 1;
     MaskX = 0;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -3103,12 +2749,6 @@ WHEN (IR == STXO_D) THEN {
     UsePost = 1;
     MaskS = 1;
     MaskX = 0;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -3155,12 +2795,6 @@ WHEN (IR == I_STXO) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 0;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -3207,12 +2841,6 @@ WHEN (IR == D_STXO) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 0;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -3259,12 +2887,6 @@ WHEN (IR == STSO) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -3311,12 +2933,6 @@ WHEN (IR == STSO_I) THEN {
     UsePost = 1;
     MaskS = 0;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -3363,12 +2979,6 @@ WHEN (IR == STSO_D) THEN {
     UsePost = 1;
     MaskS = 0;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -3415,12 +3025,6 @@ WHEN (IR == I_STSO) THEN {
     UsePost = 0;
     MaskS = 0;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -3467,12 +3071,6 @@ WHEN (IR == D_STSO) THEN {
     UsePost = 0;
     MaskS = 0;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -3519,12 +3117,6 @@ WHEN (IR == JMP) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -3578,12 +3170,6 @@ WHEN (IR == JA) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -3637,12 +3223,6 @@ WHEN (IR == JAE) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -3696,12 +3276,6 @@ WHEN (IR == JB) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -3755,12 +3329,6 @@ WHEN (IR == JBE) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -3814,12 +3382,6 @@ WHEN (IR == JE) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -3873,12 +3435,6 @@ WHEN (IR == JG) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -3932,12 +3488,6 @@ WHEN (IR == JGE) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -3991,12 +3541,6 @@ WHEN (IR == JL) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -4050,12 +3594,6 @@ WHEN (IR == JLE) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -4109,12 +3647,6 @@ WHEN (IR == JNE) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -4168,12 +3700,6 @@ WHEN (IR == JNS) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -4227,12 +3753,6 @@ WHEN (IR == JNV) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -4286,12 +3806,6 @@ WHEN (IR == JS) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
@@ -4345,12 +3859,6 @@ WHEN (IR == JV) THEN {
     UsePost = 0;
     MaskS = 1;
     MaskX = 1;
-    OverrideInterrupt = 0;
-    OverrideUser = 0;
-    OverrideCarry = 0;
-    SetInterrupt = 0;
-    SetUser = 0;
-    SetCarry = 0;
     
     " Control Unit Top Level
     RD = 0;
