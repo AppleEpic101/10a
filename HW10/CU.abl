@@ -87,6 +87,12 @@ MSBselect2..MSBselect0      pin; " Select pins for the value of MSB
 MaskSZ                      pin; " Prevents updates to SZ flags
 MaskVC                      pin; " Prevents updates to VC flags
 PopF                        pin; " Directly set flags
+OverrideInterrupt           pin; 
+OverrideUser                pin; 
+OverrideCarry               pin; 
+SetInterrupt                pin; 
+SetUser                     pin; 
+SetCarry                    pin; 
 
 " DAU
 EnableInc                   pin; " Enable incrementer/decrementer (1) or pass-thru (0)
@@ -250,6 +256,14 @@ IR.CLK = Clock;
 StateBits.CLK = Clock;
 IR.CLR = Reset;
 StateBits.CLR = Reset;
+
+" Flag Overrides for flag manipulation instructions
+OverrideInterrupt = (IR == STI) # (IR == CLI);
+SetInterrupt      = (IR == STI);
+OverrideUser      = (IR == STU) # (IR == CLU);
+SetUser           = (IR == STU);
+OverrideCarry     = (IR == STC) # (IR == CLC);
+SetCarry          = (IR == STC);
 
 " Set instruction register to ProgramDB if MaskIR is 0, else keep current IR value
 IR = (!MaskIR & ProgramDB) # (MaskIR & IR);

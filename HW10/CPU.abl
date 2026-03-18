@@ -67,7 +67,8 @@ XReg7..XReg0		pin;	"the 8-bit X register
 SReg7..SReg0		pin;	"the 8-bit S register
 
 
-" Internal signals
+OverrideInterrupt, OverrideUser, OverrideCarry      node;
+SetInterrupt, SetUser, SetCarry                   node;
 
 " declare the used modules
 
