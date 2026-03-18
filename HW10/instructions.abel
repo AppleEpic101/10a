@@ -690,7 +690,7 @@ WHEN (IR == TAX) THEN {
     AddressSel1 = 1;
     AddressSel0 = 0;
     UseInc = 0;
-    UsePost = 1;
+    UsePost = 0;
     MaskS = 1;
     MaskX = 0;
     
@@ -736,7 +736,7 @@ WHEN (IR == TXA) THEN {
     AddressSel1 = 0;
     AddressSel0 = 0;
     UseInc = 0;
-    UsePost = 1;
+    UsePost = 0;
     MaskS = 1;
     MaskX = 1;
     
@@ -782,7 +782,7 @@ WHEN (IR == INX) THEN {
     AddressSel1 = 0;
     AddressSel0 = 0;
     UseInc = 1;
-    UsePost = 1;
+    UsePost = 0;
     MaskS = 1;
     MaskX = 0;
     
@@ -828,7 +828,7 @@ WHEN (IR == DEX) THEN {
     AddressSel1 = 0;
     AddressSel0 = 0;
     UseInc = 0;
-    UsePost = 1;
+    UsePost = 0;
     MaskS = 1;
     MaskX = 0;
     
@@ -874,7 +874,7 @@ WHEN (IR == TAS) THEN {
     AddressSel1 = 1;
     AddressSel0 = 0;
     UseInc = 0;
-    UsePost = 1;
+    UsePost = 0;
     MaskS = 0;
     MaskX = 1;
     
@@ -920,7 +920,7 @@ WHEN (IR == TSA) THEN {
     AddressSel1 = 0;
     AddressSel0 = 1;
     UseInc = 0;
-    UsePost = 1;
+    UsePost = 0;
     MaskS = 1;
     MaskX = 1;
     
@@ -966,7 +966,7 @@ WHEN (IR == INS) THEN {
     AddressSel1 = 0;
     AddressSel0 = 1;
     UseInc = 1;
-    UsePost = 1;
+    UsePost = 0;
     MaskS = 0;
     MaskX = 1;
     
@@ -1012,7 +1012,7 @@ WHEN (IR == DES) THEN {
     AddressSel1 = 0;
     AddressSel0 = 1;
     UseInc = 0;
-    UsePost = 1;
+    UsePost = 0;
     MaskS = 0;
     MaskX = 1;
     
