@@ -4301,7 +4301,7 @@ WHEN (StateBits == Call3) THEN {
     OffsetSel = 1;
 }
 
-WHEN ((StateBits == Idle) & (IR = RTS)) THEN {
+WHEN ((StateBits == Idle) & (IR == RTS)) THEN {
     " PAU: RTS_LO
     MuxSel2 = 1;
     MuxSel1 = 1;
@@ -4332,8 +4332,8 @@ WHEN ((StateBits == Idle) & (IR = RTS)) THEN {
     " DAU: Post-increment S
     EnableInc = 1;
     UseOffset = 1;
-    AddressSel = 0;
-    AddressSel = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 1;
     UseInc = 1;
     UsePost = 1;
     MaskS = 0;
@@ -4378,8 +4378,8 @@ WHEN (StateBits == RTS1) THEN {
     " DAU: Post-increment S
     EnableInc = 1;
     UseOffset = 1;
-    AddressSel = 0;
-    AddressSel = 1;
+    AddressSel1 = 0;
+    AddressSel0 = 1;
     UseInc = 1;
     UsePost = 1;
     MaskS = 0;
