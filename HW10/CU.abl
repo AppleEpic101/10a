@@ -225,6 +225,8 @@ STU    = [0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 1, 0];
 CLU    = [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 0];
 STC    = [0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0];
 CLC    = [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0];
+JNU    = [1, 0, 1, 1, 1, 1, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " branch if U-bit clear
+JU     = [1, 0, 1, 1, 1, 1, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " branch if U-bit set
 
 " Call subroutine (4 clock cycles)
 " Saves address of next instruction onto stack so program knows what to return later

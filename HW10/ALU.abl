@@ -201,7 +201,7 @@ MuxOut  =  (OpSelect & Sum) # (!OpSelect & ShiftOut);
 
 " Flags7..Flags4 only update when popped. Otherwise, they retain their value. 
 Flag7 = (OverrideInterrupt & SetInterrupt & 1) # 
-        (OverrideInterrupt & !SetInterupt & 0) #
+        (OverrideInterrupt & !SetInterrupt & 0) #
         (!OverrideInterrupt & PopF & Data7) # 
         (!OverrideInterrupt & !PopF & Flags7);
 Flag6 = (PopF & Data6) # (!PopF & Flags6);

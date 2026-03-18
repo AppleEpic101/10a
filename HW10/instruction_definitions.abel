@@ -10,3 +10,5 @@ STU    = [0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 1, 0]; " set user (U) flag
 CLU    = [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 0]; " clear user (U) flag
 STC    = [0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0]; " set carry (C) flag
 CLC    = [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0]; " clear carry (C) flag
+JNU    = [1, 0, 1, 1, 1, 1, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " branch if U-bit clear
+JU     = [1, 0, 1, 1, 1, 1, 1, 1, .X., .X., .X., .X., .X., .X., .X., .X.]; " branch if U-bit set
