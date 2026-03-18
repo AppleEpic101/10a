@@ -241,6 +241,8 @@ TAS    = [0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0]; " S = Accumulator
 TSA    = [0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0]; " Accumulator = S
 INS    = [0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0]; " S = S + 1
 DES    = [0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0]; " S = S - 1
+IN     = [1, 0, 0, 1, 0, 0, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " Accumulator = IO port
+OUT    = [1, 0, 1, 1, 0, 0, 0, 0, .X., .X., .X., .X., .X., .X., .X., .X.]; " IO port = Accumulator
 
 " Call subroutine (4 clock cycles)
 " Saves address of next instruction onto stack so program knows what to return later
@@ -272,6 +274,7 @@ OverrideUser      = (IR == STU) # (IR == CLU);
 SetUser           = (IR == STU);
 OverrideCarry     = (IR == STC) # (IR == CLC);
 SetCarry          = (IR == STC);
+IO                = (IR == IN) # (IR == OUT);
 
 " Set instruction register to ProgramDB if MaskIR is 0, else keep current IR value
 IR = (!MaskIR & ProgramDB) # (MaskIR & IR);
@@ -5499,6 +5502,98 @@ WHEN (IR == DES) THEN {
     WR = 0;
     SelectDB1 = 0;
     SelectDB0 = 0;
+    OffsetSel = 0;
+}
+
+WHEN (IR == IN) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Load acc with DDB
+    UpdateAcc = 1;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 1;
+    F2 = 0;
+    F1 = 1;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass port number P to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 1;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 0;
+}
+
+WHEN (IR == OUT) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Dont care
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pass port number P to DAB
+    EnableInc = 0;
+    UseOffset = 1;
+    AddressSel1 = 1;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+
+    " Control Unit Top Level
+    RD = 0;
+    WR = 1;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
     OffsetSel = 0;
 }
 
