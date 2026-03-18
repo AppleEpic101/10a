@@ -204,12 +204,12 @@ Flag7 = (OverrideInterrupt & SetInterrupt & 1) #
         (OverrideInterrupt & !SetInterrupt & 0) #
         (!OverrideInterrupt & PopF & Data7) # 
         (!OverrideInterrupt & !PopF & Flags7);
-Flag6 = (PopF & Data6) # (!PopF & Flags6);
+Flag6 = 0;
 Flag5 = (OverrideUser & SetUser & 1) # 
         (OverrideUser & !SetUser & 0) #
         (!OverrideUser & PopF & Data5) # 
         (!OverrideUser & !PopF & Flags5);
-Flag4 = (PopF & Data4) # (!PopF & Flags4);
+Flag4 = 0;
 
 " Carry Flag: Update from Adder if selected and enabled, otherwise hold state
 Carry = (OverrideCarry & SetCarry & 1) # 
