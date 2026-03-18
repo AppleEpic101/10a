@@ -1,6 +1,6 @@
 import pandas as pd
 
-sheet_id = '1yYmfFwq5_bMKeojHUvYkk4ksbMl_yaIAT2HGvagZAHo'
+sheet_id = '1TnKetCAg2NvMBcMc5EvTSCexvkHO4fWfMF46lFpzFjY'
 gid = '0'
 url = f'https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv&gid={gid}'
 
@@ -68,6 +68,12 @@ def format_abel(row):
     UsePost = {get_val('UsePost')};
     MaskS = {get_val('MaskS')};
     MaskX = {get_val('MaskX')};
+    OverrideInterrupt = {get_val('OverrideInterrupt')};
+    OverrideUser = {get_val('OverrideUser')};
+    OverrideCarry = {get_val('OverrideCarry')};
+    SetInterrupt = {get_val('SetInterrupt')};
+    SetUser = {get_val('SetUser')};
+    SetCarry = {get_val('SetCarry')};
     
     \" Control Unit Top Level
     RD = {get_val('RD')};
