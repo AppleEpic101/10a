@@ -680,8 +680,8 @@ WHEN (IR == TAX) THEN {
     MSBselect2 = 0;
     MSBselect1 = 0;
     MSBselect0 = 0;
-    MaskSZ = 0;
-    MaskVC = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
     PopF = 0;
 
     " DAU: X = Accumulator
@@ -710,12 +710,12 @@ WHEN (IR == TXA) THEN {
     Load = 0;
 
     " ALU: Dont care
-    UpdateAcc = 0;
+    UpdateAcc = 1;
     OpSelect = 1;
     UseAdder = 0;
-    F3 = 0;
+    F3 = 1;
     F2 = 0;
-    F1 = 0;
+    F1 = 1;
     F0 = 0;
     CinSel1 = 0;
     CinSel0 = 0;
@@ -894,12 +894,12 @@ WHEN (IR == TSA) THEN {
     Load = 0;
 
     " ALU: Dont care
-    UpdateAcc = 0;
+    UpdateAcc = 1;
     OpSelect = 1;
     UseAdder = 0;
-    F3 = 0;
+    F3 = 1;
     F2 = 0;
-    F1 = 0;
+    F1 = 1;
     F0 = 0;
     CinSel1 = 0;
     CinSel0 = 0;
