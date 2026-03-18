@@ -200,7 +200,7 @@ Carry = (PopF & Data3) #                                                        
 
 Overflow = (PopF & Data2) #                                  " Directly load Overflow    
         (!PopF & !MaskVC & (
-            (OpSelect & ((UseAdder & Accum7 & Fop7 & !MuxOut7) # (UseAdder & !Accum7 & !Fop7 & MuxOut7))) # " Detects sign change in adder
+            (OpSelect & ((UseAdder & Accum7 & Fop7 & !MuxOut7) # (UseAdder & !Accum7 & !Fop7 & MuxOut7) # (!UseAdder & !Fop7 & MuxOut7))) # " Detects sign change in adder
             (!OpSelect & (Accum7 $ MuxOut7))                 " Detects sign change in shift/rotate
         )) #
         (!PopF & MaskVC & Flags2);                         " Hold state for MaskVC = 1
