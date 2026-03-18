@@ -1,6 +1,6 @@
 import pandas as pd
 
-sheet_id = '1yYmfFwq5_bMKeojHUvYkk4ksbMl_yaIAT2HGvagZAHo'
+sheet_id = '1TnKetCAg2NvMBcMc5EvTSCexvkHO4fWfMF46lFpzFjY'
 gid = '0'
 url = f'https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv&gid={gid}'
 
@@ -12,7 +12,19 @@ df = df.dropna(subset=['Opcode'])
 df = df[df['Include'] == True]
 
 def format_abel(row):
-    get_val = lambda col: int(row[col]) if pd.notnull(row[col]) else 0
+    def get_val(col):
+        val = row[col]
+        if pd.isna(val):
+            return 0
+        # Clean the string to check for .X.
+        str_val = str(val).strip().upper()
+        if str_val == '.X.':
+            return '.X.'
+        try:
+            # Convert to float first to handle cases like '1.0' then to int
+            return int(float(val))
+        except (ValueError, TypeError):
+            return val
     
     condition = row['Condition'] if 'Condition' in row and pd.notnull(row['Condition']) else None
     
