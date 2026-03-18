@@ -144,7 +144,7 @@ Fop  =  (F0 & !Data & !Accum) # (F1 & Data & !Accum) # (F2 & !Data & Accum) # (F
 " Shifts / Rotations
 
 " MSB mux 
-ShiftOut7  =  (MSBselect2 & !MSBselect1 & !MSBselect0 & Carry) #    " 100 MSB is carry flag
+ShiftOut7  =  (MSBselect2 & !MSBselect1 & !MSBselect0 & Flags3) #    " 100 MSB is carry flag (current carry for RRC)
               (!MSBselect2 & !MSBselect1 & MSBselect0 & Accum7) #  " 001 MSB remains the same
               (!MSBselect2 & MSBselect1 & !MSBselect0 & Accum6) #  " 010 MSB is bit below (shift left)
               (!MSBselect2 & MSBselect1 & MSBselect0 & Accum0);   " 011 MSB is LSB (rotate right)
@@ -201,7 +201,7 @@ Carry = (PopF & Data3) #                                                        
 Overflow = (PopF & Data2) #                                  " Directly load Overflow    
         (!PopF & !MaskVC & (
             (OpSelect & ((UseAdder & Accum7 & Fop7 & !MuxOut7) # (UseAdder & !Accum7 & !Fop7 & MuxOut7) # (!UseAdder & !Fop7 & MuxOut7))) # " Detects sign change in adder
-            (!OpSelect & (Accum7 $ MuxOut7))                 " Detects sign change in shift/rotate
+            (!OpSelect & MiddleSelect & (Accum7 $ MuxOut7))    " Detects sign change in shift/rotate (left shifts only)
         )) #
         (!PopF & MaskVC & Flags2);                         " Hold state for MaskVC = 1
 

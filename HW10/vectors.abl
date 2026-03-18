@@ -4,39 +4,191 @@
 [ 1, 1, ^H1F80,  .Z. ] -> [    .X.,  .X.,  0 ,  0 , .X.,  .X. ];
 [ 1, 0, ^H1F80,  .Z. ] -> [ ^H0000,  .X.,  0 ,  0 ,  0 ,  .X. ];
 [ 1, 1, ^H1F80,  .Z. ] -> [ ^H0000,  .X.,  0 ,  0 ,  0 ,  .X. ];
-[ 0, 0, ^HC900, ^HA2 ] -> [    .X.,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    JMP	$0900
-[ 0, 1, ^HC900, ^HD8 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;unconditional jump to set PC
-[ 0, 0, ^H8900, ^H3E ] -> [    .X.,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    LDI	$00
-[ 0, 1, ^H8900, ^HC1 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;branch slot, clear accumulator
-[ 0, 0, ^H2700, ^HC7 ] -> [ ^H0900,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    NEG
-[ 0, 1, ^H2700, ^HE3 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " 
-[ 0, 0, ^HA055, ^HBC ] -> [ ^H0901,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    STD	$55
-[ 0, 1, ^HA055, ^H58 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;should store 00 at 55
-[ 0, 0, ^H0E00,  .Z. ] -> [ ^H0902, ^H55,  0 ,  1 ,  0 , ^H00 ]; "    PUSHF
-[ 0, 1, ^H0E00, ^HB0 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check flags (Z set)
-[ 0, 0, ^H8980,  .Z. ] -> [ ^H0903, ^HFF,  0 ,  1 ,  0 , ^H01 ]; "    LDI	$80
-[ 0, 1, ^H8980, ^HC8 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;put 80 in accumulator
-[ 0, 0, ^H2700, ^HEC ] -> [ ^H0904,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    NEG
-[ 0, 1, ^H2700, ^HAC ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " 
-[ 0, 0, ^HA055, ^HB2 ] -> [ ^H0905,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    STD	$55
-[ 0, 1, ^HA055, ^HB0 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;should store 80 at 55
-[ 0, 0, ^H0E00,  .Z. ] -> [ ^H0906, ^H55,  0 ,  1 ,  0 , ^H80 ]; "    PUSHF
-[ 0, 1, ^H0E00, ^HFE ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check flags (C, S, V set)
-[ 0, 0, ^H8901,  .Z. ] -> [ ^H0907, ^HFE,  0 ,  1 ,  0 , ^H0E ]; "    LDI	$1
-[ 0, 1, ^H8901, ^H01 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;put 01 in accumulator
-[ 0, 0, ^H2700, ^HDF ] -> [ ^H0908,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    NEG
-[ 0, 1, ^H2700, ^H6E ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " 
-[ 0, 0, ^HA055, ^HB6 ] -> [ ^H0909,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    STD	$55
-[ 0, 1, ^HA055, ^H98 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;should store FF at 55
-[ 0, 0, ^H0E00,  .Z. ] -> [ ^H090A, ^H55,  0 ,  1 ,  0 , ^HFF ]; "    PUSHF
-[ 0, 1, ^H0E00, ^H02 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check flags (S, C set)
-[ 0, 0, ^H89DD,  .Z. ] -> [ ^H090B, ^HFD,  0 ,  1 ,  0 , ^H0A ]; "    LDI	$DD
-[ 0, 1, ^H89DD, ^HB2 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;put DD in accumulator
-[ 0, 0, ^H2700, ^H85 ] -> [ ^H090C,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    NEG
-[ 0, 1, ^H2700, ^H7A ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " 
-[ 0, 0, ^HA055, ^HDD ] -> [ ^H090D,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    STD	$55
-[ 0, 1, ^HA055, ^H72 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;should store 23 at 55
-[ 0, 0, ^H0E00,  .Z. ] -> [ ^H090E, ^H55,  0 ,  1 ,  0 , ^H23 ]; "    PUSHF
-[ 0, 1, ^H0E00, ^HEB ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check flags (C set)
-[ 0, 0, ^H1F80,  .Z. ] -> [ ^H090F, ^HFC,  0 ,  1 ,  0 , ^H08 ]; "    NOP
-[ 0, 1, ^H1F80, ^H84 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;NOP to flush out the last write
+[ 0, 0, ^HCAAA, ^HB1 ] -> [    .X.,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    JMP	$0AAA
+[ 0, 1, ^HCAAA, ^HBB ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;jump to 0AAA so know address
+[ 0, 0, ^H4700, ^H78 ] -> [    .X.,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    ANDI	$0
+[ 0, 1, ^H4700, ^HF2 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;reset all flags except Z is set
+[ 0, 0, ^H8944, ^H6A ] -> [ ^H0AAA,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    LDI	$44
+[ 0, 1, ^H8944, ^HD8 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;get a known value in A
+[ 0, 0, ^H5200, ^H9D ] -> [ ^H0AAB,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    ROL
+[ 0, 1, ^H5200, ^HC7 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;A is now 88
+[ 0, 0, ^H0E00, ^H6E ] -> [ ^H0AAC,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    PUSHF
+[ 0, 1, ^H0E00, ^H52 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check flags (V & S set)
+[ 0, 0, ^HA0AA,  .Z. ] -> [ ^H0AAD, ^HFF,  0 ,  1 ,  0 , ^H06 ]; "    STD	$AA
+[ 0, 1, ^HA0AA, ^H0A ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check that 88 is written to AA
+[ 0, 0, ^H5200,  .Z. ] -> [ ^H0AAE, ^HAA,  0 ,  1 ,  0 , ^H88 ]; "    ROL
+[ 0, 1, ^H5200, ^HB7 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;A is now 11
+[ 0, 0, ^H0E00, ^H70 ] -> [ ^H0AAF,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    PUSHF
+[ 0, 1, ^H0E00, ^HDF ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check flags (C & V set)
+[ 0, 0, ^HA0AA,  .Z. ] -> [ ^H0AB0, ^HFE,  0 ,  1 ,  0 , ^H0C ]; "    STD	$AA
+[ 0, 1, ^HA0AA, ^HDB ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check that 11 is written to AA
+[ 0, 0, ^H5200,  .Z. ] -> [ ^H0AB1, ^HAA,  0 ,  1 ,  0 , ^H11 ]; "    ROL
+[ 0, 1, ^H5200, ^H94 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;A is now 22
+[ 0, 0, ^H5200, ^H99 ] -> [ ^H0AB2,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    ROL
+[ 0, 1, ^H5200, ^HFD ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;A is now 44
+[ 0, 0, ^HA0AA, ^HB6 ] -> [ ^H0AB3,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    STD	$AA
+[ 0, 1, ^HA0AA, ^H82 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check that 44 is written to AA
+[ 0, 0, ^H0E00,  .Z. ] -> [ ^H0AB4, ^HAA,  0 ,  1 ,  0 , ^H44 ]; "    PUSHF
+[ 0, 1, ^H0E00, ^H03 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check flags (none set)
+[ 0, 0, ^H8900,  .Z. ] -> [ ^H0AB5, ^HFD,  0 ,  1 ,  0 , ^H00 ]; "    LDI	$0
+[ 0, 1, ^H8900, ^H9C ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;get a zero into A
+[ 0, 0, ^H0E00, ^H67 ] -> [ ^H0AB6,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    PUSHF
+[ 0, 1, ^H0E00, ^H47 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check flags (none set)
+[ 0, 0, ^H5200,  .Z. ] -> [ ^H0AB7, ^HFC,  0 ,  1 ,  0 , ^H00 ]; "    ROL
+[ 0, 1, ^H5200, ^H76 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;A is still 0
+[ 0, 0, ^H0E00, ^H0A ] -> [ ^H0AB8,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    PUSHF
+[ 0, 1, ^H0E00, ^HC0 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check flags (Z set)
+[ 0, 0, ^H4700,  .Z. ] -> [ ^H0AB9, ^HFB,  0 ,  1 ,  0 , ^H01 ]; "    ANDI	$0
+[ 0, 1, ^H4700, ^HD5 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;reset all flags except Z
+[ 0, 0, ^H89FE, ^H62 ] -> [ ^H0ABA,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    LDI	$FE
+[ 0, 1, ^H89FE, ^H20 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;put known value in A
+[ 0, 0, ^H7100, ^HB0 ] -> [ ^H0ABB,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    LSR
+[ 0, 1, ^H7100, ^H15 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;A is now 7F
+[ 0, 0, ^H0E00, ^H1D ] -> [ ^H0ABC,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    PUSHF
+[ 0, 1, ^H0E00, ^HAB ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check flags (none set)
+[ 0, 0, ^HA080,  .Z. ] -> [ ^H0ABD, ^HFA,  0 ,  1 ,  0 , ^H00 ]; "    STD	$80
+[ 0, 1, ^HA080, ^HA2 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check that 7F is written to 80
+[ 0, 0, ^H7100,  .Z. ] -> [ ^H0ABE, ^H80,  0 ,  1 ,  0 , ^H7F ]; "    LSR
+[ 0, 1, ^H7100, ^HF6 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;A is now 3F
+[ 0, 0, ^H0E00, ^H5D ] -> [ ^H0ABF,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    PUSHF
+[ 0, 1, ^H0E00, ^H1D ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check flags (C set)
+[ 0, 0, ^HA077,  .Z. ] -> [ ^H0AC0, ^HF9,  0 ,  1 ,  0 , ^H08 ]; "    STD	$77
+[ 0, 1, ^HA077, ^H19 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check that 3F is written to 77
+[ 0, 0, ^H7100,  .Z. ] -> [ ^H0AC1, ^H77,  0 ,  1 ,  0 , ^H3F ]; "    LSR
+[ 0, 1, ^H7100, ^HB6 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;A is now 1F
+[ 0, 0, ^H7100, ^HF9 ] -> [ ^H0AC2,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    LSR
+[ 0, 1, ^H7100, ^H75 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;A is now 0F
+[ 0, 0, ^H7100, ^H89 ] -> [ ^H0AC3,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    LSR
+[ 0, 1, ^H7100, ^H70 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;A is now 07
+[ 0, 0, ^H7100, ^HDC ] -> [ ^H0AC4,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    LSR
+[ 0, 1, ^H7100, ^H6B ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;A is now 03
+[ 0, 0, ^HA077, ^H78 ] -> [ ^H0AC5,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    STD	$77
+[ 0, 1, ^HA077, ^HE7 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check that 03 is written to 77
+[ 0, 0, ^H7100,  .Z. ] -> [ ^H0AC6, ^H77,  0 ,  1 ,  0 , ^H03 ]; "    LSR
+[ 0, 1, ^H7100, ^H4A ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;A is now 01
+[ 0, 0, ^H7100, ^HE1 ] -> [ ^H0AC7,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    LSR
+[ 0, 1, ^H7100, ^HD6 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;A is now 00
+[ 0, 0, ^H0E00, ^H91 ] -> [ ^H0AC8,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    PUSHF
+[ 0, 1, ^H0E00, ^H57 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check flags (C & Z set)
+[ 0, 0, ^HA077,  .Z. ] -> [ ^H0AC9, ^HF8,  0 ,  1 ,  0 , ^H09 ]; "    STD	$77
+[ 0, 1, ^HA077, ^H86 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check that 00 is written to 77
+[ 0, 0, ^H4700,  .Z. ] -> [ ^H0ACA, ^H77,  0 ,  1 ,  0 , ^H00 ]; "    ANDI	$0
+[ 0, 1, ^H4700, ^H99 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;reset all flags except Z
+[ 0, 0, ^H89F1, ^HE7 ] -> [ ^H0ACB,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    LDI	$F1
+[ 0, 1, ^H89F1, ^HA4 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;put known value in A
+[ 0, 0, ^H7101, ^HCC ] -> [ ^H0ACC,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    ASR
+[ 0, 1, ^H7101, ^H9C ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;A is now F8
+[ 0, 0, ^H0E00, ^HEC ] -> [ ^H0ACD,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    PUSHF
+[ 0, 1, ^H0E00, ^H5D ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check flags (C & S set)
+[ 0, 0, ^HA080,  .Z. ] -> [ ^H0ACE, ^HF7,  0 ,  1 ,  0 , ^H0A ]; "    STD	$80
+[ 0, 1, ^HA080, ^H0D ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check that F8 is written to 80
+[ 0, 0, ^H7101,  .Z. ] -> [ ^H0ACF, ^H80,  0 ,  1 ,  0 , ^HF8 ]; "    ASR
+[ 0, 1, ^H7101, ^HBA ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;A is now FC
+[ 0, 0, ^H0E00, ^HFC ] -> [ ^H0AD0,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    PUSHF
+[ 0, 1, ^H0E00, ^H70 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check flags (S set)
+[ 0, 0, ^HA077,  .Z. ] -> [ ^H0AD1, ^HF6,  0 ,  1 ,  0 , ^H02 ]; "    STD	$77
+[ 0, 1, ^HA077, ^HF9 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check that FC is written to 77
+[ 0, 0, ^H7101,  .Z. ] -> [ ^H0AD2, ^H77,  0 ,  1 ,  0 , ^HFC ]; "    ASR
+[ 0, 1, ^H7101, ^H26 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;A is now FE
+[ 0, 0, ^HA077, ^HD7 ] -> [ ^H0AD3,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    STD	$77
+[ 0, 1, ^HA077, ^H0F ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check that FE is written to 77
+[ 0, 0, ^H897F,  .Z. ] -> [ ^H0AD4, ^H77,  0 ,  1 ,  0 , ^HFE ]; "    LDI	$7F
+[ 0, 1, ^H897F, ^H43 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;put known positive value in A
+[ 0, 0, ^H7101, ^H0E ] -> [ ^H0AD5,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    ASR
+[ 0, 1, ^H7101, ^HED ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;A is now 3F
+[ 0, 0, ^H7101, ^H69 ] -> [ ^H0AD6,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    ASR
+[ 0, 1, ^H7101, ^H8C ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;A is now 1F
+[ 0, 0, ^H0E00, ^H70 ] -> [ ^H0AD7,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    PUSHF
+[ 0, 1, ^H0E00, ^HEC ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check flags (C set)
+[ 0, 0, ^HA077,  .Z. ] -> [ ^H0AD8, ^HF5,  0 ,  1 ,  0 , ^H08 ]; "    STD	$77
+[ 0, 1, ^HA077, ^HA4 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check that 1F is written to 77
+[ 0, 0, ^H7101,  .Z. ] -> [ ^H0AD9, ^H77,  0 ,  1 ,  0 , ^H1F ]; "    ASR
+[ 0, 1, ^H7101, ^H8F ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;A is now 0F
+[ 0, 0, ^H7101, ^H3C ] -> [ ^H0ADA,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    ASR
+[ 0, 1, ^H7101, ^H88 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;A is now 07
+[ 0, 0, ^H7101, ^H1E ] -> [ ^H0ADB,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    ASR
+[ 0, 1, ^H7101, ^H8F ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;A is now 03
+[ 0, 0, ^H7101, ^HAB ] -> [ ^H0ADC,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    ASR
+[ 0, 1, ^H7101, ^H8A ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;A is now 01
+[ 0, 0, ^H7101, ^HE5 ] -> [ ^H0ADD,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    ASR
+[ 0, 1, ^H7101, ^HFE ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;A is now 00
+[ 0, 0, ^H0E00, ^HDF ] -> [ ^H0ADE,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    PUSHF
+[ 0, 1, ^H0E00, ^H1C ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check flags (Z & C set)
+[ 0, 0, ^HA077,  .Z. ] -> [ ^H0ADF, ^HF4,  0 ,  1 ,  0 , ^H09 ]; "    STD	$77
+[ 0, 1, ^HA077, ^H74 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check that 00 is written to 77
+[ 0, 0, ^H7101,  .Z. ] -> [ ^H0AE0, ^H77,  0 ,  1 ,  0 , ^H00 ]; "    ASR
+[ 0, 1, ^H7101, ^H6F ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;A is now 00
+[ 0, 0, ^HA077, ^HBC ] -> [ ^H0AE1,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    STD	$77
+[ 0, 1, ^HA077, ^H53 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check that 00 is written to 77
+[ 0, 0, ^H0E00,  .Z. ] -> [ ^H0AE2, ^H77,  0 ,  1 ,  0 , ^H00 ]; "    PUSHF
+[ 0, 1, ^H0E00, ^HB1 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check flags (Z set)
+[ 0, 0, ^H4700,  .Z. ] -> [ ^H0AE3, ^HF3,  0 ,  1 ,  0 , ^H01 ]; "    ANDI	$0
+[ 0, 1, ^H4700, ^HBD ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;reset all flags except Z is set
+[ 0, 0, ^H8944, ^H05 ] -> [ ^H0AE4,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    LDI	$44
+[ 0, 1, ^H8944, ^HFE ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;get a known value in A
+[ 0, 0, ^H7102, ^H23 ] -> [ ^H0AE5,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    ROR
+[ 0, 1, ^H7102, ^H7D ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;A is now 22
+[ 0, 0, ^H0E00, ^HBB ] -> [ ^H0AE6,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    PUSHF
+[ 0, 1, ^H0E00, ^HAE ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check flags (none set)
+[ 0, 0, ^HA0AA,  .Z. ] -> [ ^H0AE7, ^HF2,  0 ,  1 ,  0 , ^H00 ]; "    STD	$AA
+[ 0, 1, ^HA0AA, ^H78 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check that 22 is written to AA
+[ 0, 0, ^H7102,  .Z. ] -> [ ^H0AE8, ^HAA,  0 ,  1 ,  0 , ^H22 ]; "    ROR
+[ 0, 1, ^H7102, ^HA2 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;A is now 11
+[ 0, 0, ^H7102, ^HB3 ] -> [ ^H0AE9,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    ROR
+[ 0, 1, ^H7102, ^H05 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;A is now 88
+[ 0, 0, ^H0E00, ^H37 ] -> [ ^H0AEA,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    PUSHF
+[ 0, 1, ^H0E00, ^H6F ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check flags (C & S set)
+[ 0, 0, ^HA0AA,  .Z. ] -> [ ^H0AEB, ^HF1,  0 ,  1 ,  0 , ^H0A ]; "    STD	$AA
+[ 0, 1, ^HA0AA, ^H76 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check that 88 is written to AA
+[ 0, 0, ^H7102,  .Z. ] -> [ ^H0AEC, ^HAA,  0 ,  1 ,  0 , ^H88 ]; "    ROR
+[ 0, 1, ^H7102, ^H44 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;A is now 44
+[ 0, 0, ^HA0AA, ^HC1 ] -> [ ^H0AED,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    STD	$AA
+[ 0, 1, ^HA0AA, ^HA2 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check that 44 is written to AA
+[ 0, 0, ^H0E00,  .Z. ] -> [ ^H0AEE, ^HAA,  0 ,  1 ,  0 , ^H44 ]; "    PUSHF
+[ 0, 1, ^H0E00, ^H5E ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check flags (none set)
+[ 0, 0, ^H8900,  .Z. ] -> [ ^H0AEF, ^HF0,  0 ,  1 ,  0 , ^H00 ]; "    LDI	$0
+[ 0, 1, ^H8900, ^H10 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;get a zero into A
+[ 0, 0, ^H0E00, ^H8E ] -> [ ^H0AF0,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    PUSHF
+[ 0, 1, ^H0E00, ^HDF ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check flags (none set)
+[ 0, 0, ^H7102,  .Z. ] -> [ ^H0AF1, ^HEF,  0 ,  1 ,  0 , ^H00 ]; "    ROR
+[ 0, 1, ^H7102, ^HED ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;A is still 0
+[ 0, 0, ^H0E00, ^H84 ] -> [ ^H0AF2,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    PUSHF
+[ 0, 1, ^H0E00, ^HA6 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check flags (Z set)
+[ 0, 0, ^H89E0,  .Z. ] -> [ ^H0AF3, ^HEE,  0 ,  1 ,  0 , ^H01 ]; "    LDI	$E0
+[ 0, 1, ^H89E0, ^H5A ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;get a known value in A
+[ 0, 0, ^H6B52, ^H71 ] -> [ ^H0AF4,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    ADDI	$52
+[ 0, 1, ^H6B52, ^H7D ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;reset all flags except carry and A is 32
+[ 0, 0, ^H7103, ^H5E ] -> [ ^H0AF5,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    RRC
+[ 0, 1, ^H7103, ^HC9 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;A is now 99
+[ 0, 0, ^H0E00, ^HD6 ] -> [ ^H0AF6,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    PUSHF
+[ 0, 1, ^H0E00, ^H22 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check flags (S set)
+[ 0, 0, ^HA0AA,  .Z. ] -> [ ^H0AF7, ^HED,  0 ,  1 ,  0 , ^H02 ]; "    STD	$AA
+[ 0, 1, ^HA0AA, ^H55 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check that 99 is written to AA
+[ 0, 0, ^H7103,  .Z. ] -> [ ^H0AF8, ^HAA,  0 ,  1 ,  0 , ^H99 ]; "    RRC
+[ 0, 1, ^H7103, ^H89 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;A is now 4C
+[ 0, 0, ^H0E00, ^HCB ] -> [ ^H0AF9,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    PUSHF
+[ 0, 1, ^H0E00, ^HB2 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check flags (C set)
+[ 0, 0, ^HA0AA,  .Z. ] -> [ ^H0AFA, ^HEC,  0 ,  1 ,  0 , ^H08 ]; "    STD	$AA
+[ 0, 1, ^HA0AA, ^HAE ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check that 4C is written to AA
+[ 0, 0, ^H7103,  .Z. ] -> [ ^H0AFB, ^HAA,  0 ,  1 ,  0 , ^H4C ]; "    RRC
+[ 0, 1, ^H7103, ^H0F ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;A is now A6
+[ 0, 0, ^H7103, ^H19 ] -> [ ^H0AFC,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    RRC
+[ 0, 1, ^H7103, ^H92 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;A is now 53
+[ 0, 0, ^HA0AA, ^H90 ] -> [ ^H0AFD,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    STD	$AA
+[ 0, 1, ^HA0AA, ^H92 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check that 53 is written to AA
+[ 0, 0, ^H0E00,  .Z. ] -> [ ^H0AFE, ^HAA,  0 ,  1 ,  0 , ^H53 ]; "    PUSHF
+[ 0, 1, ^H0E00, ^H40 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check flags (none set)
+[ 0, 0, ^H8901,  .Z. ] -> [ ^H0AFF, ^HEB,  0 ,  1 ,  0 , ^H00 ]; "    LDI	$01
+[ 0, 1, ^H8901, ^H96 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;put 01 into A
+[ 0, 0, ^H7103, ^HDB ] -> [ ^H0B00,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    RRC
+[ 0, 1, ^H7103, ^HF6 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;A is now 00
+[ 0, 0, ^H0E00, ^H53 ] -> [ ^H0B01,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    PUSHF
+[ 0, 1, ^H0E00, ^H8F ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check flags (C & Z set)
+[ 0, 0, ^H7103,  .Z. ] -> [ ^H0B02, ^HEA,  0 ,  1 ,  0 , ^H09 ]; "    RRC
+[ 0, 1, ^H7103, ^H2B ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;A is now 80
+[ 0, 0, ^HA0AA, ^HFC ] -> [ ^H0B03,  .X.,  0 ,  0 ,  0 ,  .X. ]; "    STD	$AA
+[ 0, 1, ^HA0AA, ^H16 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check that 80 is written to AA
+[ 0, 0, ^H0E00,  .Z. ] -> [ ^H0B04, ^HAA,  0 ,  1 ,  0 , ^H80 ]; "    PUSHF
+[ 0, 1, ^H0E00, ^H16 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;check flags (S set)
+[ 0, 0, ^H1F80,  .Z. ] -> [ ^H0B05, ^HE9,  0 ,  1 ,  0 , ^H02 ]; "    NOP
+[ 0, 1, ^H1F80, ^H12 ] -> [    .X.,  .X., .X., .X., .X.,  .X. ]; " ;NOP to flush out the final write
