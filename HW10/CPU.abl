@@ -188,7 +188,6 @@ DAU.MaskX = CU.MaskX;
 
 " Update Accumulator and Flags from ALU
 Accum = ALU.[Accum7..Accum0];    
-" Flags6 and Flags4 are unused, so they are not updated
 Flags = ALU.[Flags7..Flags0]; 
 
 " Update Data Address Bus and XReg and SReg from DAU

@@ -59,7 +59,8 @@ TITLE 'Data Address Unit'
 " 03/05/26   Alex Du  Initial Revision
 " 03/05/26   Alex Du  Fixed bugs
 " 03/07/26   Alex Du  Add comments
-" 03/18/26   Alex Du  Add extra credit instructions
+" 03/18/26   Alex Du  Add extra credit instructions to operations table
+" 03/18/26   Alex Du  Add additional comments
 
 
 " Pin/Signal Declarations

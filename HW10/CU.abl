@@ -59,6 +59,7 @@ INTERFACE (ProgramDB15..ProgramDB0, Flags7..Flags0, Reset, Clock ->
 " 03/17/26   Alex Du  Added CALL and RTS instructions
 " 03/17/26   Alex Du  Implemented Finite State Machine
 " 03/18/26   Alex Du  Implemented extra credit instructions
+" 03/18/26   Alex Du  Add additional comments
 
 TITLE 'Control Unit'
 
@@ -87,12 +88,12 @@ MSBselect2..MSBselect0      pin; " Select pins for the value of MSB
 MaskSZ                      pin; " Prevents updates to SZ flags
 MaskVC                      pin; " Prevents updates to VC flags
 PopF                        pin; " Directly set flags
-OverrideInterrupt           pin; 
-OverrideUser                pin; 
-OverrideCarry               pin; 
-SetInterrupt                pin; 
-SetUser                     pin; 
-SetCarry                    pin; 
+OverrideInterrupt           pin; " Override mode for interrupt flag
+OverrideUser                pin; " Override mode for user flag
+OverrideCarry               pin; " Override mode for carry flag
+SetInterrupt                pin; " Set interrupt flag in override mode
+SetUser                     pin; " Set user flag in override mode
+SetCarry                    pin; " Set carry flag in override mode
 
 " DAU
 EnableInc                   pin; " Enable incrementer/decrementer (1) or pass-thru (0)
@@ -124,12 +125,12 @@ Flags     = [Flags7..Flags0];     " Flags Bus
 StateBits = [StateBits2..StateBits0]; " State bits for finite state machine
 
 " Define state bits
-Idle = [0, 0, 0];
-Call1 = [0, 0, 1];
-Call2 = [0, 1, 0];
-Call3 = [0, 1, 1];
-RTS1 = [1, 0, 0];
-RTS2 = [1, 0, 1];
+Idle = [0, 0, 0]; " Idle state
+Call1 = [0, 0, 1]; " CALL instruction, clock cycle 1
+Call2 = [0, 1, 0]; " CALL instruction, clock cycle 2
+Call3 = [0, 1, 1]; " CALL instruction, clock cycle 3
+RTS1 = [1, 0, 0]; " RTS instruction, clock cycle 1
+RTS2 = [1, 0, 1]; " RTS instruction, clock cycle 2
 
 " Instructions
 " (m) - Use direct address
@@ -267,18 +268,19 @@ StateBits.CLK = Clock;
 IR.CLR = Reset;
 StateBits.CLR = Reset;
 
-" Flag Overrides for flag manipulation instructions
-OverrideInterrupt = (IR == STI) # (IR == CLI);
-SetInterrupt      = (IR == STI);
-OverrideUser      = (IR == STU) # (IR == CLU);
-SetUser           = (IR == STU);
-OverrideCarry     = (IR == STC) # (IR == CLC);
-SetCarry          = (IR == STC);
-IO                = (IR == INPUT) # (IR == OUT);
+" Flag Overrides for flag manipulation instructions (extra credit)
+OverrideInterrupt = (IR == STI) # (IR == CLI); " Override mode for interrupt flag
+SetInterrupt      = (IR == STI); " Set interrupt flag in override mode
+OverrideUser      = (IR == STU) # (IR == CLU); " Override mode for user flag
+SetUser           = (IR == STU); " Set user flag in override mode
+OverrideCarry     = (IR == STC) # (IR == CLC); " Override mode for carry flag
+SetCarry          = (IR == STC); " Set carry flag in override mode
+IO                = (IR == INPUT) # (IR == OUT); " IO instructions
 
 " Set instruction register to ProgramDB if MaskIR is 0, else keep current IR value
 IR = (!MaskIR & ProgramDB) # (MaskIR & IR);
 
+" MaskIR during CALL and RTS instructions 
 MaskIR = ((StateBits == Idle) & ((IR == CALL) # (IR == RTS))) #
          ((StateBits == Call1) # (StateBits == Call2) # (StateBits == RTS1));
 

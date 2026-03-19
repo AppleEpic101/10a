@@ -9,9 +9,14 @@ INTERFACE  (Data7..Data0,
 
 TITLE      'Caltech10 ALU Unit'
 
-" Description: This module implements the ALU unit for the CPU. 
-"              It handles arithmetic, bitwise logic, and complex shifting operations. 
-"              It uses a registered Accumulator architecture and features a flexible flag-update system.
+" Description: This module implements the ALU unit for the CPU. The ALU consists of an 8-bit Harvard Architecture accumulator-based design. 
+"              The Arithmetic Logic Unit (ALU) performs all standard logic and arithmetic operations for the CPU, 
+"              including Boolean operations, addition, subtraction, comparisons, and shifts. 
+"              As the processor is accumulator-based, the 8-bit accumulator always serves as one operand for these 
+"              operations, and the result is always stored back into it. For two-operand instructions, the second operand 
+"              is provided either as an immediate value from the instruction or from a location in data memory. 
+"              Every ALU operation automatically updates the sign (S) and zero (Z) status flags, while arithmetic 
+"              and shift operations also affect the carry (C) and overflow (V) flags to assist with conditional branching.
 " 
 " Inputs: Data7..Data0 - 8 bits of data input
 "         UpdateAcc - Write-enable for accumulator
@@ -34,8 +39,10 @@ TITLE      'Caltech10 ALU Unit'
 "         SetCarry - Set carry flag
 "         Reset - System reset
 "         Clock - System clock
+"
 " Outputs: Accum7..Accum0 - 8 bits of accumulator
 "          Flags7..Flags0 - 8 bits of flags
+"
 " =========================================================================================================================
 " Instruction | UpAcc | OpSelect | UseAdder | F3..F0 | CinSel | InvC | MaskSZ | MaskVC | LSBsel | MidSel | MSBsel |
 " ------------|-------|----------|----------|--------|--------|------|--------|--------|--------|--------|--------|
@@ -69,6 +76,7 @@ TITLE      'Caltech10 ALU Unit'
 " 03/03/26   Alex Du  Fixed bugs
 " 03/03/26   Alex Du  Add comments
 " 03/15/26   Alex Du  Add operations table
+" 03/18/26   Alex Du  Revise flag logic for extra credit
 " 03/18/26   Alex Du  Expand table to include extra credit instructions
 
 
@@ -90,12 +98,12 @@ MaskSZ		                pin;	" Prevents updates to SZ flags
 MaskVC		                pin;	" Prevents updates to VC flags
 PopF		                pin;	" Directly set flags
 
-OverrideInterrupt		pin;	" Manually set interrupt flag
-OverrideUser		        pin;	" Manually set user flag
-OverrideCarry		        pin;	" Manually set carry flag
-SetInterrupt		        pin;	" Set interrupt flag
-SetUser		                pin;	" Set user flag
-SetCarry		        pin;	" Set carry flag
+OverrideInterrupt		pin;	" Override mode for interrupt flag
+OverrideUser		        pin;	" Override mode for user flag
+OverrideCarry		        pin;	" Override mode for carry flag
+SetInterrupt		        pin;	" Set interrupt flag in override mode
+SetUser		                pin;	" Set user flag in override mode
+SetCarry		        pin;	" Set carry flag in override mode
 
 Reset			        pin;	" System reset
 Clock 		                pin;	" System clock
@@ -151,10 +159,12 @@ Flags.CLK  =  Clock;
 " F-block (Logical Operations)
 
 " 4:1 mux. By varying F3-F0, we can 
-" produce logic functions (AND, OR, XOR, NOT)
-" between the Accum and Data inputs.
+" produce logic functions between the Accum and Data inputs.
 
-Fop  =  (F0 & !Data & !Accum) # (F1 & Data & !Accum) # (F2 & !Data & Accum) # (F3 & Data & Accum);
+Fop  =  (F0 & !Data & !Accum) # " Defines result when both inputs are 0 (e.g., for NOT or NOR)
+        (F1 & Data & !Accum) # " Defines result when only Data is 1
+        (F2 & !Data & Accum) # " Defines result when only Accum is 1
+        (F3 & Data & Accum);  " Defines result when both inputs are 1 (e.g., for AND or OR)
 
 " Shifts / Rotations
 
@@ -200,21 +210,21 @@ MuxOut  =  (OpSelect & Sum) # (!OpSelect & ShiftOut);
 " Flag Operations
 
 " Flags7..Flags4 only update when popped. Otherwise, they retain their value. 
-Flag7 = (OverrideInterrupt & SetInterrupt & 1) # 
-        (OverrideInterrupt & !SetInterrupt & 0) #
-        (!OverrideInterrupt & PopF & Data7) # 
-        (!OverrideInterrupt & !PopF & Flags7);
+Flag7 = (OverrideInterrupt & SetInterrupt & 1) # " Manaully set interrupt flag
+        (OverrideInterrupt & !SetInterrupt & 0) # " Manaully clear interrupt flag
+        (!OverrideInterrupt & PopF & Data7) #    " Directly load interrupt flag
+        (!OverrideInterrupt & !PopF & Flags7);   " Hold interrupt flag
 Flag6 = 0;
-Flag5 = (OverrideUser & SetUser & 1) # 
-        (OverrideUser & !SetUser & 0) #
-        (!OverrideUser & PopF & Data5) # 
-        (!OverrideUser & !PopF & Flags5);
+Flag5 = (OverrideUser & SetUser & 1) # " Manaully set user flag
+        (OverrideUser & !SetUser & 0) # " Manaully clear user flag
+        (!OverrideUser & PopF & Data5) # " Directly load user flag
+        (!OverrideUser & !PopF & Flags5);   " Hold user flag
 Flag4 = 0;
 
 " Carry Flag: Update from Adder if selected and enabled, otherwise hold state
-Carry = (OverrideCarry & SetCarry & 1) # 
-        (OverrideCarry & !SetCarry & 0) #
-        (!OverrideCarry & PopF & Data3) #                                                                            " Directly load Carry 
+Carry = (OverrideCarry & SetCarry & 1) # " Manaully set carry flag
+        (OverrideCarry & !SetCarry & 0) # " Manaully clear carry flag
+        (!OverrideCarry & PopF & Data3) # " Directly load Carry 
         (!OverrideCarry & !PopF & !MaskVC & OpSelect & ((!InvertCarry & CarryOut7) # (InvertCarry & !CarryOut7))) #   " Arithmetic carry. Can be inverted using InvertCarry for subtraction
         (!OverrideCarry & !PopF & !MaskVC & !OpSelect & ((MiddleSelect & Accum7) # (!MiddleSelect & Accum0))) #       " Bit that falls off the end of the shift/rotate moves to carry
         (!OverrideCarry & !PopF & MaskVC & Flags3);                                                                 " Hold state for MaskVC = 1
