@@ -89,10 +89,9 @@ MuxOut  = (Increment & !MuxSel2 & !MuxSel1 & !MuxSel0) #   " 000 → PC+1 for se
                 (RTS_HI & MuxSel2 & MuxSel1 & MuxSel0);          " 111 → RTS second half: restore upper 5 bits to complete the return address
 
 " 13-bit Ripple-Carry Adder: computes Sum = PC + MuxOut (or 0 + MuxOut when Load=1)
-Carry0 = 0;      " Ripple carry starts at 0 — no initial borrow or carry needed for clean addition
+Carry0 = 0;      " Ripple carry starts at 0 (no initial borrow or carry needed for clean addition)
 
-" When Load=1 the term (PC & !Load) collapses to 0, so Sum = MuxOut + 0
-" This lets the adder act as a plain register-load for direct jumps without a separate bypass path
+" When Load=1 the term (PC & !Load) becomes 0, so Sum = MuxOut + 0
 Sum = ((PC & !Load) $ MuxOut) $ CarryIn; " Full-adder XOR logic across all 13 bits simultaneously
 
 " Standard carry-out expression: propagate (A XOR B) & Cin, or generate A & B

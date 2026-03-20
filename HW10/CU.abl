@@ -5041,14 +5041,14 @@ WHEN (IR == OUT) THEN {
 
 STATE_DIAGRAM StateBits; " FSM controls the multi-cycle CALL and RTS sequences; all other instructions stay in Regular for one cycle
 
-" Regular is the idle state: single-cycle instructions live here entirely.
-" CALL and RTS are the only instructions with multi-cycle behaviour, requiring extra states.
+" Regular is the idle state: single-cycle instructions 
+" CALL and RTS are the only instructions with multi-cycle behaviour
 STATE Regular:
-    IF (IR == CALL) THEN Call1 " Detected a CALL — enter the push-return-address sequence
-    ELSE IF (IR == RTS) THEN RTS1 " Detected an RTS — enter the pop-return-address sequence
-    ELSE Regular; " All other instructions are done in one cycle; stay in Regular
+    IF (IR == CALL) THEN Call1 " Enter CALL sequence
+    ELSE IF (IR == RTS) THEN RTS1 " Enter RTS sequence
+    ELSE Regular; " Stay in Regular for single-cycle instructions
 
-" CALL uses four states (Regular + 3 extra) because it must:
+" CALL uses four states:
 "   1. (Regular) Decode the instruction and prepare DDB with the return address high byte
 "   2. (Call1) Pre-decrement S and write the high byte of PC+1 to the stack
 "   3. (Call2) Pre-decrement S again and write the low byte of PC+1; also load the target address into PC
@@ -5057,7 +5057,7 @@ STATE Call1: GOTO Call2;
 STATE Call2: GOTO Call3;
 STATE Call3: GOTO Regular;
 
-" RTS uses three states (Regular + 2 extra) because it must:
+" RTS uses three states:
 "   1. (Regular/RTS) Read the low byte of the saved PC from stack; post-increment S
 "   2. (RTS1) Read the high byte of the saved PC from stack; post-increment S
 "   3. (RTS2) Resume normal fetch from the restored PC

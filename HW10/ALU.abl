@@ -196,8 +196,6 @@ ShiftOut[6..1]  =  (MiddleSelect & Accum[5..0]) #   " MiddleSelect=1 shifts cont
 " Adder
 
 " 4:1 mux: Selects CarryIn for the LSB of the adder.
-" Seeding carry-in is how we implement subtraction (A−B = A + NOT(B) + 1) and carry-borrow variants
-" without a dedicated subtractor circuit.
 CarryIn_LO  =  (CinSel1 & CinSel0) #             " 11: seed 1 for two's-complement negation (SUB = A + NOT(B) + 1)
                (!CinSel1 & CinSel0 & !Flags3) #    " 01: seed !Carry (SBB: uses the borrow stored in the carry flag as the initial carry-in)
                (CinSel1 & !CinSel0 & Flags3);     " 10: seed Carry (ADC: propagates the carry flag into the addition)
@@ -215,9 +213,7 @@ CarryIn  =  [CarryOut6..CarryOut0, CarryIn_LO]; " LSB gets the seeded value; hig
 Sum  =  (Accum & UseAdder) $ Fop $ CarryIn;
 
 
-
 " If OpSelect is high, output comes from the adder (arithmetic); otherwise from the shift/rotate path.
-" Having a single mux here lets both paths share the same flag and accumulator update logic downstream.
 MuxOut  =  (OpSelect & Sum) # (!OpSelect & ShiftOut);
 
 
@@ -227,14 +223,14 @@ MuxOut  =  (OpSelect & Sum) # (!OpSelect & ShiftOut);
 " Holding them by default prevents unrelated ALU ops from accidentally clobbering interrupt/user mode state.
 Flag7 = (OverrideInterrupt & SetInterrupt & 1) # " Override=1, Set=1: force interrupt flag high (STI)
         (OverrideInterrupt & !SetInterrupt & 0) # " Override=1, Set=0: force interrupt flag low (CLI)
-        (!OverrideInterrupt & PopF & Data7) #    " Override=0, PopF=1: restore interrupt flag from data bus (POPF)
-        (!OverrideInterrupt & !PopF & Flags7);   " Override=0, PopF=0: retain the existing interrupt flag (all other instructions)
-Flag6 = 0; " Bit 6 is reserved/unused; hardwiring it to 0 avoids undefined state
+        (!OverrideInterrupt & PopF & Data7) #    " Override=0, PopF=1: load interrupt flag from data bus (POPF)
+        (!OverrideInterrupt & !PopF & Flags7);   " Override=0, PopF=0: retain the existing interrupt flag
+Flag6 = 0; " unused
 Flag5 = (OverrideUser & SetUser & 1) # " Override=1, Set=1: force user flag high (STU)
         (OverrideUser & !SetUser & 0) # " Override=1, Set=0: force user flag low (CLU)
-        (!OverrideUser & PopF & Data5) # " Override=0, PopF=1: restore user flag from data bus (POPF)
-        (!OverrideUser & !PopF & Flags5);   " Override=0, PopF=0: retain the existing user flag (all other instructions)
-Flag4 = 0; " Bit 4 is reserved/unused; hardwired to 0 for the same reason as Flag6
+        (!OverrideUser & PopF & Data5) # " Override=0, PopF=1: load user flag from data bus (POPF)
+        (!OverrideUser & !PopF & Flags5);   " Override=0, PopF=0: retain the existing user flag
+Flag4 = 0; " unused
 
 " Carry Flag: updated by the adder, shift path, PopF, or an Override; otherwise frozen
 " InvertCarry flips the adder carry for subtraction (A−B produces carry=0 when no borrow,
@@ -244,36 +240,31 @@ Carry = (OverrideCarry & SetCarry & 1) # " Override=1, Set=1: force carry high (
         (!OverrideCarry & PopF & Data3) # " Override=0, PopF=1: restore carry from data bus (POPF)
         (!OverrideCarry & !PopF & !MaskVC & OpSelect & ((!InvertCarry & CarryOut7) # (InvertCarry & !CarryOut7))) #   " Adder path: invert CarryOut7 for SUB/SBB to satisfy carry=1≡no-borrow convention
         (!OverrideCarry & !PopF & !MaskVC & !OpSelect & ((MiddleSelect & Accum7) # (!MiddleSelect & Accum0))) #       " Shift path: capture the bit that falls off the edge (MSB for left-shifts, LSB for right-shifts)
-        (!OverrideCarry & !PopF & MaskVC & Flags3);                                                                 " MaskVC=1: instruction doesn’t affect carry (logic ops) — freeze it
+        (!OverrideCarry & !PopF & MaskVC & Flags3);                                                                 " MaskVC=1 hold carry flag
 
 " Overflow Flag: set when addition/subtraction wraps the sign, or when a left-shift changes it
-
-" Overflow occurs when two same-signed inputs produce an opposite-signed result,
-" or when NEG of 0x80 produces 0x80 (minimum signed integer has no positive equivalent).
 Overflow = (PopF & Data2) #                                  " PopF=1: restore overflow from data bus (POPF)
         (!PopF & !MaskVC & (
             (OpSelect & (
-                (UseAdder & Accum7 & Fop7 & !MuxOut7) #    " Pos + Pos = Neg: both operands positive, result negative → overflow
-                (UseAdder & !Accum7 & !Fop7 & MuxOut7) #   " Neg + Neg = Pos: both operands negative, result positive → overflow
-                (!UseAdder & !Fop7 & MuxOut7)              " NEG 0x80 case: negating the most-negative number wraps to itself → overflow
+                (UseAdder & Accum7 & Fop7 & !MuxOut7) #    " Pos + Pos = Neg: both operands positive, result negative = overflow
+                (UseAdder & !Accum7 & !Fop7 & MuxOut7) #   " Neg + Neg = Pos: both operands negative, result positive = overflow
+                (!UseAdder & !Fop7 & MuxOut7)              " Extra credit: Negating the most-negative number wraps to itself = overflow
             )) #
-            (!OpSelect & MiddleSelect & (Accum7 $ MuxOut7)) " Left-shift sign change: overflow only relevant for left-shifts (not right-shifts)
+            (!OpSelect & MiddleSelect & (Accum7 $ MuxOut7)) " Left-shift sign change: overflow only relevant for left-shifts
         )) #
-        (!PopF & MaskVC & Flags2);                         " MaskVC=1: instruction doesn’t affect overflow (logic ops) — freeze it
+        (!PopF & MaskVC & Flags2);                         " MaskVC=1: hold overflow flag
 
 " Sign Flag: reflect the MSB of the result; MaskSZ freezes it for instructions that must not touch SZ
 Sign  =  (PopF & Data1) #                    " PopF=1: restore sign from data bus (POPF)
-        (!PopF & MaskSZ & Flags1) #        " MaskSZ=1: instruction (e.g. LD) must not alter the sign flag — freeze it
+        (!PopF & MaskSZ & Flags1) #        " MaskSZ=1: hold sign flag
         (!PopF & !MaskSZ & MuxOut7);       " MaskSZ=0: update sign from the MSB of the result (negative if bit 7 is set)
 
 " Zero Flag: set when ALL result bits are 0; MaskSZ freezes it for the same instructions
 Zero  =  (PopF & Data0) #                                                                                                " PopF=1: restore zero from data bus (POPF)
-        (!PopF & MaskSZ & Flags0) #                                                                                  " MaskSZ=1: freeze zero flag to avoid disrupting condition-code state
-        (!PopF & !MaskSZ & !MuxOut7 & !MuxOut6 & !MuxOut5 & !MuxOut4 & !MuxOut3 & !MuxOut2 & !MuxOut1 & !MuxOut0);     " All bits must be 0; a single 1 bit anywhere means result is non-zero
+        (!PopF & MaskSZ & Flags0) #                                                                                  " MaskSZ=1: hold zero flag
+        (!PopF & !MaskSZ & !MuxOut7 & !MuxOut6 & !MuxOut5 & !MuxOut4 & !MuxOut3 & !MuxOut2 & !MuxOut1 & !MuxOut0);     " All bits must be 0
 
 " Pack the four computed flag nodes into the Flags register
-" The ordering places the most-significant/privileged bits at the top:
-" [Interrupt, Reserved, User, Reserved, Carry, Overflow, Sign, Zero]
 Flags  :=  [Flag7, Flag6, Flag5, Flag4, Carry, Overflow, Sign, Zero];
 
 

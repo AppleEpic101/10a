@@ -206,10 +206,10 @@ ProgramAB = PAU.[ProgAddr12..ProgAddr0];
 " Update Data Data Bus from CU
 " 4:1 mux for what gets driven onto DDB during a write cycle, controlled by SelectDB.
 " This allows different sources to appear on DDB depending on what needs to be written to memory/I-O:
-" 00 → Low-8 bits of PC  (CALL: saves the low byte of the return address onto the stack)
-" 01 → High-8 bits of PC (CALL: saves the high byte of the return address; only 5 bits are significant)
-" 10 → Flags              (PUSHF: saves the flag register onto the stack)
-" 11 → Accumulator        (STD/STX/STS: stores the accumulator into data memory)
+" 00 = Low-8 bits of PC  (CALL: saves the low byte of the return address onto the stack)
+" 01 = High-8 bits of PC (CALL: saves the high byte of the return address; only 5 bits are significant)
+" 10 = Flags              (PUSHF: saves the flag register onto the stack)
+" 11 = Accumulator        (STD/STX/STS: stores the accumulator into data memory)
 DataDB = (!CU.SelectDB1 & !CU.SelectDB0 & PAU.[PC7..PC0]) #                                              " 00: Low-8 bits of PC
             (!CU.SelectDB1 & CU.SelectDB0 & [0, 0, 0, PAU.PC12, PAU.PC11, PAU.PC10, PAU.PC9, PAU.PC8]) # " 01: High-8 bits of PC 
             (CU.SelectDB1 & !CU.SelectDB0 & [Flags7..Flags0]) #                                          " 10: Flags
