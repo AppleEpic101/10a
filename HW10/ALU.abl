@@ -176,29 +176,29 @@ Fop  =  (F0 & !Data & !Accum) # " F0 row: contributes when both inputs are 0 (e.
 " MSB mux 
 " The MSB must be chosen carefully per operation because it determines both the new bit-7 value
 " AND whether the old Accum7 gets captured into carry (sign preservation vs. rotation).
-ShiftOut7  =  (MSBselect2 & !MSBselect1 & !MSBselect0 & Flags3) #    " 100: MSB becomes the saved carry flag (RRC — the carry slot refills the vacated MSB)
-              (!MSBselect2 & !MSBselect1 & MSBselect0 & Accum7) #  " 001: MSB stays the same (ASR — arithmetic shift preserves the sign bit)
-              (!MSBselect2 & MSBselect1 & !MSBselect0 & Accum6) #  " 010: MSB becomes the bit below it (LSL/RLC/ROL — shift left fills MSB from the next bit)
-              (!MSBselect2 & MSBselect1 & MSBselect0 & Accum0);   " 011: MSB becomes LSB (ROR — rotate right wraps the vacated MSB with the old LSB)
+ShiftOut7  =  (MSBselect2 & !MSBselect1 & !MSBselect0 & Flags3) #    " 100: MSB becomes the saved carry flag (RRC)
+              (!MSBselect2 & !MSBselect1 & MSBselect0 & Accum7) #  " 001: MSB stays the same (ASR)
+              (!MSBselect2 & MSBselect1 & !MSBselect0 & Accum6) #  " 010: MSB becomes the bit below it (LSL/RLC/ROL)
+              (!MSBselect2 & MSBselect1 & MSBselect0 & Accum0);   " 011: MSB becomes LSB (ROR)
 
 " LSB mux
 " Similarly the new LSB must be sourced correctly; the three cases handle rotate-with-carry,
 " shift-right (vacate with 0), and rotate-left (wrap old MSB into LSB).
-ShiftOut0  =  (!LSBselect1 & LSBselect0 & Flags3) #      " 01: LSB becomes carry flag (RLC — carry fills the vacated LSB position)
-              (LSBselect1 & !LSBselect0 & Accum1) #      " 10: LSB becomes the bit above (right-shifts: discard current LSB, shift everything down)
-              (LSBselect1 & LSBselect0 & Accum7);        " 11: LSB becomes MSB (ROL — rotate left wraps the old MSB into the LSB)
+ShiftOut0  =  (!LSBselect1 & LSBselect0 & Flags3) #      " 01: LSB becomes carry flag (RLC)
+              (LSBselect1 & !LSBselect0 & Accum1) #      " 10: LSB becomes the bit above (right-shifts)
+              (LSBselect1 & LSBselect0 & Accum7);        " 11: LSB becomes MSB (ROL)
 
 " Middle bits are shifted left or right 
 " MiddleSelect steers all 6 interior bits in one go; this avoids duplicating six separate muxes
-ShiftOut[6..1]  =  (MiddleSelect & Accum[5..0]) #   " MiddleSelect=1 shifts content up (shift/rotate left): Accum[5..0] feeds bits [6..1]
-                   (!MiddleSelect & Accum[7..2]);   " MiddleSelect=0 shifts content down (shift/rotate right): Accum[7..2] feeds bits [6..1]
+ShiftOut[6..1]  =  (MiddleSelect & Accum[5..0]) #   " MiddleSelect=1 shifts content up (shift/rotate left)
+                   (!MiddleSelect & Accum[7..2]);   " MiddleSelect=0 shifts content down (shift/rotate right)
 
 " Adder
 
 " 4:1 mux: Selects CarryIn for the LSB of the adder.
 CarryIn_LO  =  (CinSel1 & CinSel0) #             " 11: seed 1 for two's-complement negation (SUB = A + NOT(B) + 1)
-               (!CinSel1 & CinSel0 & !Flags3) #    " 01: seed !Carry (SBB: uses the borrow stored in the carry flag as the initial carry-in)
-               (CinSel1 & !CinSel0 & Flags3);     " 10: seed Carry (ADC: propagates the carry flag into the addition)
+               (!CinSel1 & CinSel0 & !Flags3) #    " 01: seed !Carry (SBB)
+               (CinSel1 & !CinSel0 & Flags3);     " 10: seed Carry (ADC)
 
 " Ripple-carry logic for the adder.
 " (Accum & UseAdder) zeros the accumulator term when UseAdder=0, making the adder a transparent pass-through for F-block results.
@@ -206,7 +206,7 @@ CarryOut  =  ((Accum & UseAdder) & Fop) #
              (CarryIn & ((Accum & UseAdder) $ Fop));
 
 " Ripple connection: output carry of each stage feeds as input to the next bit.
-CarryIn  =  [CarryOut6..CarryOut0, CarryIn_LO]; " LSB gets the seeded value; higher bits use the carry from the stage below
+CarryIn  =  [CarryOut6..CarryOut0, CarryIn_LO]; 
 
 " Result from adder using the accumulator and the F-Block as operands
 " When UseAdder=0 : (Accum & 0) = 0, so Sum = Fop, letting the F-block output bypass the adder
