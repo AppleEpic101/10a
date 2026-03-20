@@ -3595,7 +3595,327 @@ WHEN (IR == JV) THEN {
     OffsetSel = 0;
 }
 
+WHEN ((StateBits == Regular) & (IR == CALL)) THEN {
+    " PAU: Hold PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 1;
+    Load = 0;
 
+    " ALU: Dont care
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Dont care
+    EnableInc = 0;
+    UseOffset = 0;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 0;
+    SelectDB0 = 1;
+    OffsetSel = 1;
+}
+
+WHEN (StateBits == Call1) THEN {
+    " PAU: Hold PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 1;
+    Load = 0;
+
+    " ALU: Dont care
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pre-dec S
+    EnableInc = 1;
+    UseOffset = 0;
+    AddressSel1 = 0;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 0;
+    MaskX = 1;
+
+    " Control Unit Top Level
+    RD = 0;
+    WR = 1;
+    SelectDB1 = 0;
+    SelectDB0 = 1;
+    OffsetSel = 1;
+}
+
+WHEN (StateBits == Call2) THEN {
+    " PAU: Direct jump to 13-bit address
+    MuxSel2 = 0;
+    MuxSel1 = 1;
+    MuxSel0 = 0;
+    Load = 1;
+
+    " ALU: Dont care
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Pre-dec S
+    EnableInc = 1;
+    UseOffset = 0;
+    AddressSel1 = 0;
+    AddressSel0 = 1;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 0;
+    MaskX = 1;
+
+    " Control Unit Top Level
+    RD = 0;
+    WR = 1;
+    SelectDB1 = 0;
+    SelectDB0 = 0;
+    OffsetSel = 1;
+}
+
+WHEN (StateBits == Call3) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Dont care
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Dont care
+    EnableInc = 0;
+    UseOffset = 0;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 1;
+    SelectDB0 = 1;
+    OffsetSel = 1;
+}
+
+WHEN ((StateBits == Regular) & (IR == RTS)) THEN {
+    " PAU: RTS_LO
+    MuxSel2 = 1;
+    MuxSel1 = 1;
+    MuxSel0 = 0;
+    Load = 1;
+
+    " ALU: Dont care
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Post-increment S
+    EnableInc = 1;
+    UseOffset = 0;
+    AddressSel1 = 0;
+    AddressSel0 = 1;
+    UseInc = 1;
+    UsePost = 1;
+    MaskS = 0;
+    MaskX = 1;
+
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 0;
+    SelectDB0 = 0;
+    OffsetSel = 1;
+}
+
+WHEN (StateBits == RTS1) THEN {
+    " PAU: RTS_HI
+    MuxSel2 = 1;
+    MuxSel1 = 1;
+    MuxSel0 = 1;
+    Load = 1;
+
+    " ALU: Dont care
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Post-increment S
+    EnableInc = 1;
+    UseOffset = 0;
+    AddressSel1 = 0;
+    AddressSel0 = 1;
+    UseInc = 1;
+    UsePost = 1;
+    MaskS = 0;
+    MaskX = 1;
+
+    " Control Unit Top Level
+    RD = 1;
+    WR = 0;
+    SelectDB1 = 0;
+    SelectDB0 = 1;
+    OffsetSel = 1;
+}
+
+WHEN (StateBits == RTS2) THEN {
+    " PAU: Increment PC
+    MuxSel2 = 0;
+    MuxSel1 = 0;
+    MuxSel0 = 0;
+    Load = 0;
+
+    " ALU: Dont care
+    UpdateAcc = 0;
+    OpSelect = 1;
+    UseAdder = 0;
+    F3 = 0;
+    F2 = 0;
+    F1 = 0;
+    F0 = 0;
+    CinSel1 = 0;
+    CinSel0 = 0;
+    InvertCarry = 0;
+    LSBselect1 = 0;
+    LSBselect0 = 0;
+    MiddleSelect = 0;
+    MSBselect2 = 0;
+    MSBselect1 = 0;
+    MSBselect0 = 0;
+    MaskSZ = 1;
+    MaskVC = 1;
+    PopF = 0;
+
+    " DAU: Dont care
+    EnableInc = 0;
+    UseOffset = 0;
+    AddressSel1 = 0;
+    AddressSel0 = 0;
+    UseInc = 0;
+    UsePost = 0;
+    MaskS = 1;
+    MaskX = 1;
+
+    " Control Unit Top Level
+    RD = 0;
+    WR = 0;
+    SelectDB1 = 0;
+    SelectDB0 = 1;
+    OffsetSel = 1;
+}
 
 WHEN (IR == NEG) THEN {
     " PAU: Increment PC
@@ -4718,341 +5038,17 @@ WHEN (IR == OUT) THEN {
 STATE_DIAGRAM StateBits; " Finite state machine for CALL and RTS instructions
 
 STATE Regular:
-    WITH {
-        IF (IR == CALL) THEN {
-            " PAU: Hold PC
-            MuxSel2 = 0;
-            MuxSel1 = 0;
-            MuxSel0 = 1;
-            Load = 0;
-
-            " ALU: Dont care
-            UpdateAcc = 0;
-            OpSelect = 1;
-            UseAdder = 0;
-            F3 = 0;
-            F2 = 0;
-            F1 = 0;
-            F0 = 0;
-            CinSel1 = 0;
-            CinSel0 = 0;
-            InvertCarry = 0;
-            LSBselect1 = 0;
-            LSBselect0 = 0;
-            MiddleSelect = 0;
-            MSBselect2 = 0;
-            MSBselect1 = 0;
-            MSBselect0 = 0;
-            MaskSZ = 1;
-            MaskVC = 1;
-            PopF = 0;
-
-            " DAU: Dont care
-            EnableInc = 0;
-            UseOffset = 0;
-            AddressSel1 = 0;
-            AddressSel0 = 0;
-            UseInc = 0;
-            UsePost = 0;
-            MaskS = 1;
-            MaskX = 1;
-
-            " Control Unit Top Level
-            RD = 0;
-            WR = 0;
-            SelectDB1 = 0;
-            SelectDB0 = 1;
-            OffsetSel = 1;
-        } ELSE IF (IR == RTS) THEN {
-            " PAU: RTS_LO
-            MuxSel2 = 1;
-            MuxSel1 = 1;
-            MuxSel0 = 0;
-            Load = 1;
-
-            " ALU: Dont care
-            UpdateAcc = 0;
-            OpSelect = 1;
-            UseAdder = 0;
-            F3 = 0;
-            F2 = 0;
-            F1 = 0;
-            F0 = 0;
-            CinSel1 = 0;
-            CinSel0 = 0;
-            InvertCarry = 0;
-            LSBselect1 = 0;
-            LSBselect0 = 0;
-            MiddleSelect = 0;
-            MSBselect2 = 0;
-            MSBselect1 = 0;
-            MSBselect0 = 0;
-            MaskSZ = 1;
-            MaskVC = 1;
-            PopF = 0;
-
-            " DAU: Post-increment S
-            EnableInc = 1;
-            UseOffset = 0;
-            AddressSel1 = 0;
-            AddressSel0 = 1;
-            UseInc = 1;
-            UsePost = 1;
-            MaskS = 0;
-            MaskX = 1;
-
-            " Control Unit Top Level
-            RD = 1;
-            WR = 0;
-            SelectDB1 = 0;
-            SelectDB0 = 0;
-            OffsetSel = 1;
-        }
-    }
     IF (IR == CALL) THEN Call1
     ELSE IF (IR == RTS) THEN RTS1
     ELSE Regular;
 
 " CALL progresses from Regular to Call1 to Call2 to Call3 to Regular
-STATE Call1:
-    WITH {
-        " PAU: Hold PC
-        MuxSel2 = 0;
-        MuxSel1 = 0;
-        MuxSel0 = 1;
-        Load = 0;
-
-        " ALU: Dont care
-        UpdateAcc = 0;
-        OpSelect = 1;
-        UseAdder = 0;
-        F3 = 0;
-        F2 = 0;
-        F1 = 0;
-        F0 = 0;
-        CinSel1 = 0;
-        CinSel0 = 0;
-        InvertCarry = 0;
-        LSBselect1 = 0;
-        LSBselect0 = 0;
-        MiddleSelect = 0;
-        MSBselect2 = 0;
-        MSBselect1 = 0;
-        MSBselect0 = 0;
-        MaskSZ = 1;
-        MaskVC = 1;
-        PopF = 0;
-
-        " DAU: Pre-dec S
-        EnableInc = 1;
-        UseOffset = 0;
-        AddressSel1 = 0;
-        AddressSel0 = 1;
-        UseInc = 0;
-        UsePost = 0;
-        MaskS = 0;
-        MaskX = 1;
-
-        " Control Unit Top Level
-        RD = 0;
-        WR = 1;
-        SelectDB1 = 0;
-        SelectDB0 = 1;
-        OffsetSel = 1;
-    }
-    GOTO Call2;
-
-STATE Call2:
-    WITH {
-        " PAU: Direct jump to 13-bit address
-        MuxSel2 = 0;
-        MuxSel1 = 1;
-        MuxSel0 = 0;
-        Load = 1;
-
-        " ALU: Dont care
-        UpdateAcc = 0;
-        OpSelect = 1;
-        UseAdder = 0;
-        F3 = 0;
-        F2 = 0;
-        F1 = 0;
-        F0 = 0;
-        CinSel1 = 0;
-        CinSel0 = 0;
-        InvertCarry = 0;
-        LSBselect1 = 0;
-        LSBselect0 = 0;
-        MiddleSelect = 0;
-        MSBselect2 = 0;
-        MSBselect1 = 0;
-        MSBselect0 = 0;
-        MaskSZ = 1;
-        MaskVC = 1;
-        PopF = 0;
-
-        " DAU: Pre-dec S
-        EnableInc = 1;
-        UseOffset = 0;
-        AddressSel1 = 0;
-        AddressSel0 = 1;
-        UseInc = 0;
-        UsePost = 0;
-        MaskS = 0;
-        MaskX = 1;
-
-        " Control Unit Top Level
-        RD = 0;
-        WR = 1;
-        SelectDB1 = 0;
-        SelectDB0 = 0;
-        OffsetSel = 1;
-    }
-    GOTO Call3;
-
-STATE Call3:
-    WITH {
-        " PAU: Increment PC
-        MuxSel2 = 0;
-        MuxSel1 = 0;
-        MuxSel0 = 0;
-        Load = 0;
-
-        " ALU: Dont care
-        UpdateAcc = 0;
-        OpSelect = 1;
-        UseAdder = 0;
-        F3 = 0;
-        F2 = 0;
-        F1 = 0;
-        F0 = 0;
-        CinSel1 = 0;
-        CinSel0 = 0;
-        InvertCarry = 0;
-        LSBselect1 = 0;
-        LSBselect0 = 0;
-        MiddleSelect = 0;
-        MSBselect2 = 0;
-        MSBselect1 = 0;
-        MSBselect0 = 0;
-        MaskSZ = 1;
-        MaskVC = 1;
-        PopF = 0;
-
-        " DAU: Dont care
-        EnableInc = 0;
-        UseOffset = 0;
-        AddressSel1 = 0;
-        AddressSel0 = 0;
-        UseInc = 0;
-        UsePost = 0;
-        MaskS = 1;
-        MaskX = 1;
-
-        " Control Unit Top Level
-        RD = 0;
-        WR = 0;
-        SelectDB1 = 1;
-        SelectDB0 = 1;
-        OffsetSel = 1;
-    }
-    GOTO Regular;
+STATE Call1: GOTO Call2;
+STATE Call2: GOTO Call3;
+STATE Call3: GOTO Regular;
 
 " RTS progresses from Regular to RTS1 to RTS2 to Regular
-STATE RTS1:
-    WITH {
-        " PAU: RTS_HI
-        MuxSel2 = 1;
-        MuxSel1 = 1;
-        MuxSel0 = 1;
-        Load = 1;
-
-        " ALU: Dont care
-        UpdateAcc = 0;
-        OpSelect = 1;
-        UseAdder = 0;
-        F3 = 0;
-        F2 = 0;
-        F1 = 0;
-        F0 = 0;
-        CinSel1 = 0;
-        CinSel0 = 0;
-        InvertCarry = 0;
-        LSBselect1 = 0;
-        LSBselect0 = 0;
-        MiddleSelect = 0;
-        MSBselect2 = 0;
-        MSBselect1 = 0;
-        MSBselect0 = 0;
-        MaskSZ = 1;
-        MaskVC = 1;
-        PopF = 0;
-
-        " DAU: Post-increment S
-        EnableInc = 1;
-        UseOffset = 0;
-        AddressSel1 = 0;
-        AddressSel0 = 1;
-        UseInc = 1;
-        UsePost = 1;
-        MaskS = 0;
-        MaskX = 1;
-
-        " Control Unit Top Level
-        RD = 1;
-        WR = 0;
-        SelectDB1 = 0;
-        SelectDB0 = 1;
-        OffsetSel = 1;
-    }
-    GOTO RTS2;
-
-STATE RTS2:
-    WITH {
-        " PAU: Increment PC
-        MuxSel2 = 0;
-        MuxSel1 = 0;
-        MuxSel0 = 0;
-        Load = 0;
-
-        " ALU: Dont care
-        UpdateAcc = 0;
-        OpSelect = 1;
-        UseAdder = 0;
-        F3 = 0;
-        F2 = 0;
-        F1 = 0;
-        F0 = 0;
-        CinSel1 = 0;
-        CinSel0 = 0;
-        InvertCarry = 0;
-        LSBselect1 = 0;
-        LSBselect0 = 0;
-        MiddleSelect = 0;
-        MSBselect2 = 0;
-        MSBselect1 = 0;
-        MSBselect0 = 0;
-        MaskSZ = 1;
-        MaskVC = 1;
-        PopF = 0;
-
-        " DAU: Dont care
-        EnableInc = 0;
-        UseOffset = 0;
-        AddressSel1 = 0;
-        AddressSel0 = 0;
-        UseInc = 0;
-        UsePost = 0;
-        MaskS = 1;
-        MaskX = 1;
-
-        " Control Unit Top Level
-        RD = 0;
-        WR = 0;
-        SelectDB1 = 0;
-        SelectDB0 = 1;
-        OffsetSel = 1;
-    }
-    GOTO Regular;
+STATE RTS1: GOTO RTS2;
+STATE RTS2: GOTO Regular;
 
 END CUInterface
