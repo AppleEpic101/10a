@@ -167,8 +167,8 @@ ALU.InvertCarry = CU.InvertCarry;                                               
 ALU.[LSBselect1..LSBselect0] = CU.[LSBselect1..LSBselect0];                             " Selects source for bit 0 of shift/rotate result
 ALU.MiddleSelect = CU.MiddleSelect;                                                     " Selects left vs right direction for interior bits
 ALU.[MSBselect2..MSBselect0] = CU.[MSBselect2..MSBselect0];                             " Selects source for bit 7 of shift/rotate result
-ALU.MaskSZ = CU.MaskSZ;                                                                 " Freezes S/Z flags for instructions (like LD) that must not touch them
-ALU.MaskVC = CU.MaskVC;                                                                 " Freezes V/C flags for logic instructions that don't produce carry/overflow
+ALU.MaskSZ = CU.MaskSZ;                                                                 " Freezes S/Z flags
+ALU.MaskVC = CU.MaskVC;                                                                 " Freezes V/C flags
 ALU.PopF = CU.PopF;                                                                     " Direct flag load from DDB (POPF instruction)
 ALU.OverrideInterrupt = CU.OverrideInterrupt;                                           " Lets STI/CLI bypass the normal flag-update path
 ALU.OverrideUser = CU.OverrideUser;                                                     " Lets STU/CLU bypass the normal flag-update path
@@ -178,15 +178,15 @@ ALU.SetUser = CU.SetUser;                                                       
 ALU.SetCarry = CU.SetCarry;                                                             " Tells ALU whether to set (1) or clear (0) the carry flag
 
 " Connect DAU inputs
-DAU.[Accum7..Accum0] = Accum;                                                           " DAU needs Accum for TAX/TAS (transfer Acc to a register)
+DAU.[Accum7..Accum0] = Accum;                                                           " DAU needs Accum for TAX/TAS
 DAU.[Offset7..Offset0] = CU.[Address7..Address0];                                       " Low 8 bits of IR serve as the memory offset for indexed addressing
 DAU.EnableInc = CU.EnableInc;                                                           " Enables the inc/dec path; when 0 the operand is 0 and the register is unchanged
 DAU.UseOffset = CU.UseOffset;                                                           " Selects whether the external offset (0) or zero (0) is added in the second adder stage
 DAU.[AddressSel1..AddressSel0] = CU.[AddressSel1..AddressSel0];                         " Selects X, S, Acc, or 0 as the base pointer
 DAU.UseInc = CU.UseInc;                                                                 " Selects increment (+1) vs decrement (-1) direction
-DAU.UsePost = CU.UsePost;                                                               " 0=pre-modify (address is the modified value), 1=post-modify (address is original value)
-DAU.MaskS = CU.MaskS;                                                                   " Prevents S from being written when the instruction only uses/modifies X
-DAU.MaskX = CU.MaskX;                                                                   " Prevents X from being written when the instruction only uses/modifies S
+DAU.UsePost = CU.UsePost;                                                               " 0=pre-modify, 1=post-modify
+DAU.MaskS = CU.MaskS;                                                                   " Prevents S from being written
+DAU.MaskX = CU.MaskX;                                                                   " Prevents X from being written
 
 
 " Outputs
