@@ -280,12 +280,15 @@ IO                = (IR == INPUT) # (IR == OUT); " IO instructions
 " Set instruction register to ProgramDB if MaskIR is 0, else keep current IR value
 IR = (!MaskIR & ProgramDB) # (MaskIR & IR);
 
-" MaskIR during CALL and RTS instructions 
+" MaskIR is needed whenever the PC is being held (still pointing at the CALL/RTS word),
+" because ProgramDB still carries that same instruction and would re-trigger the sequence.
 MaskIR = ((StateBits == Regular) & ((IR == CALL) # (IR == RTS))) #
          ((StateBits == Call1) # (StateBits == Call2) # (StateBits == RTS1));
 
 
 " Set address to low 13-bits of IR
+" For jumps/calls, IR[12:0] is the target address; for immediate/offset
+" instructions the CU selects the relevant sub-field using SelectDB and OffsetSel.
 [Address12..Address0] = [IR12..IR0];
 
 " Map all instructions to control signals
@@ -3596,10 +3599,10 @@ WHEN (IR == JV) THEN {
 }
 
 WHEN ((StateBits == Regular) & (IR == CALL)) THEN {
-    " PAU: Hold PC
+    " PAU: Hold PC so the CPU keeps fetching the CALL instruction word while the return address is being pushed
     MuxSel2 = 0;
     MuxSel1 = 0;
-    MuxSel0 = 1;
+    MuxSel0 = 1; " Hold (PC + 0) — we haven't jumped yet and need two more cycles to save the return address
     Load = 0;
 
     " ALU: Dont care
@@ -3635,17 +3638,17 @@ WHEN ((StateBits == Regular) & (IR == CALL)) THEN {
 
     " Control Unit Top Level
     RD = 0;
-    WR = 0;
+    WR = 0; " No write yet — this cycle only computes the return address
     SelectDB1 = 0;
-    SelectDB0 = 1;
-    OffsetSel = 1;
+    SelectDB0 = 1; " Drive the high byte of PC+1 onto DDB so Call1 can write it
+    OffsetSel = 1; " Use DDB (PC byte) as the PAU offset instead of the IR low bits
 }
 
 WHEN (StateBits == Call1) THEN {
     " PAU: Hold PC
     MuxSel2 = 0;
     MuxSel1 = 0;
-    MuxSel0 = 1;
+    MuxSel0 = 1; " Hold again so PC is still PC+1, ready to be read
     Load = 0;
 
     " ALU: Dont care
@@ -3669,30 +3672,31 @@ WHEN (StateBits == Call1) THEN {
     MaskVC = 1;
     PopF = 0;
 
-    " DAU: Pre-dec S
-    EnableInc = 1;
+    " DAU: Pre-dec S then write high byte of PC+1 to the new top of stack
+    EnableInc = 1; " Enable the incrementer/decrementer
     UseOffset = 0;
     AddressSel1 = 0;
-    AddressSel0 = 1;
-    UseInc = 0;
-    UsePost = 0;
-    MaskS = 0;
+    AddressSel0 = 1; " Base = SReg
+    UseInc = 0;     " Decrement (S = S - 1) to allocate space on the stack before writing
+    UsePost = 0;    " Pre-decrement: address is S-1; write happens at the new S
+    MaskS = 0;      " Allow S to update so the stack pointer moves down
     MaskX = 1;
 
     " Control Unit Top Level
     RD = 0;
-    WR = 1;
+    WR = 1;         " Write the high byte of the return address to memory
     SelectDB1 = 0;
-    SelectDB0 = 1;
-    OffsetSel = 1;
+    SelectDB0 = 1;  " DDB carries the high byte of PC+1 so it's what gets stored
+    OffsetSel = 1;  " Use DDB-sourced offset so the PAU gets the correct PC byte to put on the bus
 }
 
 WHEN (StateBits == Call2) THEN {
-    " PAU: Direct jump to 13-bit address
+    " PAU: Direct jump to the 13-bit target address embedded in the instruction
+    " Now that both bytes of the return address are on the stack, it is safe to overwrite the PC.
     MuxSel2 = 0;
     MuxSel1 = 1;
-    MuxSel0 = 0;
-    Load = 1;
+    MuxSel0 = 0; " Direct — mux selects the 13-bit address from the IR
+    Load = 1;    " Load=1 zeroes the PC term so Sum = target address (not PC + offset)
 
     " ALU: Dont care
     UpdateAcc = 0;
@@ -3719,25 +3723,25 @@ WHEN (StateBits == Call2) THEN {
     EnableInc = 1;
     UseOffset = 0;
     AddressSel1 = 0;
-    AddressSel0 = 1;
-    UseInc = 0;
-    UsePost = 0;
-    MaskS = 0;
+    AddressSel0 = 1; " Base = SReg
+    UseInc = 0;     " Decrement again
+    UsePost = 0;    " Pre-decrement so the address is the new (lower) stack slot
+    MaskS = 0;      " Allow S to update
     MaskX = 1;
 
     " Control Unit Top Level
     RD = 0;
-    WR = 1;
+    WR = 1;        " Write the low byte of the return address
     SelectDB1 = 0;
-    SelectDB0 = 0;
-    OffsetSel = 1;
+    SelectDB0 = 0; " DDB carries the low byte of PC+1
+    OffsetSel = 1; " Still using DDB-sourced offset
 }
 
 WHEN (StateBits == Call3) THEN {
     " PAU: Increment PC
     MuxSel2 = 0;
     MuxSel1 = 0;
-    MuxSel0 = 0;
+    MuxSel0 = 0; " Increment (PC + 1)
     Load = 0;
 
     " ALU: Dont care
@@ -3807,22 +3811,22 @@ WHEN ((StateBits == Regular) & (IR == RTS)) THEN {
     MaskVC = 1;
     PopF = 0;
 
-    " DAU: Post-increment S
+    " DAU: Post-increment S after reading the low byte so the stack pointer advances to the next saved byte
     EnableInc = 1;
     UseOffset = 0;
     AddressSel1 = 0;
-    AddressSel0 = 1;
-    UseInc = 1;
-    UsePost = 1;
-    MaskS = 0;
+    AddressSel0 = 1; " Base = SReg
+    UseInc = 1;     " Increment S
+    UsePost = 1;    " Post-increment: read from current S first, THEN advance S
+    MaskS = 0;      " Allow S to update to its incremented value
     MaskX = 1;
 
     " Control Unit Top Level
-    RD = 1;
+    RD = 1;         " Read the low byte of the return address from memory
     WR = 0;
     SelectDB1 = 0;
-    SelectDB0 = 0;
-    OffsetSel = 1;
+    SelectDB0 = 0;  " DDB is driven from the memory read; SelectDB doesn't matter for input ops
+    OffsetSel = 1;  " Use DDB as the PAU offset so the restored byte is fed into the PC path
 }
 
 WHEN (StateBits == RTS1) THEN {
@@ -3857,18 +3861,18 @@ WHEN (StateBits == RTS1) THEN {
     EnableInc = 1;
     UseOffset = 0;
     AddressSel1 = 0;
-    AddressSel0 = 1;
-    UseInc = 1;
-    UsePost = 1;
-    MaskS = 0;
+    AddressSel0 = 1; " Base = SReg
+    UseInc = 1;     " Increment S
+    UsePost = 1;    " Post-increment: read from current S, then advance S
+    MaskS = 0;      " Allow S update
     MaskX = 1;
 
     " Control Unit Top Level
     RD = 1;
     WR = 0;
     SelectDB1 = 0;
-    SelectDB0 = 1;
-    OffsetSel = 1;
+    SelectDB0 = 1;  " Drive high-byte PC path via DDB-sourced SelectDB
+    OffsetSel = 1;  " Use DDB as offset so the high bits get merged into the PAU's RTS_HI slot
 }
 
 WHEN (StateBits == RTS2) THEN {
@@ -5035,19 +5039,28 @@ WHEN (IR == OUT) THEN {
     OffsetSel = 0;
 }
 
-STATE_DIAGRAM StateBits; " Finite state machine for CALL and RTS instructions
+STATE_DIAGRAM StateBits; " FSM controls the multi-cycle CALL and RTS sequences; all other instructions stay in Regular for one cycle
 
+" Regular is the idle state: single-cycle instructions live here entirely.
+" CALL and RTS are the only instructions with multi-cycle behaviour, requiring extra states.
 STATE Regular:
-    IF (IR == CALL) THEN Call1
-    ELSE IF (IR == RTS) THEN RTS1
-    ELSE Regular;
+    IF (IR == CALL) THEN Call1 " Detected a CALL — enter the push-return-address sequence
+    ELSE IF (IR == RTS) THEN RTS1 " Detected an RTS — enter the pop-return-address sequence
+    ELSE Regular; " All other instructions are done in one cycle; stay in Regular
 
-" CALL progresses from Regular to Call1 to Call2 to Call3 to Regular
+" CALL uses four states (Regular + 3 extra) because it must:
+"   1. (Regular) Decode the instruction and prepare DDB with the return address high byte
+"   2. (Call1) Pre-decrement S and write the high byte of PC+1 to the stack
+"   3. (Call2) Pre-decrement S again and write the low byte of PC+1; also load the target address into PC
+"   4. (Call3) Execute the first instruction at the call target (normal fetch resumes)
 STATE Call1: GOTO Call2;
 STATE Call2: GOTO Call3;
 STATE Call3: GOTO Regular;
 
-" RTS progresses from Regular to RTS1 to RTS2 to Regular
+" RTS uses three states (Regular + 2 extra) because it must:
+"   1. (Regular/RTS) Read the low byte of the saved PC from stack; post-increment S
+"   2. (RTS1) Read the high byte of the saved PC from stack; post-increment S
+"   3. (RTS2) Resume normal fetch from the restored PC
 STATE RTS1: GOTO RTS2;
 STATE RTS2: GOTO Regular;
 

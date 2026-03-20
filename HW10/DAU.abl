@@ -121,8 +121,8 @@ AdderSum = [AdderSum7..AdderSum0];       " Group final stage result bits
 AdderCout = [AdderCout7..AdderCout0];    " Group final carry generation bits
 AdderCin = [AdderCout6..AdderCout0, 0];  " Shifts carry bits left for the second stage ripple-carry
 
-IncVal = [0,0,0,0,0,0,0,1];
-DecVal = [1,1,1,1,1,1,1,1];
+IncVal = [0,0,0,0,0,0,0,1]; " +1 in binary
+DecVal = [1,1,1,1,1,1,1,1]; " -1 in two's-complement (0xFF)
 EQUATIONS
 " Sync the registers to clock
 XReg.CLK = Clock;

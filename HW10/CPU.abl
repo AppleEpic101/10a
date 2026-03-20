@@ -67,8 +67,8 @@ XReg7..XReg0		pin;	"the 8-bit X register
 SReg7..SReg0		pin;	"the 8-bit S register
 
 
-OverrideInterrupt, OverrideUser, OverrideCarry      node;
-SetInterrupt, SetUser, SetCarry                   node;
+OverrideInterrupt, OverrideUser, OverrideCarry      node; " override mode for flags
+SetInterrupt, SetUser, SetCarry                   node; " set flags in override mode
 
 " declare the used modules
 
@@ -138,95 +138,104 @@ CU.[ProgramDB15..ProgramDB0] = ProgramDB;
 CU.[Flags7..Flags0] = [Flags7..Flags0];
 
 " Connect PAU inputs (Offset, Direct, MuxSel, Load)
-" 2:1 mux for offset into PAU using OffsetSel from Control Unit. 
-" The 2 possible inputs are low-8 bits of IR (0) or Data data bus (1)
-PAU.[Offset7..Offset0] = (!CU.OffsetSel & CU.[Address7..Address0]) #
-                        (CU.OffsetSel & DataDB);
-PAU.[Direct12..Direct0] = CU.[Address12..Address0];
-PAU.[MuxSel2..MuxSel0] = CU.[MuxSel2..MuxSel0];
-PAU.Load = CU.Load;
+" 2:1 mux for the offset fed into PAU, controlled by OffsetSel from the CU.
+" OffsetSel=0 → low-8 bits of IR (used for relative branches whose offset is embedded in the instruction)
+" OffsetSel=1 → DDB (used during RTS to feed the popped PC bytes back into the PAU)
+PAU.[Offset7..Offset0] = (!CU.OffsetSel & CU.[Address7..Address0]) #    " IR[7:0] carries the branch offset for relative jumps
+                        (CU.OffsetSel & DataDB);                        " DDB carries the saved return address byte during RTS
+PAU.[Direct12..Direct0] = CU.[Address12..Address0];                     " Full 13-bit target address from IR for absolute jumps/CALL
+PAU.[MuxSel2..MuxSel0] = CU.[MuxSel2..MuxSel0];                         " CU selects which PAU mode (increment, hold, direct, relative, RTS_LO, RTS_HI)
+PAU.Load = CU.Load;                                                     " Load=1 suppresses the PC term in the PAU adder for absolute loads
 
 " Connect ALU inputs 
-" 4:1 mux for data into ALU using SelectDB1 and SelectDB0 from Control Unit. 
-" The 4 possible inputs are S-Register (00), X-Register (01), low-8 bits of IR (10), and Data data bus (11)
-ALU.[Data7..Data0] = (!CU.SelectDB1 & !CU.SelectDB0 & [SReg7..SReg0]) #                 " 00 S-Register
-                        (!CU.SelectDB1 & CU.SelectDB0 & [XReg7..XReg0]) #               " 01 X-Register
-                        (CU.SelectDB1 & !CU.SelectDB0 & CU.[Address7..Address0]) #      " 10 low-8 bits of IR
-                        (CU.SelectDB1 & CU.SelectDB0 & DataDB);                         " 11  Data data bus
-ALU.UpdateAcc = CU.UpdateAcc;
-ALU.OpSelect = CU.OpSelect;
-ALU.UseAdder = CU.UseAdder;
-ALU.[F3..F0] = CU.[F3..F0];
-ALU.[CinSel1..CinSel0] = CU.[CinSel1..CinSel0];
-ALU.InvertCarry = CU.InvertCarry;
-ALU.[LSBselect1..LSBselect0] = CU.[LSBselect1..LSBselect0];
-ALU.MiddleSelect = CU.MiddleSelect;
-ALU.[MSBselect2..MSBselect0] = CU.[MSBselect2..MSBselect0];
-ALU.MaskSZ = CU.MaskSZ;
-ALU.MaskVC = CU.MaskVC;
-ALU.PopF = CU.PopF;
-ALU.OverrideInterrupt = CU.OverrideInterrupt;
-ALU.OverrideUser = CU.OverrideUser;
-ALU.OverrideCarry = CU.OverrideCarry;
-ALU.SetInterrupt = CU.SetInterrupt;
-ALU.SetUser = CU.SetUser;
-ALU.SetCarry = CU.SetCarry;
+" 4:1 mux for data into ALU, controlled by SelectDB from the CU.
+" The four possible sources let the ALU operate on register values, immediates, or memory reads:
+" 00 → SReg (TSA: load Acc with S)
+" 01 → XReg (TXA: load Acc with X)
+" 10 → IR[7:0] (immediate: instruction encodes the operand directly, so no memory read needed)
+" 11 → DDB   (memory/I-O operand: the result of a prior RD cycle)
+ALU.[Data7..Data0] = (!CU.SelectDB1 & !CU.SelectDB0 & [SReg7..SReg0]) #                     " 00: S-Register
+                        (!CU.SelectDB1 & CU.SelectDB0 & [XReg7..XReg0]) #               " 01: X-Register
+                        (CU.SelectDB1 & !CU.SelectDB0 & CU.[Address7..Address0]) #      " 10: low-8 bits of IR (immediate)
+                        (CU.SelectDB1 & CU.SelectDB0 & DataDB);                         " 11: Data data bus (from memory)
+ALU.UpdateAcc = CU.UpdateAcc;                                                           " Write-enable: prevents compare/test from overwriting Acc
+ALU.OpSelect = CU.OpSelect;                                                             " Selects adder vs shift/rotate output path in the ALU
+ALU.UseAdder = CU.UseAdder;                                                             " When 0, passes F-block directly through adder (logical ops)
+ALU.[F3..F0] = CU.[F3..F0];                                                             " Selects the boolean function for the F-block truth table
+ALU.[CinSel1..CinSel0] = CU.[CinSel1..CinSel0];                                         " Selects the carry-in seed (0, 1, Carry, !Carry)
+ALU.InvertCarry = CU.InvertCarry;                                                       " Inverts adder carry-out for subtraction's borrow convention
+ALU.[LSBselect1..LSBselect0] = CU.[LSBselect1..LSBselect0];                             " Selects source for bit 0 of shift/rotate result
+ALU.MiddleSelect = CU.MiddleSelect;                                                     " Selects left vs right direction for interior bits
+ALU.[MSBselect2..MSBselect0] = CU.[MSBselect2..MSBselect0];                             " Selects source for bit 7 of shift/rotate result
+ALU.MaskSZ = CU.MaskSZ;                                                                 " Freezes S/Z flags for instructions (like LD) that must not touch them
+ALU.MaskVC = CU.MaskVC;                                                                 " Freezes V/C flags for logic instructions that don't produce carry/overflow
+ALU.PopF = CU.PopF;                                                                     " Direct flag load from DDB (POPF instruction)
+ALU.OverrideInterrupt = CU.OverrideInterrupt;                                           " Lets STI/CLI bypass the normal flag-update path
+ALU.OverrideUser = CU.OverrideUser;                                                     " Lets STU/CLU bypass the normal flag-update path
+ALU.OverrideCarry = CU.OverrideCarry;                                                   " Lets STC/CLC bypass the normal flag-update path
+ALU.SetInterrupt = CU.SetInterrupt;                                                     " Tells ALU whether to set (1) or clear (0) the interrupt flag
+ALU.SetUser = CU.SetUser;                                                               " Tells ALU whether to set (1) or clear (0) the user flag
+ALU.SetCarry = CU.SetCarry;                                                             " Tells ALU whether to set (1) or clear (0) the carry flag
 
 " Connect DAU inputs
-DAU.[Accum7..Accum0] = Accum;
-DAU.[Offset7..Offset0] = CU.[Address7..Address0]; " 
-DAU.EnableInc = CU.EnableInc;
-DAU.UseOffset = CU.UseOffset;
-DAU.[AddressSel1..AddressSel0] = CU.[AddressSel1..AddressSel0];
-DAU.UseInc = CU.UseInc;
-DAU.UsePost = CU.UsePost;
-DAU.MaskS = CU.MaskS;
-DAU.MaskX = CU.MaskX;
+DAU.[Accum7..Accum0] = Accum;                                                           " DAU needs Accum for TAX/TAS (transfer Acc to a register)
+DAU.[Offset7..Offset0] = CU.[Address7..Address0];                                       " Low 8 bits of IR serve as the memory offset for indexed addressing
+DAU.EnableInc = CU.EnableInc;                                                           " Enables the inc/dec path; when 0 the operand is 0 and the register is unchanged
+DAU.UseOffset = CU.UseOffset;                                                           " Selects whether the external offset (0) or zero (0) is added in the second adder stage
+DAU.[AddressSel1..AddressSel0] = CU.[AddressSel1..AddressSel0];                         " Selects X, S, Acc, or 0 as the base pointer
+DAU.UseInc = CU.UseInc;                                                                 " Selects increment (+1) vs decrement (-1) direction
+DAU.UsePost = CU.UsePost;                                                               " 0=pre-modify (address is the modified value), 1=post-modify (address is original value)
+DAU.MaskS = CU.MaskS;                                                                   " Prevents S from being written when the instruction only uses/modifies X
+DAU.MaskX = CU.MaskX;                                                                   " Prevents X from being written when the instruction only uses/modifies S
 
 
 " Outputs
 
 " Update Accumulator and Flags from ALU
-Accum = ALU.[Accum7..Accum0];    
-Flags = ALU.[Flags7..Flags0]; 
+Accum = ALU.[Accum7..Accum0];     
+Flags = ALU.[Flags7..Flags0];       
 
 " Update Data Address Bus and XReg and SReg from DAU
-DataAB = DAU.[DataAddr7..DataAddr0];
-XReg = DAU.[XReg7..XReg0];
-SReg = DAU.[SReg7..SReg0];
+DataAB = DAU.[DataAddr7..DataAddr0]; 
+XReg = DAU.[XReg7..XReg0];           
+SReg = DAU.[SReg7..SReg0];           
 
 " Update Program Address Bus from PAU
-ProgramAB = PAU.[ProgAddr12..ProgAddr0];
+ProgramAB = PAU.[ProgAddr12..ProgAddr0]; 
 
 " Update Data Data Bus from CU
-" 4:1 mux for data into Data Data Bus using SelectDB1 and SelectDB0 from Control Unit.
-" The 4 possible inputs are low-8 bits of PC (00), high-8 bits of PC (01), Flags (10), and Accumulator (11)
-DataDB = (!CU.SelectDB1 & !CU.SelectDB0 & PAU.[PC7..PC0]) #                                              "00 Low-8 bits of PC
-            (!CU.SelectDB1 & CU.SelectDB0 & [0, 0, 0, PAU.PC12, PAU.PC11, PAU.PC10, PAU.PC9, PAU.PC8]) # "01 High-8 bits of PC
-            (CU.SelectDB1 & !CU.SelectDB0 & [Flags7..Flags0]) #                                          "10 Flags
-            (CU.SelectDB1 & CU.SelectDB0 & [Accum7..Accum0]);                                            "11 Accumulator
+" 4:1 mux for what gets driven onto DDB during a write cycle, controlled by SelectDB.
+" This allows different sources to appear on DDB depending on what needs to be written to memory/I-O:
+" 00 → Low-8 bits of PC  (CALL: saves the low byte of the return address onto the stack)
+" 01 → High-8 bits of PC (CALL: saves the high byte of the return address; only 5 bits are significant)
+" 10 → Flags              (PUSHF: saves the flag register onto the stack)
+" 11 → Accumulator        (STD/STX/STS: stores the accumulator into data memory)
+DataDB = (!CU.SelectDB1 & !CU.SelectDB0 & PAU.[PC7..PC0]) #                                              " 00: Low-8 bits of PC
+            (!CU.SelectDB1 & CU.SelectDB0 & [0, 0, 0, PAU.PC12, PAU.PC11, PAU.PC10, PAU.PC9, PAU.PC8]) # " 01: High-8 bits of PC 
+            (CU.SelectDB1 & !CU.SelectDB0 & [Flags7..Flags0]) #                                          " 10: Flags
+            (CU.SelectDB1 & CU.SelectDB0 & [Accum7..Accum0]);                                            " 11: Accumulator
 
 
 " Output Enable when clock is active low
-RD = CU.RD & !Clock;
-WR = CU.WR & !Clock;
-IO = CU.IO & !Clock;
+RD = CU.RD & !Clock; 
+WR = CU.WR & !Clock; 
+IO = CU.IO & !Clock;  
 
 
 
 " Data data bus is enabled when writing
 DataDB.OE  =  WR;
 
-" most signals are always enabled
-ProgramAB.OE         =  ^h1FFF;
-DataAB.OE            =  ^hFF;
-RD.OE                =  1;
-WR.OE                =  1;
-IO.OE                =  1;
-[Accum7..Accum0].OE  =  ^hFF;
-[Flags7..Flags0].OE  =  ^hFF;
-[XReg7..XReg0].OE    =  ^hFF;
-[SReg7..SReg0].OE    =  ^hFF;
+" Most signals are permanently enabled so the test fixture can always observe their values
+ProgramAB.OE         =  ^h1FFF; " All 13 address bits always driven
+DataAB.OE            =  ^hFF;   " All 8 data address bits always driven
+RD.OE                =  1;      " Read signal always visible
+WR.OE                =  1;      " Write signal always visible
+IO.OE                =  1;      " I/O signal always visible
+[Accum7..Accum0].OE  =  ^hFF;   " All 8 accumulator bits always driven (debugging visibility)
+[Flags7..Flags0].OE  =  ^hFF;   " All 8 flag bits always driven (needed for CU branch decision feedback)
+[XReg7..XReg0].OE    =  ^hFF;   " X register always driven for test visibility
+[SReg7..SReg0].OE    =  ^hFF;   " S register always driven for test visibility
 
 
 
